@@ -146,12 +146,6 @@ LIGHT.FOLLOW(POINTER)
 > READY
 > _`;
 function makePhosphor(kind: number, amber: boolean): Material {
-  const cells = Array(384).fill(0);
-  program.split('\n').forEach((line, y) =>
-    [...line.slice(0, 32)].forEach((letter, x) => {
-      cells[y * 32 + x] = letter.charCodeAt(0);
-    }),
-  );
   return {
     shader,
     passes: ['surface'],
@@ -162,13 +156,14 @@ function makePhosphor(kind: number, amber: boolean): Material {
       1,
       ...(amber ? [0.92, 0.65, 0.32] : [0.58, 0.88, 0.73]),
       0,
-      ...cells,
+      ...Array(384).fill(0),
     ]),
     bounds: { initial: 0, measure: () => ({ x: 0, y: 0 }) },
   };
 }
 export function Phosphor({
   kind = 'wave',
+  code = program,
   value = 60,
   phase = 0.8,
   powered = true,
@@ -177,6 +172,7 @@ export function Phosphor({
   style,
 }: {
   kind?: 'wave' | 'code' | 'orbit' | 'spectrum' | 'field';
+  code?: string;
   value?: number;
   phase?: number;
   powered?: boolean;
@@ -197,6 +193,25 @@ export function Phosphor({
     material.parameters.set(1, value / 100);
     material.parameters.set(3, Number(powered));
   }, [material, phase, value, powered]);
+  const screenText = code
+    .toUpperCase()
+    .split('\n')
+    .slice(0, 12)
+    .map((line) =>
+      [...line.slice(0, 32)]
+        .map((letter) => (font[letter] ? letter : ' '))
+        .join(''),
+    )
+    .join('\n');
+  useLayoutEffect(() => {
+    const cells = Array(384).fill(0);
+    screenText.split('\n').forEach((line, y) =>
+      [...line].forEach((letter, x) => {
+        cells[y * 32 + x] = letter.charCodeAt(0);
+      }),
+    );
+    cells.forEach((cell, i) => material.parameters.set(i + 8, cell));
+  }, [material, screenText]);
   const ref = useSurface({ material });
   return (
     <div
@@ -210,7 +225,7 @@ export function Phosphor({
           : `Phosphor ${kind} responding to the controls`
       }
     >
-      {kind === 'code' && <pre className="sr-only">{program}</pre>}
+      {kind === 'code' && <pre className="sr-only">{screenText}</pre>}
     </div>
   );
 }

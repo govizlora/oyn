@@ -29,6 +29,23 @@ See [the study notes](examples/atelier/README.md). Nothing is deployed by these 
 The shadcn migration remains separate: `npm run dev:shadcn` on :5176 and
 `npm run build:shadcn`. MUI and the historical benchmark are also retained.
 
+## Object library — 48 interactive studies
+
+The homepage's **Object library** entry opens `/?view=library`. Eight rooms cover
+Touch, Navigate, Make, Arrange, Respond, Time, Play and Everyday. This expands the
+exploration beyond fixed compositions: dropdowns, tables, windows, inputs, paper,
+files, color/type/layout tools, calendars, notifications and playful GPU objects.
+
+Star objects to keep a browser-local shortlist; **Picked** collects them and
+**Export selection** downloads source references for recomposition. Each object
+also has a direct inspection URL. Only six specimens are mounted per catalog page.
+These are app-local component explorations, not a published package or real OS/
+backend operations. The three original homepage studies remain accessible.
+
+`npm run test:library` runs the production, headless Chrome suite for all 48 objects,
+persistence/export, real shader updates, keyboard interaction and responsive layouts.
+See [the collection and composition notes](examples/atelier/src/library/README.md).
+
 ## Support policy
 
 Oyn supports **WebGPU only**, in a secure context (HTTPS or localhost) with an available GPU adapter/device. Environments without usable WebGPU are unsupported. There is no WebGL, Canvas2D or CSS rendering fallback, automatic native-style restoration, or planned compatibility renderer.

@@ -30,7 +30,8 @@
     "dev:atelier": "npm run dev -w @oyn/example-atelier",
     "build:shadcn": "npm run build:packages && npm run build -w @oyn/example-shadcn",
     "test:atelier": "npm run build && node tests/atelier.mjs",
-    "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir"
+    "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir",
+    "test:library": "npm run build && node tests/library.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

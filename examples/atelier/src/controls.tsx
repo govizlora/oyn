@@ -13,7 +13,8 @@ import { useSurface } from '@oyn/surface';
 
 export type Tone =
   'porcelain' | 'chalk' | 'orange' | 'ink' | 'sage' | 'yellow' | 'lilac';
-const colors: Record<Tone, string> = {
+export type SurfaceTone = Tone | `#${string}`;
+export const ceramicColors: Record<Tone, string> = {
   porcelain: '#eeeee9',
   chalk: '#f4f4f0',
   orange: '#e95b2c',
@@ -28,25 +29,27 @@ export const css = (variables: Record<string, string | number>) =>
 // All solid surfaces, including wells, share Ceramic. CSS paints only ink and
 // layout, never a second approximation of a surface's bevel or shadow.
 export function useCeramic<T extends HTMLElement>(
-  tone: Tone,
+  tone: SurfaceTone,
   elevation: number,
   budget = Math.max(elevation, 0),
   rim = 3,
 ) {
-  const material = useMemo(
-    () =>
-      ceramic({
-        color: colors[tone],
-        elevation,
-        maxElevation: budget,
-        lightRim: tone === 'ink' ? 2 : rim,
-        lightSurfaceTop: tone === 'ink' ? 0.04 : 0.16,
-        lightEdgeShade: 0.04,
-        shadowStrength: 0.13,
-        contactShadowStrength: 0.03,
-      }),
-    [tone, budget, rim],
-  ); // Live elevation has exactly one writer below.
+  const material = useMemo(() => {
+    const color = tone.startsWith('#')
+      ? tone.toLowerCase()
+      : ceramicColors[tone as Tone];
+    const ink = color === ceramicColors.ink;
+    return ceramic({
+      color,
+      elevation,
+      maxElevation: budget,
+      lightRim: ink ? 2 : rim,
+      lightSurfaceTop: ink ? 0.04 : 0.16,
+      lightEdgeShade: 0.04,
+      shadowStrength: 0.13,
+      contactShadowStrength: 0.03,
+    });
+  }, [tone, budget, rim]); // Live elevation has exactly one writer below.
   useLayoutEffect(
     () => material.setElevation(elevation),
     [material, elevation],
@@ -62,7 +65,7 @@ export function Surface({
   children,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
-  tone?: Tone;
+  tone?: SurfaceTone;
   elevation?: number;
   rim?: number;
 }) {

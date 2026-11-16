@@ -26,6 +26,19 @@ npm run test:atelier        # production, headless Google Chrome
 The bottom pictograms switch studies and update the URL. Back/forward works.
 Each study intentionally starts fresh when selected; no hidden persistence.
 
+## Object library
+
+The small **Object library** entry opens `/?view=library`, a separate scrolling
+collection of 48 locally interactive specimens in eight rooms. The three existing
+compositions remain full-screen. Each specimen can be inspected on its own, starred
+into a browser-local shortlist, and exported as a source-reference manifest for
+later composition. Only shortlist IDs persist; demo values reset between rooms.
+
+`npm run test:library` verifies this additive collection separately. See
+[the library notes](src/library/README.md) for all objects, routes, interaction
+boundaries, architecture and validation. Search is global across rooms (or scoped
+to Picked). The library shares the same SurfaceProvider and existing primitives.
+
 ## Interaction
 
 - Dials: drag vertically; native arrow keys, Home and End also work.
@@ -69,7 +82,8 @@ specific absolute surface geometry. There are no per-study renderer copies.
 contract. The small code display draws curved raster geometry, scanlines, bloom
 and bitmap glyphs in WGSL. The fictional code is also real HTML `<pre>` content for
 assistive technology; shader glyph data comes from that same string. It is not a
-screenshot, texture, second graphics engine or CSS approximation. Other procedural
+screenshot, texture, second graphics engine or CSS approximation. The library can also edit a bounded 32×12 text grid, updating the same uniform
+cells without rebuilding the shader. Other procedural
 modes remain available in the material, but are not used by the current homepage.
 It needs one additional cached pipeline.
 
