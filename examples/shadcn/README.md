@@ -1,26 +1,63 @@
-# shadcn/ui — original SaaS preview
+# shadcn Dashboard — Original / Ceramic
 
-Run from the repository root: `npm run dev:shadcn` (http://127.0.0.1:5175).
+## Run
 
-Independent UI-only workspace: overview, projects, team, and settings. Uses Radix-backed shadcn/ui, the existing new-york preset, Tailwind 4, and the official neutral tokens. No Surface imports or appearance-removal overrides.
+From the repository root:
+- `npm run dev` / `npm run dev:shadcn` → http://127.0.0.1:5176
+- `npm run build` → root `dist/`
+- `npm run test:shadcn` and `npm run test:theme` (server running)
 
-References:
-- [Official dashboard blocks](https://ui.shadcn.com/blocks/dashboard)
-- [Official tasks example](https://ui.shadcn.com/examples/tasks)
-- [Theming](https://ui.shadcn.com/docs/theming)
-- Registry components: `https://ui.shadcn.com/r/styles/new-york/{name}.json`
-- Neutral tokens: `https://ui.shadcn.com/r/colors/neutral.json`
+## Three separate responsibilities
 
-Registry component styling and behavior are retained. Import aliases are localized, and legacy CSS-variable arbitrary values are expressed as `[var(--name)]` for Tailwind 4 compatibility (no visual redesign). The neutral theme includes the legacy destructive-foreground/sidebar-background aliases needed by these components. Upstream MIT license is retained in `src/components/ui/LICENSE.md`.
+- **`original/`**: immutable official new-york-v4 registry snapshot, including
+  dashboard-01, its data, UI primitives and mobile hook. Extracted file contents
+  are byte-for-byte identical to the saved registry responses. `manifest.json`
+  records SHA-256 checksums. Never edit these files for a local adaptation.
+- **`src/ceramic/`**: independent Button, Card, Dialog, Tabs and low-elevation PanelSurface implementations,
+  plus their materials. They render Ceramic directly and know nothing about the
+  app's Original / Ceramic selector. UI state stays inside components.
+- **`src/app/`**: the comparison application, adapted dashboard, theme, mode
+  controls and component registry. `registry.tsx` selects migrated components;
+  `ui/` contains thin app import adapters and direct original exports for the
+  remaining primitives. These adapters are wiring, not a third component library.
 
-The app is a small composition of official primitives, not a verbatim copy of dashboard-01. Layout/spacing and page typography are application composition; there are no custom surface colors, shadows, or radii.
+Changing mode remounts only the demo contents with `key={appearance}` inside a
+stable scroll container. The outer shell/sidebar and native scroll position stay
+intact, without a scroll cache or restoration effect. Table pagination,
+selection, tab state, open dialogs and drafts reset. No state transfer or cache
+is maintained between implementations. The mode/theme preference itself persists.
 
-All business state is local to this app and resets on refresh. There is no shared business layer, backend, storage, auth, or email delivery. Forms and actions demonstrate UI behavior, not production workflows. The upstream Sidebar owns its own open/collapsed behavior.
+## Upstream and build integration
 
-Only the original version is implemented. A Surface version is deferred until the native baseline is ready.
+Source: https://ui.shadcn.com/r/styles/new-york-v4/dashboard-01.json
 
-## Color mode
+Official preview: https://ui.shadcn.com/blocks/dashboard
 
-The sidebar footer offers Light / Dark / System above the user menu. System is the default and follows live OS changes; selection is local to this preview and resets on reload. Application ThemeProvider owns the resolved mode. Neutral dark CSS tokens follow https://ui.shadcn.com/docs/theming. Test both demos with `npm run test:theme`.
+`upstream.json` lists the original dashboard import sources. The exact saved
+responses for the complete local snapshot live in `original/registries/`, and
+`original/manifest.json` is the authoritative snapshot inventory.
 
-Theme controls use the official Radix/new-york-v4 ButtonGroup from https://ui.shadcn.com/r/styles/new-york-v4/button-group.json (only local import paths adapted). Group orientation uses the official prop for collapsed sidebars; rounding and border joining are owned by ButtonGroup, not ThemeToggle. No Base UI dependency was added.
+Unchanged upstream imports are resolved by Vite/TypeScript aliases: the upstream
+registry namespace points at `original/`, `cn` uses the app utility, and the
+upstream Sonner `next-themes` hook receives the app's resolved theme through a
+small read-only bridge. This does not add another theme controller or modify
+upstream source. Original composite components keep their original dependencies;
+Ceramic Dialog uses Ceramic Button explicitly.
+
+See `UPSTREAM-LICENSE.md` and [migration boundaries](MIGRATION.md).
+
+## Application-only adaptations
+
+The app dashboard lives in `src/app/dashboard/` and `src/app/page.tsx`, separate
+from the untouched upstream dashboard snapshot. It adds an inset preview with
+independent scrolling, comparison controls, an initials avatar fallback and a
+local Add Section dialog. Stat-card decorative gradients are selected in the
+app, not in either component library. No backend/account actions are provided.
+
+Ceramic is experimental and WebGPU-only. Original is a comparison implementation,
+not an automatic compatibility fallback. All browser tests run headlessly.
+
+The main content panel separates its stationary background surface from the
+stable scrolling viewport. Ceramic uses elevation 8 with no duplicate CSS shadow;
+Original uses the original inset panel CSS paint. The sidebar/frame is darker
+than the content in light mode and lighter in dark mode.

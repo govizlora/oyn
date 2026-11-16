@@ -8,10 +8,17 @@ export function createPresentation(mesh: Mesh) {
   const positioned = getComputedStyle(host).position === 'static';
   if (positioned) host.style.position = 'relative';
   host.style.isolation = 'isolate';
+  // Keep the padded bitmap out of scrollable overflow. The host-sized layer
+  // owns layout bounds; layout containment keeps exterior ink from enlarging
+  // ancestor scroll areas without clipping that ink.
+  const layer = document.createElement('span');
+  layer.dataset.oynLayer = ''; layer.setAttribute('aria-hidden', 'true');
+  layer.style.cssText = 'position:absolute;inset:0;display:block;pointer-events:none;z-index:-1;contain:layout;';
   const canvas = document.createElement('canvas');
   canvas.dataset.oynCanvas = ''; canvas.setAttribute('aria-hidden', 'true');
-  canvas.style.cssText = 'position:absolute;pointer-events:none;z-index:-1;display:block;';
-  host.append(canvas);
+  canvas.style.cssText = 'position:absolute;pointer-events:none;display:block;';
+  layer.append(canvas);
+  host.append(layer);
   let cachedBounds: DOMRect | undefined, radius = 0;
   let width = 0, height = 0, pad: Insets = { x: 0, y: 0 };
   function measure(limit: number) {
@@ -41,7 +48,7 @@ export function createPresentation(mesh: Mesh) {
       radius, canvas.width / cssW, canvas.height / cssH, 0]);
   }
   function dispose() {
-    canvas.remove(); canvas.width = canvas.height = 0;
+    layer.remove(); canvas.width = canvas.height = 0;
     if (positioned && host.style.position === 'relative') host.style.position = position;
     if (host.style.isolation === 'isolate') host.style.isolation = isolation;
   }

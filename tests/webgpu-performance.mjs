@@ -9,7 +9,7 @@ const themes=process.env.THEMES?.split(',')||(smoke?['light','dark']:['light']);
 await mkdir('test-results/webgpu',{recursive:true});
 const browserName=process.env.BROWSER||'chrome';
 assert.ok(['chrome','firefox'].includes(browserName));
-const browser=browserName==='firefox'?await firefox.launch({headless:false}):await chromium.launch({channel:'chrome',headless:false,args:['--window-size=1440,1000']});
+const browser=browserName==='firefox'?await firefox.launch({headless:true}):await chromium.launch({channel:'chrome',headless:true,args:['--window-size=1440,1000']});
 const info=browserName==='chrome'?await(await browser.newBrowserCDPSession()).send('SystemInfo.getInfo'):null;
 const result={date:new Date().toISOString(),browserName,browser:browser.version(),gpu:info?.gpu.devices??null,features:info?.gpu.featureStatus??null,viewport:{width:1440,height:900},warmupMs:5000,sampleMs:12000,runs:[]};
 const pct=(a,p)=>a.slice().sort((a,b)=>a-b)[Math.floor((a.length-1)*p)]||0;

@@ -5,7 +5,7 @@ import type { Material, SurfaceMode } from './material.js';
 
 export type { Material, Parameters, Insets, SurfaceMode } from './material.js';
 export { createParameters } from './material.js';
-export type SurfaceOptions = { material: Material };
+export type SurfaceOptions = { material: Material; enabled?: boolean };
 type Service = {
   entries: Map<HTMLElement, Mesh>;
   invalidate: () => void;
@@ -40,23 +40,30 @@ export function SurfaceProvider({ children, mode = 'system', onError = console.e
 
 /** Optional forwarded ref is composed here, not reimplemented by every adapter. */
 export function useSurface<T extends HTMLElement = HTMLDivElement>(
-  { material: source }: SurfaceOptions, forwardedRef?: Ref<T>,
+  { material: source, enabled = true }: SurfaceOptions, forwardedRef?: Ref<T>,
 ) {
   const mode = useSurfaceMode();
   const material = source.resolveMode?.(mode) ?? source;
   const service = useContext(Context);
   if (!service) throw new Error('useSurface requires SurfaceProvider');
   const mesh = useRef<Mesh | null>(null);
+  const active = useRef(enabled);
+  active.current = enabled;
   const latest = useRef(material);
   latest.current = material;
   useLayoutEffect(() => {
-    if (mesh.current) { mesh.current.material = material; service.invalidate(); }
-  }, [service, material]);
+    if (mesh.current) {
+      mesh.current.material = material;
+      if (enabled) service.entries.set(mesh.current.element, mesh.current);
+      else service.entries.delete(mesh.current.element);
+      service.invalidate();
+    }
+  }, [service, material, enabled]);
 
   return useCallback((element: T | null) => {
     if (mesh.current) service.entries.delete(mesh.current.element);
     mesh.current = element ? { element, material: latest.current, initialBudget: latest.current.bounds.initial } : null;
-    if (mesh.current) service.entries.set(element!, mesh.current);
+    if (mesh.current && active.current) service.entries.set(element!, mesh.current);
     service.invalidate();
     const cleanup: unknown = typeof forwardedRef === 'function' ? forwardedRef(element) : undefined;
     if (forwardedRef && typeof forwardedRef !== 'function') forwardedRef.current = element;

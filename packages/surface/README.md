@@ -73,3 +73,18 @@ Pass `mode="light"` or `mode="dark"` once when an application already owns theme
 Materials may implement `resolveMode(mode)`; `useSurface` resolves appearance without mutating
 a source shared across providers. The low-level engine does not read browser theme:
 non-React integrations resolve the material explicitly before registering it.
+
+
+### Explicit appearance comparison
+
+`useSurface({ material, enabled: false }, ref)` retains the same DOM ref but does
+not register a renderable surface. Re-enabling registers it with the existing
+provider; disabling removes its canvas on the next scheduled frame. This is an
+explicit presentation choice, not a GPU failure fallback. The DOM subtree and
+its form/interaction state are not remounted.
+
+
+The padded canvas is hosted inside an absolute, host-sized `data-oyn-layer`
+with `contain: layout` (not paint containment). Exterior material ink remains
+visible, but does not enlarge ancestor scrollable overflow. Native ancestor
+clipping still applies. The layer and canvas are both removed on disposal.

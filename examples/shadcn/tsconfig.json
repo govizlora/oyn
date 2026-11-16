@@ -1,1 +1,26 @@
-{"extends": "../../tsconfig.json", "compilerOptions": {"baseUrl": ".", "paths": {"@/*": ["./src/*"]}}, "include": ["src"]}
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@original/*": [
+        "./original/registry/new-york-v4/*"
+      ],
+      "@/registry/new-york-v4/*": [
+        "./original/registry/new-york-v4/*"
+      ],
+      "cn": [
+        "./src/lib/utils.ts"
+      ],
+      "next-themes": [
+        "./src/app/upstream-theme.ts"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}

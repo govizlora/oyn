@@ -46,7 +46,7 @@ try {
     if (i > 100) throw Error('Vite did not start: ' + serverOutput);
     await new Promise(r => setTimeout(r, 100));
   }
-  browser = process.env.BROWSER === 'firefox' ? await firefox.launch({ headless: false }) : await chromium.launch({ channel: 'chrome', headless: false });
+  browser = process.env.BROWSER === 'firefox' ? await firefox.launch({ headless: true }) : await chromium.launch({ channel: 'chrome', headless: true });
   const page = await browser.newPage();
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   await page.goto(base + '/tests/fixtures/surface.html');

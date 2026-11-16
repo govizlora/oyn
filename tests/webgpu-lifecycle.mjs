@@ -2,7 +2,7 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { BENCHMARK } from '../src/benchmark-config.ts';
 const base=process.env.BASE_URL||'http://127.0.0.1:5173';
-const browser=await chromium.launch({channel:'chrome',headless:false});
+const browser=await chromium.launch({channel:'chrome',headless:true});
 try{
 for(const scenario of ['cancel','loss','configure-error','pointer']){
  const page=await browser.newPage({viewport:{width:1440,height:900}});

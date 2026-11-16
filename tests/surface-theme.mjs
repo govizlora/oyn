@@ -17,7 +17,7 @@ const colored = ceramic({ color: { light: '#ff0000', dark: '#0000ff' } });
 assert.equal(colored.resolveMode('light').parameters.get(4), 1);
 assert.equal(colored.resolveMode('dark').parameters.get(6), 1);
 
-const browser = await chromium.launch({ channel: 'chrome', headless: false });
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   const page = await browser.newPage({ colorScheme: 'light' });
   const errors = [];
@@ -28,7 +28,7 @@ try {
     body: `<html><head><link rel="icon" href="data:,"></head><body><div id="root"></div><script type="module" src="/@fs/${process.cwd()}/tests/fixtures/surface-theme.tsx"></script></body></html>`,
   }));
   await page.goto('http://127.0.0.1:5176/theme-test');
-  await page.locator('#dark > canvas').waitFor();
+  await page.locator('#dark > [data-oyn-layer] > canvas').waitFor();
   const brightness = async id => {
     const box = await page.locator('#' + id).boundingBox();
     const png = PNG.sync.read(await page.screenshot({ clip: { x: box.x + 50, y: box.y + 40, width: 1, height: 1 } }));

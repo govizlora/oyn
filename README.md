@@ -16,7 +16,7 @@ The root A/B benchmark is retained for research; it is not the current package a
 
 ```sh
 npm install
-npm run dev
+npm run dev:benchmark
 ```
 
 - **A — Instanced:** http://127.0.0.1:5173/?mode=shared
@@ -46,13 +46,13 @@ Historical light-mode measurements and limitations: [performance report](test-re
 ### Reproducible measurement
 
 ```sh
-npm run build
+npm run build:benchmark
 npx vite preview --host 127.0.0.1 --port 5178 --strictPort
 # In another terminal:
 npm run test:performance
 ```
 
-The performance script launches installed **headed Google Chrome** with actual GPU acceleration, one test page at a time, viewport 1440×900. It uses automatic lighting plus deterministic native scrolling, warms up for 5 seconds and records 12 seconds per case. By default it measures light mode; use `THEMES=dark` or `THEMES=light,dark` to select appearances. It tests the fixed 120-card / DPR-2 workload in A/B twice, reversing A/B order in the second round. `BASE_URL` can override the default production preview URL.
+The performance script now launches installed **headless Google Chrome** (historical reports used headed Chrome), one test page at a time, viewport 1440×900. It uses automatic lighting plus deterministic native scrolling, warms up for 5 seconds and records 12 seconds per case. By default it measures light mode; use `THEMES=dark` or `THEMES=light,dark` to select appearances. It tests the fixed 120-card / DPR-2 workload in A/B twice, reversing A/B order in the second round. `BASE_URL` can override the default production preview URL.
 
 Raw per-frame data, machine GPU details, screenshots and summaries go to `test-results/webgpu/`. Actual API calls are instrumented: requestDevice, configure, render passes, draws/instance counts, queue submissions and copy calls. Invalid counts, unexpected browser errors and hidden documents fail the test. A’s explicit texture-size rejection is recorded separately as unsupported, never as a successful performance sample.
 
@@ -79,23 +79,24 @@ Mouse-follow lighting remains the default. Choose automatic lighting and auto-sc
 - `packages/surface`: `@oyn/surface` — SurfaceProvider, useSurface, DOM integration and WebGPU rendering; one canvas per element and one device/scheduler per Provider.
 - `packages/material-ceramic`: `@oyn/material-ceramic` — composable shader fragments; explicit light/dark optical modes.
 
-## Independent SaaS demos (paused experiments)
+## Dashboard comparison — main entry
 
-The original demos are native UI baselines. The Surface copy imports the current WebGPU-only packages; full example UI revalidation was not part of the package migration:
+`npm run dev` (also `dev:shadcn`) opens the official
+shadcn/ui dashboard-01 comparison at http://127.0.0.1:5176.
 
-- MUI original: `npm run dev:mui` → http://127.0.0.1:5174
-- shadcn original: `npm run dev:shadcn` → http://127.0.0.1:5175
-- shadcn + Surface: `npm run dev:shadcn-surface` → http://127.0.0.1:5176
+One comparison app, two component implementations: **Original / Ceramic**.
+Untouched upstream sources live in `examples/shadcn/original/`; our components
+live in `examples/shadcn/src/ceramic/`. The app registry selects Button, Card,
+Dialog and Tabs; other components remain Original. Switching mode remounts the
+demo contents and resets local UI state, while preserving the outer scroll container. Theme and appearance preferences persist.
+App-only dashboard adaptations, including Add Section, live in `src/app/`.
 
-The two shadcn demos include Light/Dark/System controls. The Surface copy adapts application Buttons and Card shells. Each demo owns its own local, nonpersistent UI state. The root performance experiment is separate from the package rendering architecture.
+`npm run build` produces the dashboard in root `dist/` for static hosting.
+The historical benchmark remains available through `dev:benchmark` and
+`build:benchmark`. MUI remains a separate unchanged experiment (`dev:mui`, :5174).
 
-```sh
-npm run build:all
-npm run test:surface-core
-npm run test:ceramic
-npm run test:theme
-npm run test:shadcn-surface
-npm run test:examples
-```
+See [dashboard provenance and changes](examples/shadcn/README.md).
+Tests against the running dashboard:
+`npm run test:shadcn`, `npm run test:theme`.
 
-See `HANDOFF.md` for current decisions and older historical notes. Still Creek is a read-only visual/math reference, not a runtime dependency.
+See `HANDOFF.md` for historical research notes. Still Creek is read-only.

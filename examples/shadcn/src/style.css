@@ -113,3 +113,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+
+/* Only the material mode uses Ceramic's tuned workspace palette. */
+:root[data-appearance="ceramic"] { --background: #f0f0f0; --card: #f0f0f0; --sidebar: #e8e8e8; }
+:root.dark[data-appearance="ceramic"] { --background: #000; --card: #0c0c0c; --sidebar: #181818; }

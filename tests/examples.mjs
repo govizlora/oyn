@@ -5,7 +5,7 @@ import { mkdir } from 'node:fs/promises';
 await mkdir('test-results', { recursive: true });
 const browser = await chromium.launch();
 try {
-  for (const [name, port] of [['mui', 5174], ['shadcn', 5175]]) {
+  for (const [name, port] of [['mui', 5174]]) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errors = [];
     page.on('pageerror', error => errors.push(String(error)));

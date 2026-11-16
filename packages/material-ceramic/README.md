@@ -27,7 +27,7 @@ ceramic({ lightReflectionStrength: 2, shadowStrength: 0.1 });
 ceramic({ mode: 'dark', darkFrost: 0.2 });
 ```
 
-Workspace brightness values (`lightWorkspace: 232`, `darkWorkspace: 0`) are exported guidance, not material options. The application owns its background. The shadcn Surface demo uses #f0f0f0 / #000000 backgrounds and default neutral materials; primary/destructive actions retain semantic colors. Avoid pure white neutral surfaces if white highlights should remain visible.
+Workspace brightness values (`lightWorkspace: 232`, `darkWorkspace: 0`) are exported guidance, not material options. The application owns its background. The shadcn demo uses #f0f0f0 / #000000 backgrounds and default neutral materials; primary/destructive actions retain semantic colors. Avoid pure white neutral surfaces if white highlights should remain visible.
 
 
 Omit `mode` to inherit Surface's theme (system by default). An explicit `mode` fixes
@@ -37,3 +37,28 @@ starts with light parameters; use `material.resolveMode?.(mode) ?? material` for
 low-level integrations. Resolved instances are cached separately per mode, so one
 source can safely be shared by light and dark providers. Call `setElevation` on
 the source to update all its resolved instances.
+
+
+### Soft shadow silhouette
+
+The projected shadow convolves the rounded rectangle with a Gaussian area-light
+approximation. Straight bands use analytic Gaussian integrals; circular corner
+bands use bounded eight-point quadrature. Unlike a signed-distance opacity ramp,
+this accounts for reduced occlusion near corners. The existing elevation layers,
+pointer projection, contact shadow and strength settings remain unchanged.
+This is a soft-shadow approximation, not a full physical light-transport solver.
+Canvas padding uses a conservative Gaussian tail bound matching this kernel.
+
+With the Surface demo running on port 5176, `npm run test:ceramic-shadow` compares
+the production GPU kernel against dense CPU integration for dialog, card, button,
+square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
+
+### Inset surfaces
+
+`inset()` is the recessed floor/wall material ported from Still Creek's concave
+surface optics and preset. It uses the same Surface provider, frame coordinates,
+and rounded-rectangle geometry as Ceramic, with one surface pass and no exterior
+cast shadow. `inset({ depth: 2.3, wallAngle: 50, curve: 2 })` accepts numeric
+options; `insetDefaults` exposes the full preset. Light/dark mode inherits from
+the provider unless explicitly supplied. Focus/loading emission and glass are
+not included. Layout radius belongs to the host element, not the material.

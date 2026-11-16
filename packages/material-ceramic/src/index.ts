@@ -63,3 +63,5 @@ export function ceramic(options: CeramicOptions = {}): CeramicMaterial {
     setElevation(value: number) { validateElevation(value, lightHeight); parameters.set(1, value); variants.forEach(material => material.setElevation(value)); },
   };
 }
+
+export { inset, insetDefaults, type InsetOptions } from './inset.js';

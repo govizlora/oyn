@@ -1,0 +1,12 @@
+export * from "@original/ui/dialog";
+import { registered } from "../registry";
+export const Dialog = registered("Dialog");
+export const DialogClose = registered("DialogClose");
+export const DialogContent = registered("DialogContent");
+export const DialogDescription = registered("DialogDescription");
+export const DialogFooter = registered("DialogFooter");
+export const DialogHeader = registered("DialogHeader");
+export const DialogOverlay = registered("DialogOverlay");
+export const DialogPortal = registered("DialogPortal");
+export const DialogTitle = registered("DialogTitle");
+export const DialogTrigger = registered("DialogTrigger");
