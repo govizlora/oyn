@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:shadcn",
-    "build": "npm run build:packages && npm run build -w @oyn/example-shadcn -- --outDir ../../dist --emptyOutDir",
+    "dev": "npm run dev:atelier",
+    "build": "npm run build:packages && npm run build:atelier",
     "test": "node tests/benchmark.mjs",
     "dev:mui": "npm run dev -w @oyn/example-mui",
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
-    "build:all": "npm run build:packages && npm run build:benchmark && npm run build -w @oyn/example-mui -w @oyn/example-shadcn",
+    "build:all": "npm run build:packages && npm run build:benchmark && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
     "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/material-ceramic",
     "test:ceramic": "npm run build:packages && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",
@@ -26,7 +26,11 @@
     "dev:benchmark": "vite --host 127.0.0.1",
     "build:benchmark": "tsc --noEmit && vite build",
     "test:surface-overflow": "node tests/surface-overflow.mjs",
-    "test:shadcn": "node tests/shadcn-menus.mjs && node tests/shadcn-menu-variants.mjs && node tests/shadcn-navigation-motion.mjs && node tests/shadcn-navigation.mjs && node tests/shadcn-registry.mjs && node tests/shadcn-scroll.mjs && node tests/shadcn-scrollbar.mjs && node tests/shadcn-panel.mjs && node tests/shadcn-shadow-stacking.mjs && node tests/shadcn.mjs && node tests/tabs.mjs && node tests/surface-dialog.mjs"
+    "test:shadcn": "node tests/shadcn-menus.mjs && node tests/shadcn-menu-variants.mjs && node tests/shadcn-navigation-motion.mjs && node tests/shadcn-navigation.mjs && node tests/shadcn-registry.mjs && node tests/shadcn-scroll.mjs && node tests/shadcn-scrollbar.mjs && node tests/shadcn-panel.mjs && node tests/shadcn-shadow-stacking.mjs && node tests/shadcn.mjs && node tests/tabs.mjs && node tests/surface-dialog.mjs",
+    "dev:atelier": "npm run dev -w @oyn/example-atelier",
+    "build:shadcn": "npm run build:packages && npm run build -w @oyn/example-shadcn",
+    "test:atelier": "npm run build && node tests/atelier.mjs",
+    "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir"
   },
   "dependencies": {
     "react": "^19.2.0",

@@ -2,6 +2,31 @@
 
 Experimental GPU surfaces with native DOM layout and interaction.
 
+## Ceramic studies — current homepage
+
+`npm run dev` starts the three **desktop-first, full-viewport, light-mode**
+compositions at http://127.0.0.1:5177. Use the three small pictograms at the bottom,
+or open a study directly:
+
+- `/?study=1` — **Quiet / Porcelain**: a restrained white Ceramic instrument.
+- `/?study=2` — **Signal / Soft machine**: sage, a large dial, and a phosphor scope.
+- `/?study=3` — **Play / Future instrument**: a dense, colorful control surface with
+  six dials, four faders, a keyboard, pads, a sequencer and two GPU displays.
+
+No hero copy, dashboards, fonts, stock images, or UI-kit dependency. The actual
+controls are native HTML; Ceramic and a local phosphor material supply their
+WebGPU paint through **one SurfaceProvider**. This is a visual instrument, not an
+audio engine. Play explicitly starts signal motion; idle/reduced-motion/hidden
+pages do not run that clock. The original Ceramic defaults are unchanged.
+
+`npm run build` produces this homepage in root `dist/`. `npm run test:atelier`
+builds and checks production in **headless Chrome**, including interaction,
+WebGPU counts, screenshot review sizes, history, and explicit unsupported state.
+See [the study notes](examples/atelier/README.md). Nothing is deployed by these commands.
+
+The shadcn migration remains separate: `npm run dev:shadcn` on :5176 and
+`npm run build:shadcn`. MUI and the historical benchmark are also retained.
+
 ## Support policy
 
 Oyn supports **WebGPU only**, in a secure context (HTTPS or localhost) with an available GPU adapter/device. Environments without usable WebGPU are unsupported. There is no WebGL, Canvas2D or CSS rendering fallback, automatic native-style restoration, or planned compatibility renderer.
@@ -79,9 +104,9 @@ Mouse-follow lighting remains the default. Choose automatic lighting and auto-sc
 - `packages/surface`: `@oyn/surface` — SurfaceProvider, useSurface, DOM integration and WebGPU rendering; one canvas per element and one device/scheduler per Provider.
 - `packages/material-ceramic`: `@oyn/material-ceramic` — composable shader fragments; explicit light/dark optical modes.
 
-## Dashboard comparison — main entry
+## Dashboard comparison — separate migration example
 
-`npm run dev` (also `dev:shadcn`) opens the official
+`npm run dev:shadcn` opens the official
 shadcn/ui dashboard-01 comparison at http://127.0.0.1:5176.
 
 One comparison app, two component implementations: **Original / Ceramic**.
@@ -91,7 +116,7 @@ Dialog and Tabs; other components remain Original. Switching mode remounts the
 demo contents and resets local UI state, while preserving the outer scroll container. Theme and appearance preferences persist.
 App-only dashboard adaptations, including Add Section, live in `src/app/`.
 
-`npm run build` produces the dashboard in root `dist/` for static hosting.
+`npm run build:shadcn` produces the dashboard in `examples/shadcn/dist/`.
 The historical benchmark remains available through `dev:benchmark` and
 `build:benchmark`. MUI remains a separate unchanged experiment (`dev:mui`, :5174).
 
