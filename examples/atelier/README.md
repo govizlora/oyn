@@ -1,116 +1,104 @@
 # Ceramic studies
 
-Three desktop-first, full-viewport homepage explorations. Light only; no marketing
-copy. The primary visual reference was a quiet white panel of tactile ceramic
-controls, with Braun / Teenage Engineering-inspired order and restrained color.
-The current iteration applies that material language to **everyday interfaces**,
-not music hardware. Small functional labels and dates are part of the objects.
+Three desktop-first, full-viewport homepage explorations. Light only, no marketing
+copy: tactile ceramic, quiet geometry and restrained hardware-inspired color.
+The splash is for a desktop's **first screen**, not a phone mockup or dashboard.
 
 ## Open
 
 ```sh
 npm run dev                 # http://127.0.0.1:5177
-npm run build               # root dist/, static hosting, no deployment
-npm run test:atelier        # production, headless Google Chrome
+npm run build               # root dist/, static hosting; no deployment
+npm run test:atelier        # production, headless Chrome, including the archive
+npm run test:library        # full collection and selection workflow
 ```
 
-- `/?study=1`: **Quiet — Porcelain**. Fine partitions, a brightness dial, finish
-  swatches, round pads, window-arrangement radio segments, toggles and shortcuts.
-- `/?study=2`: **Focus — Daily objects**. A quiet focus-duration dial and presets,
-  a shared interactive calendar, a checkable daily list and a quiet-time switch.
-- `/?study=3`: **Play — Everyday desktop**. Calendar, searchable file collection,
-  physically raised selected table rows, grid view, multi-select filters, radio
-  dropdowns, colored labels, display controls, keyboard shortcuts and a small
-  amber phosphor code display.
+- `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
+  radio segments, switches, slider and shortcut keys.
+- `/?study=2`: **Air — Kinetic objects**. Swept ceramic rotor, speed dial, reverse,
+  removable grille, three/five/seven-blade detents, luminous pilot and switches.
+- `/?study=3`: **Play — Tactile playground**. Pocket rotor, eight independently
+  latched lamps, graphical phosphor field, twelve keycaps, three vertical faders,
+  reaction bubbles and colored checkbox pills. Each control changes something.
+- `/?view=library&room=hardware`: the six new hardware objects, separately reusable.
+- `/?view=library&room=archive`: the former **Daily objects** and **Everyday desktop**
+  compositions, preserved intact with their calendars, to-do list, searchable
+  table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The bottom pictograms switch studies and update the URL. Back/forward works.
-Each study intentionally starts fresh when selected; no hidden persistence.
+The bottom pictograms switch studies; the **last** opens the component library.
+One URL owner supports direct links and back/forward. Preview state intentionally
+resets when changing studies/rooms; only starred object IDs persist.
 
 ## Object library
 
-The small **Object library** entry opens `/?view=library`, a separate scrolling
-collection of 48 locally interactive specimens in eight rooms. The three existing
-compositions remain full-screen. Each specimen can be inspected on its own, starred
-into a browser-local shortlist, and exported as a source-reference manifest for
-later composition. Only shortlist IDs persist; demo values reset between rooms.
+56 entries: **54 interactive object specimens plus 2 preserved compositions**, in
+10 rooms. Up to six entries mount per page; archived compositions span the full
+width. Inspect individually, star a shortlist, export named source references,
+and recombine later. This is an app-local exploration library, not a public package.
+See [the library notes](src/library/README.md) for the inventory and boundaries.
 
-`npm run test:library` verifies this additive collection separately. See
-[the library notes](src/library/README.md) for all objects, routes, interaction
-boundaries, architecture and validation. Search is global across rooms (or scoped
-to Picked). The library shares the same SurfaceProvider and existing primitives.
+## Interaction and boundaries
 
-## Interaction
+Native HTML retains focus, accessibility, form and keyboard semantics. Dials drag
+vertically and support arrows/Home/End. Faders, switches, detents and pills are native
+range/radio/checkbox inputs. Buttons lower their Ceramic elevation on press.
+The pocket keyboard accepts physical letter/arrow keys while focused; Enter/Space
+remain native activation of the focused key. It never installs global shortcuts.
 
-- Dials: drag vertically; native arrow keys, Home and End also work.
-- Sliders, radio groups and switches retain native form and keyboard semantics.
-- Calendar: previous/next month, day selection, arrows, Home/End and PageUp/PageDown.
-  Month changes clamp the day, and a single day remains in the Tab order.
-- Collection: search, sort by name/size/recency, independently filter file types,
-  switch list/grid, and select individual files or all **visible** files. Selection
-  persists across filtering and views; the select-all checkbox has a native mixed
-  state. Filtering does not move the Labels panel below it.
-- Dropdowns: native details/summary, ArrowDown to open and focus a choice, native
-  radio/checkbox keys, Escape to dismiss and restore focus. Outside pointer and
-  focus movement dismiss them. Multi-select filters stay open for further choices.
-- Command/Ctrl+K and the tactile shortcut keys focus search. The Dock focuses
-  actual controls; the previous-day key changes the calendar. The star key toggles
-  a local favorite state. Colored labels are independent checkboxes.
-- Button presses lower the Ceramic surface through `setElevation`.
+Lamp levels change actual shader light output. Bubble elevation has a fixed
+material budget, so its fader updates the existing material rather than rebinding it. The play keyboard toggles the first
+lamp; vertical faders control rotor speed, lamp intensity and bubble elevation.
+Reaction keys shift a two-bubble local queue; clicking a bubble changes its glyph.
+Fan power controls all share one state. Zero speed also stops motion.
 
-These are **local interactive design prototypes**. Files, sync meters and calendar
-markers are sample data. Controls do not change OS brightness, networking or focus
-settings, operate on real files, persist preferences, or run a countdown. There is
-no audio, microphone, backend, external service, or automatic animation clock.
+All data and effects are local demonstrations. No OS settings, physical fans,
+networking, real messages, file transfers, audio, microphone, backend or accounts
+are involved. Dates/files/status meters in the archive are samples, not live data.
 
 ## Rendering ownership
 
-Native HTML owns layout, accessibility, focus and interaction. There is one
-SurfaceProvider, one device and the existing Surface draw scheduler. `controls.tsx`
-is the shared source of basic controls and app-only Ceramic variations;
-`everyday.tsx` owns the shared Calendar, Check, Menu, SelectMenu, Files and ChoiceChips.
-`desktop.tsx` composes the second and third studies. Library defaults are unchanged.
-Raised and recessed objects use Ceramic; CSS supplies layout, flat ink, iconography
-and environmental background. Numeric pixel radii respect Surface's geometry contract.
+- `controls.tsx`: sole Ceramic configuration and basic Surface/Key/Dial/Fader/Switch.
+- `playful-controls.tsx`: shared rotor housing, detent, lamps, keyboard, bubbles/pills.
+- `kinetic-studies.tsx`: composes Air and Play using those same primitives.
+- `everyday.tsx`: shared Calendar, Check, native Menu/SelectMenu, Files and ChoiceChips.
+- `desktop.tsx`: untouched original compositions, re-exported by `library/archive.tsx`.
+- `instrument-material.tsx`: one app-local optical shader/pipeline for rotor blades
+  and luminous lenses. The rotor rotates **inside WGSL**, not by rotating a bound
+  DOM surface. Housings, knobs, buttons and wells remain Ceramic.
+- `phosphor.tsx`: one additional shader/pipeline for graphical fields and editable
+  CRT glyphs. Text uniforms and semantic HTML come from one string.
+- `motion-clock.ts`: one shared 30 Hz numeric time source, with no GPU submission.
+  It exists only while a powered, nonzero-speed rotor subscribes; it stops on
+  unmount, hidden document or reduced-motion preference. Fans start off. Resuming
+  never simulates hidden time. There is no per-widget timer or renderer.
 
-Each behavior has one owner: native details owns dropdown open state; one selected
-ID array serves both file views; native inputs drive selection; the calendar's
-committed selected date drives keyboard focus. The common stylesheet precedes the
-everyday stylesheet at the entry point, so shared defaults do not override the
-specific absolute surface geometry. There are no per-study renderer copies.
+One SurfaceProvider owns one GPU device, its pipeline cache and the existing draw
+scheduler. Every raised/recessed element is HTML bound to Ceramic; CSS lays out
+geometry and prints flat marks, never another bevel/shadow approximation. Numeric
+updates wake Surface's sole scheduler. Five pipelines maximum after visiting both
+optical materials (three Ceramic passes + optical + phosphor).
 
-`phosphor.tsx` is an app-local Material using the normal Surface frame and uniform
-contract. The small code display draws curved raster geometry, scanlines, bloom
-and bitmap glyphs in WGSL. The fictional code is also real HTML `<pre>` content for
-assistive technology; shader glyph data comes from that same string. It is not a
-screenshot, texture, second graphics engine or CSS approximation. The library can also edit a bounded 32×12 text grid, updating the same uniform
-cells without rebuilding the shader. Other procedural
-modes remain available in the material, but are not used by the current homepage.
-It needs one additional cached pipeline.
-
-There is no animation at rest or separate render loop per widget. Surface owns
-GPU submission and redraws visible-size targets on a dirty frame. This example
-does **not** introduce partial redraw or claim mobile GPU performance.
+This does not add partial redraw, viewport culling, arbitrary DOM rotation or a
+mobile GPU performance guarantee. WebGPU/HTTPS or localhost remains required;
+unsupported environments show an explicit error, not a CSS/Canvas2D/WebGL fallback.
 
 ## Validation
 
-`test:atelier` builds the homepage and starts its own production preview on :5191.
-`BASE_URL` can target an already-running server. It tests:
+`test:atelier` builds production and runs the shared-clock policy unit test, new
+homepage interactions, and the preserved archive regression suite. Both browser
+suites run headless, with their own preview on :5191; `BASE_URL` can use an existing
+server. Tests include actual changed pixels, mouse/keyboard input, single device,
+cached pipelines, zero Canvas2D copies, idle rendering, motion cleanup, hidden and
+reduced-motion policy, history, unsupported state and five viewport sizes:
+1440×1000, 1440×900, 1280×720, 900×600, 390×844 (DPR 2). Desktop studies fit one screen;
+small screens reflow. Archive tests retain calendar/search/sort/filter/dropdown and
+mixed-selection coverage. Outputs: `test-results/atelier/` and `atelier-archive/`.
 
-- native mouse/keyboard controls, calendar focus and month boundaries;
-- real search/sort/filter, mixed and visible-only selection, table/grid consistency;
-- dropdown keyboard/dismissal, tags, Dock and search shortcuts;
-- changed selection pixels, stable content layout, shader/runtime errors;
-- one live device, four shared pipelines, no Canvas2D image copies;
-- idle rendering, reduced-motion preferences and URL back/forward;
-- screenshots at 1440×1000, 1440×900, 1280×720, 900×600 and 390×844 (DPR 2);
-- one-screen desktop composition, narrow reflow, no horizontal overflow, controls
-  inside their physical panel;
-- explicit unsupported state when WebGPU is unavailable, without a fallback.
+The library suite covers all 56 entries, persisted picks/export, isolated links,
+search/paging, denied storage, and 30 room/viewport screenshots. Outputs:
+`test-results/library/`. All screenshots are ignored by git.
 
-Outputs go to `test-results/atelier/` (gitignored). Chrome has been visually
-reviewed. `BROWSER=firefox` runs the same suite, but the installed headless Firefox
-currently blocklists WebGPU on this machine; its stock configuration is **not a
-rendered pass**. HTTPS/localhost and an available WebGPU adapter remain required.
-
-The shadcn migration, MUI comparison, and historical benchmark are untouched.
-Nothing here publishes the site or changes remote access.
+Chrome is the rendered review target. Stock installed headless Firefox blocklists
+WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison,
+core material defaults and historical benchmark are unchanged. Nothing is pushed
+or publicly deployed by these commands.

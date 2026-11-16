@@ -2,18 +2,19 @@ import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SurfaceProvider } from '@oyn/surface';
 import { QuietStudy } from './studies';
-import { FocusStudy, PlayStudy } from './desktop';
+import { AirStudy, PlaygroundStudy } from './kinetic-studies';
 import { ObjectLibrary, type LibraryLocation } from './library';
 import { objects, rooms } from './library/registry';
 import './style.css';
 import './desktop.css';
 import './library/library.css';
+import './kinetic.css';
 
-const studies = [QuietStudy, FocusStudy, PlayStudy];
+const studies = [QuietStudy, AirStudy, PlaygroundStudy];
 const names = [
   'Quiet · Porcelain',
-  'Focus · Daily objects',
-  'Play · Everyday desktop',
+  'Air · Kinetic objects',
+  'Play · Tactile playground',
 ];
 function readLocation() {
   const params = new URL(location.href).searchParams;
@@ -70,13 +71,6 @@ function App() {
     >
       {!route.library && (
         <>
-          <button
-            type="button"
-            className="library-entry"
-            onClick={() => library({ room: 'controls' })}
-          >
-            Object library <span>{objects.length} ↗</span>
-          </button>
           <div className="corner-mark" aria-hidden="true">
             <span />
             <span />
@@ -157,6 +151,17 @@ function App() {
               </label>
             ))}
           </div>
+          <button
+            type="button"
+            className="study-option library-option"
+            aria-label="Object library"
+            title="Object library"
+            onClick={() => library({ room: 'hardware' })}
+          >
+            <svg viewBox="0 0 28 20" aria-hidden="true">
+              <path d="M5 4h18v12H5Zm0 4h18m-14 4h3m4 0h3" />
+            </svg>
+          </button>
         </nav>
       )}
       {error && (

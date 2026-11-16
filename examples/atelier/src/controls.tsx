@@ -60,6 +60,7 @@ export function useCeramic<T extends HTMLElement>(
 export function Surface({
   tone = 'porcelain',
   elevation = 5,
+  maxElevation,
   rim = 3,
   className = '',
   children,
@@ -67,12 +68,13 @@ export function Surface({
 }: HTMLAttributes<HTMLDivElement> & {
   tone?: SurfaceTone;
   elevation?: number;
+  maxElevation?: number;
   rim?: number;
 }) {
   const ref = useCeramic<HTMLDivElement>(
     tone,
     elevation,
-    Math.max(0, elevation),
+    maxElevation ?? Math.max(0, elevation),
     rim,
   );
   return (
@@ -538,6 +540,7 @@ export function Fader({
       </div>
       <input
         type="range"
+        aria-orientation={vertical ? 'vertical' : 'horizontal'}
         min="0"
         max="100"
         value={value}

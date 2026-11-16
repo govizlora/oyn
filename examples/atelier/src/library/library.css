@@ -1,25 +1,5 @@
 /* Catalog geometry is independent of the three full-screen compositions.
    Ceramic owns every raised/recessed plate; CSS owns typography and flat ink. */
-.library-entry {
-  position: absolute;
-  top: 38px;
-  right: 44px;
-  border: 0;
-  background: none;
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  font-size: 11px;
-  color: #626c5e;
-  z-index: 2;
-}
-.library-entry span {
-  font-family: ui-monospace, monospace;
-  color: #a76f4d;
-}
-.atelier:not(.atelier-library) .ambient-index {
-  right: 230px;
-}
 .atelier.atelier-library {
   height: auto;
   min-height: 100svh;
@@ -2092,13 +2072,6 @@
   .library-section-heading > span:last-child {
     font-size: 9px;
   }
-  .library-entry {
-    top: 22px;
-    right: 24px;
-  }
-  .atelier:not(.atelier-library) .ambient-index {
-    display: none;
-  }
 }
 @media (max-width: 560px) {
   .library-shell {
@@ -2166,14 +2139,6 @@
   }
   .is-isolated .specimen-stage {
     min-height: 340px;
-  }
-  .library-entry {
-    font-size: 10px;
-    top: 25px;
-    right: 22px;
-  }
-  .library-entry span {
-    display: none;
   }
 }
 /* Everyday adapters reuse the actual menus and file collection, not copies. */

@@ -63,6 +63,18 @@ try {
       pipelines: 0,
       copies: 0,
     };
+    window.activeIntervals = new Set();
+    const start = window.setInterval,
+      stop = window.clearInterval;
+    window.setInterval = (...args) => {
+      const id = start(...args);
+      window.activeIntervals.add(id);
+      return id;
+    };
+    window.clearInterval = (id) => {
+      window.activeIntervals.delete(id);
+      return stop(id);
+    };
     if (!window.GPUAdapter) return;
     const instrument = (proto, name, key) => {
       const original = proto[name];
@@ -98,12 +110,25 @@ try {
     await settle();
     assert.equal(await page.locator('[role="alert"]').count(), 0);
   };
-  const selected = async (label) =>
+  const role = (type, name) => page.getByRole(type, { name, exact: true });
+  const countTimers = () => page.evaluate(() => window.activeIntervals.size);
+  const choose = async (name) => {
+    await role('radio', name).check();
+    await ready();
+  };
+  const idle = async () => {
+    await page.mouse.move(20, 20);
+    await settle();
+    const n = await page.evaluate(() => window.gpuStats.submits);
+    await page.waitForTimeout(220);
     assert.equal(
-      await page.getByRole('radio', { name: label, exact: true }).isChecked(),
-      true,
+      await page.evaluate(() => window.gpuStats.submits),
+      n,
+      'no idle GPU submissions',
     );
-  const renderChanged = async (locator, action) => {
+    assert.equal(await countTimers(), 0, 'no idle simulation timer');
+  };
+  const changed = async (locator, action) => {
     await page.mouse.move(20, 20);
     await settle();
     const before = await locator.screenshot();
@@ -112,22 +137,25 @@ try {
     await settle();
     assert.ok(
       !before.equals(await locator.screenshot()),
-      'control changes rendered output',
+      'interaction updates rendered pixels',
     );
   };
   await page.goto(base + '/?study=1');
   await ready();
-  assert.equal(await page.locator('.instrument canvas').count(), 32);
-  const brightness = page.getByRole('slider', {
-    name: 'Display brightness',
-    exact: true,
-  });
-  await brightness.focus();
-  await brightness.press('End');
-  assert.equal(await brightness.inputValue(), '100');
-  await brightness.press('Home');
-  assert.equal(await brightness.inputValue(), '0');
-  const knob = await brightness.boundingBox();
+  await idle();
+  assert.equal(
+    await page.locator('.study-selector > button').getAttribute('aria-label'),
+    'Object library',
+    'library is the last navigation choice',
+  );
+  await choose('Air · Kinetic objects');
+  const speed = role('slider', 'Rotor speed');
+  await speed.focus();
+  await speed.press('End');
+  assert.equal(await speed.inputValue(), '100');
+  await speed.press('Home');
+  assert.equal(await speed.inputValue(), '0');
+  const knob = await speed.boundingBox();
   await page.mouse.move(knob.x + knob.width / 2, knob.y + knob.height / 2);
   await page.mouse.down();
   await page.mouse.move(
@@ -136,385 +164,178 @@ try {
     { steps: 8 },
   );
   await page.mouse.up();
-  assert.equal(await brightness.inputValue(), '52');
-  await page.getByRole('switch', { name: 'Power', exact: true }).press('Space');
-  assert.equal(
-    await page.getByRole('switch', { name: 'Power', exact: true }).isChecked(),
-    false,
+  assert.equal(await speed.inputValue(), '52');
+  await changed(page.locator('.air-under'), () =>
+    role('button', 'Fan power').click(),
   );
-  await page
-    .getByRole('radio', { name: 'Window arrangement: columns', exact: true })
-    .check();
-  await page
-    .getByRole('radio', { name: 'Window arrangement: columns', exact: true })
-    .press('ArrowRight');
-  await selected('Window arrangement: list');
-  await page
-    .getByRole('button', { name: 'Favorite appearance', exact: true })
-    .click();
   assert.equal(
-    await page
-      .getByRole('button', { name: 'Favorite appearance', exact: true })
-      .getAttribute('aria-pressed'),
+    await role('switch', 'Fan enabled').isChecked(),
+    true,
+    'all power controls share one state',
+  );
+  assert.equal(
+    await role('button', 'Rotor power').getAttribute('aria-pressed'),
     'true',
   );
-  await page.getByRole('radio', { name: 'ink finish', exact: true }).check();
-  await selected('ink finish');
-
-  await page
-    .getByRole('radio', { name: 'Focus · Daily objects', exact: true })
-    .check();
-  await ready();
-  assert.equal(new URL(page.url()).searchParams.get('study'), '2');
-  assert.equal(await page.locator('.instrument canvas').count(), 15);
-  await page.getByRole('radio', { name: '45 minutes', exact: true }).check();
-  assert.equal(
-    await page
-      .getByRole('slider', { name: 'Focus duration', exact: true })
-      .inputValue(),
-    '45',
+  assert.equal(await countTimers(), 1);
+  await changed(page.locator('.rotor-paint'), () => page.waitForTimeout(140));
+  await role('button', 'Reverse rotor').click();
+  assert.match(
+    await page.locator('.rotor-paint').getAttribute('aria-label'),
+    /reverse/,
   );
-  await page
-    .getByRole('checkbox', { name: 'A few pages', exact: true })
-    .check();
-  assert.equal(
-    await page.locator('.task-heading').innerText(),
-    '18 / 11\n2 / 3',
+  await role('switch', 'Fan enabled').uncheck();
+  await idle();
+  await changed(page.locator('.rotor-paint'), () =>
+    role('button', 'Rotor grille').click(),
   );
-  await page
-    .getByRole('switch', { name: 'Quiet time enabled', exact: true })
-    .check();
-  assert.ok(
-    (await page.locator('.focus-status').innerText()).includes(
-      'Do not disturb',
-    ),
+  await changed(page.locator('.rotor-paint'), () =>
+    role('radio', 'Blade profile: 3').check(),
   );
-  await page
-    .getByRole('button', { name: 'November 18, 2026', exact: true })
-    .focus();
-  await page.keyboard.press('ArrowRight');
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'November 19, 2026', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
+  assert.match(
+    await page.locator('.rotor-paint').getAttribute('aria-label'),
+    /7 blades/,
   );
-  await page.keyboard.press('PageDown');
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'December 19, 2026', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
+  await role('radio', 'Blade profile: 3').press('ArrowLeft');
+  assert.equal(await role('radio', 'Blade profile: 2').isChecked(), true);
+  await changed(page.locator('.air-light-bar'), () =>
+    role('slider', 'Pilot brightness').fill('0'),
   );
-  await page
-    .getByRole('button', { name: 'December 31, 2026', exact: true })
-    .click();
-  await page.keyboard.press('PageDown');
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'January 31, 2027', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  await page.keyboard.press('PageDown');
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'February 28, 2027', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-    'month navigation clamps the day correctly',
-  );
-  // Clicking the already-selected date must not leave a delayed focus request.
-  await page
-    .getByRole('button', { name: 'February 28, 2027', exact: true })
-    .click();
-  const previousMonth = page.getByRole('button', {
-    name: 'Previous month',
-    exact: true,
-  });
-  await previousMonth.click();
-  assert.equal(
-    await page.locator('.calendar-heading strong').innerText(),
-    'January',
-  );
-  await page.getByRole('button', { name: 'Next month', exact: true }).click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Next month', exact: true })
-      .evaluate((el) => el === document.activeElement),
-    true,
-    'returning to the selected month preserves month-navigation focus',
-  );
-  await previousMonth.click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'January 1, 2027', exact: true })
-      .getAttribute('tabindex'),
-    '0',
-  );
-
-  await page
-    .getByRole('radio', { name: 'Play · Everyday desktop', exact: true })
-    .check();
-  await ready();
-  assert.equal(await page.locator('.instrument canvas').count(), 50);
-  const all = page.getByRole('checkbox', {
-    name: 'Select all visible files',
-    exact: true,
-  });
-  assert.equal(await all.evaluate((input) => input.indeterminate), true);
-  await renderChanged(page.locator('.file-table'), () =>
-    page
-      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
-      .check(),
-  );
-  assert.match(await page.locator('.selection-count').innerText(), /^03/);
-  await all.check();
-  assert.match(await page.locator('.selection-count').innerText(), /^04/);
-  assert.equal(await all.evaluate((input) => input.indeterminate), false);
-  await all.uncheck();
-  assert.match(await page.locator('.selection-count').innerText(), /^00/);
-  await page
-    .getByRole('checkbox', { name: 'Select Soft forms', exact: true })
-    .check();
-
-  const sort = page.locator('.files-toolbar summary');
-  await sort.focus();
-  await sort.press('ArrowDown');
-  assert.equal(
-    await page.locator('.files-toolbar details').evaluate((el) => el.open),
-    true,
-  );
-  assert.equal(
-    await page
-      .getByRole('radio', { name: 'Sort: Recent', exact: true })
-      .evaluate((el) => el === document.activeElement),
-    true,
-  );
-  await page.keyboard.press('ArrowDown');
-  await settle();
-  assert.equal(
-    await page.locator('.files-toolbar details').evaluate((el) => el.open),
-    false,
-  );
-  assert.equal(
-    await page.locator('.file-identity strong').first().innerText(),
-    'Daylight',
-  );
-  assert.equal(
-    await sort.evaluate((el) => el === document.activeElement),
-    true,
-  );
-  await sort.click();
-  await page.getByRole('radio', { name: 'Sort: Size', exact: true }).check();
-  assert.equal(
-    await page.locator('.file-identity strong').first().innerText(),
-    'Daylight',
-  );
-  await sort.click();
-  await page.getByRole('radio', { name: 'Sort: Recent', exact: true }).check();
-  assert.equal(
-    await page.locator('.file-identity strong').first().innerText(),
-    'Soft forms',
-  );
-
-  const filter = page.locator('.files-heading summary');
-  await filter.click();
-  await page
-    .getByRole('checkbox', { name: 'Show Notes', exact: true })
-    .uncheck();
-  assert.equal(await page.locator('.file-table tbody tr').count(), 3);
-  assert.equal(
-    await page.locator('.files-heading details').evaluate((el) => el.open),
-    true,
-    'multi-select stays open',
-  );
-  await page.screenshot({
-    path: new URL('everyday-dropdown.png', out).pathname,
-  });
-  await page.keyboard.press('Escape');
-  assert.equal(
-    await page.locator('.files-heading details').evaluate((el) => el.open),
-    false,
-  );
-  assert.equal(
-    await filter.evaluate((el) => el === document.activeElement),
-    true,
-  );
-  await filter.click();
-  await page.getByRole('checkbox', { name: 'Show Notes', exact: true }).check();
-  await page
-    .getByRole('slider', { name: 'Screen brightness', exact: true })
-    .focus();
-  assert.equal(
-    await page.locator('.files-heading details').evaluate((el) => el.open),
-    false,
-    'tab/focus departure dismisses a dropdown',
-  );
-
-  const find = page.getByRole('searchbox', { name: 'Find files', exact: true });
-  await page.keyboard.press('Meta+k');
-  assert.equal(
-    await find.evaluate((el) => el === document.activeElement),
-    true,
-  );
-  const organizeY = await page
-    .locator('.organize-panel')
-    .evaluate((el) => el.getBoundingClientRect().y);
-  await find.fill('field');
-  assert.equal(await page.locator('.file-table tbody tr').count(), 1);
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
-      .isChecked(),
-    false,
-  );
-  await all.check();
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
-      .isChecked(),
-    true,
-  );
-  await find.fill('nothing-matches');
-  assert.equal(await page.getByText('No matches', { exact: true }).count(), 1);
-  assert.equal(
-    await page
-      .locator('.organize-panel')
-      .evaluate((el) => el.getBoundingClientRect().y),
-    organizeY,
-    'filtering does not move adjacent modules',
-  );
-  await page
-    .getByRole('button', { name: 'Clear filters', exact: true })
-    .click();
-  assert.equal(await page.locator('.file-table tbody tr').count(), 4);
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Select Soft forms', exact: true })
-      .isChecked(),
-    true,
-    'hidden selections survive filtering',
-  );
-  await page.getByRole('radio', { name: 'grid view', exact: true }).check();
-  assert.equal(await page.locator('.file-tile').count(), 4);
-  await page
-    .getByRole('checkbox', { name: 'Select Daylight', exact: true })
-    .check();
-  await page.screenshot({ path: new URL('everyday-grid.png', out).pathname });
-  await page.getByRole('radio', { name: 'list view', exact: true }).check();
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Select Daylight', exact: true })
-      .isChecked(),
-    true,
-  );
-  await page
-    .getByRole('button', { name: 'Clear selection', exact: true })
-    .click();
-  assert.match(await page.locator('.selection-count').innerText(), /^00/);
-  await page.getByRole('checkbox', { name: 'Later', exact: true }).check();
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Ideas', exact: true })
-      .isChecked(),
-    true,
-  );
-  await page.getByRole('checkbox', { name: 'Personal', exact: true }).uncheck();
-  assert.equal(
-    await page
-      .getByRole('checkbox', { name: 'Later', exact: true })
-      .isChecked(),
-    true,
-  );
-  const display = page.getByRole('slider', {
-    name: 'Screen brightness',
-    exact: true,
-  });
-  await display.focus();
-  await display.press('End');
-  assert.equal(await display.inputValue(), '100');
-  await page
-    .getByRole('radio', { name: 'Display profile: moon', exact: true })
-    .check();
-  await selected('Display profile: moon');
-  await page.getByRole('switch', { name: 'Wi-Fi', exact: true }).uncheck();
-  assert.equal(
-    await page.getByRole('switch', { name: 'Wi-Fi', exact: true }).isChecked(),
-    false,
-  );
-  await page.locator('.workspace-menu summary').click();
-  await page
-    .getByRole('radio', { name: 'Workspace: Shared', exact: true })
-    .check();
-  assert.ok(
-    (await page.locator('.workspace-menu summary').innerText()).includes(
-      'Shared',
-    ),
-  );
-  await page
-    .getByRole('button', { name: 'Open calendar', exact: true })
-    .click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'November 18, 2026', exact: true })
-      .evaluate((el) => el === document.activeElement),
-    true,
-  );
-  await page
-    .getByRole('button', { name: 'Previous selected day', exact: true })
-    .click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'November 17, 2026', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  await page
-    .getByRole('button', { name: 'Star workspace', exact: true })
-    .click();
-  assert.equal(await page.locator('.workspace-status').innerText(), 'Starred');
-  await page
-    .getByRole('button', { name: 'Open control center', exact: true })
-    .click();
-  assert.equal(
-    await display.evaluate((el) => el === document.activeElement),
-    true,
-  );
-
-  const stats = await page.evaluate(() => window.gpuStats);
-  assert.equal(stats.devices - stats.destroyed, 1);
-  assert.equal(stats.pipelines, 4);
-  assert.equal(stats.copies, 0);
-  await page.mouse.move(20, 20);
-  await settle();
-  const idle = await page.evaluate(() => window.gpuStats.submits);
-  await page.waitForTimeout(250);
-  assert.equal(
-    await page.evaluate(() => window.gpuStats.submits),
-    idle,
-    'no idle render or simulation clock',
-  );
-  await page.goBack();
-  await ready();
-  assert.equal(await page.locator('.atelier').getAttribute('data-study'), '2');
-  await page.goForward();
-  await ready();
-  assert.equal(await page.locator('.atelier').getAttribute('data-study'), '3');
+  await role('button', 'Rotor power').click();
+  await speed.fill('0');
+  await idle();
+  await speed.fill('70');
+  assert.equal(await countTimers(), 1);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page
-    .getByRole('radio', { name: 'Display profile: moon', exact: true })
-    .check();
+  await idle();
+  await role('radio', 'Blade profile: 1').check();
   await settle();
   assert.equal(
     await page
-      .locator('.system-controls .segment-thumb')
+      .locator('.detent-handle')
       .evaluate((el) => getComputedStyle(el).transitionDuration),
     '0s',
   );
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  results.push({ interactions: 'passed', gpu: stats });
-  // Clean-state visual review at large, common laptop, compact, and narrow sizes.
+  await page.waitForFunction(() => window.activeIntervals.size === 1);
+  assert.equal(await countTimers(), 1);
+  // Exercise the visibility policy without a visible browser or timing-dependent
+  // OS foreground switch. The scheduler reads document.hidden, one policy owner.
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      value: true,
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  assert.equal(await countTimers(), 0);
+  await page.evaluate(() => {
+    delete document.hidden;
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  assert.equal(await countTimers(), 1);
+  await choose('Play · Tactile playground');
+  assert.equal(
+    await countTimers(),
+    0,
+    'unmounting a running rotor releases its subscription',
+  );
+  assert.equal(
+    await page.locator('.task-list,.file-table').count(),
+    0,
+    'text-heavy collections no longer occupy the splash',
+  );
+  await changed(page.locator('.lamp-rack'), () =>
+    role('button', 'Lamp 2').click(),
+  );
+  assert.equal(
+    await role('button', 'Lamp 2').getAttribute('aria-pressed'),
+    'true',
+  );
+  await changed(page.locator('.lamp-rack'), () =>
+    role('slider', 'Lamp intensity').fill('20'),
+  );
+  assert.equal(
+    await role('slider', 'Lamp intensity').getAttribute('aria-orientation'),
+    'vertical',
+  );
+  await role('slider', 'Lamp intensity').press('ArrowUp');
+  assert.equal(await role('slider', 'Lamp intensity').inputValue(), '21');
+  await role('button', 'Key F').click();
+  assert.equal(
+    await page.locator('.keyboard-indicators output').innerText(),
+    'F',
+  );
+  assert.equal(
+    await role('button', 'Lamp 1').getAttribute('aria-pressed'),
+    'false',
+  );
+  await role('button', 'Key F').press('Enter');
+  assert.equal(
+    await page.locator('.keyboard-indicators output').innerText(),
+    'F',
+    'Enter activates the focused key, not a competing keyboard handler',
+  );
+  assert.equal(
+    await role('button', 'Lamp 1').getAttribute('aria-pressed'),
+    'true',
+    'one activation, one lamp change',
+  );
+  await role('button', 'Key F').press('a');
+  assert.equal(
+    await page.locator('.keyboard-indicators output').innerText(),
+    'A',
+  );
+  await role('button', 'Key A').press('Space');
+  assert.equal(
+    await role('button', 'Lamp 1').getAttribute('aria-pressed'),
+    'true',
+  );
+  await changed(page.locator('.bubble-conversation'), () =>
+    role('button', 'Send spark reaction').click(),
+  );
+  assert.equal(await role('button', 'Change first bubble: heart').count(), 1);
+  await role('button', 'Change second bubble: spark').click();
+  assert.equal(await role('button', 'Change second bubble: check').count(), 1);
+  await changed(page.locator('.bubble-conversation'), () =>
+    role('slider', 'Bubble elevation').fill('0'),
+  );
+  await changed(page.locator('.tactile-pills'), () =>
+    role('checkbox', 'Pill moon').check(),
+  );
+  assert.equal(await role('checkbox', 'Pill sun').isChecked(), true);
+  await role('checkbox', 'Pill star').uncheck();
+  await role('switch', 'Pocket fan enabled').check();
+  assert.equal(await countTimers(), 1);
+  await role('slider', 'Pocket rotor speed').fill('0');
+  await idle();
+  await role('slider', 'Pocket rotor speed').fill('60');
+  assert.equal(await countTimers(), 1);
+  await role('button', 'Rotor power').click();
+  await idle();
+  const gpu = await page.evaluate(() => window.gpuStats);
+  assert.equal(gpu.devices - gpu.destroyed, 1);
+  assert.equal(gpu.pipelines, 5);
+  assert.equal(gpu.copies, 0);
+  await page.goBack();
+  await ready();
+  assert.equal(new URL(page.url()).searchParams.get('study'), '2');
+  await page.goForward();
+  await ready();
+  assert.equal(new URL(page.url()).searchParams.get('study'), '3');
+  await role('button', 'Object library').click();
+  await page.waitForSelector('.specimen-stage canvas');
+  assert.equal(new URL(page.url()).searchParams.get('room'), 'hardware');
+  await page
+    .getByRole('navigation', { name: 'Object rooms' })
+    .getByRole('button', { name: /^Archive/ })
+    .click();
+  assert.equal(await page.locator('.task-list').count(), 1);
+  assert.equal(await page.locator('.file-table').count(), 1);
+  await role('button', 'Back to homepage').click();
+  await ready();
+  await idle();
+  results.push({ interactions: 'passed', gpu });
   for (const viewport of [
     { width: 1440, height: 1000 },
     { width: 1440, height: 900 },
@@ -527,52 +348,48 @@ try {
       await page.goto(`${base}/?study=${study}`);
       await ready();
       const geometry = await page.evaluate(() => {
-        const board = document
-          .querySelector('.instrument')
-          .getBoundingClientRect();
-        const controls = [
-          ...document.querySelectorAll('.instrument button,.instrument input'),
-        ].map((e) => e.getBoundingClientRect());
+        const b = document.querySelector('.instrument').getBoundingClientRect();
         return {
-          width: innerWidth,
-          height: innerHeight,
           scrollWidth: document.documentElement.scrollWidth,
           scrollHeight: document.documentElement.scrollHeight,
-          board: {
-            left: board.left,
-            right: board.right,
-            top: board.top,
-            bottom: board.bottom,
-          },
-          outside: controls.filter(
-            (r) =>
-              r.width &&
-              r.height &&
-              (r.left < board.left - 1 ||
-                r.right > board.right + 1 ||
-                r.top < board.top - 1 ||
-                r.bottom > board.bottom + 1),
-          ).length,
+          board: { left: b.left, right: b.right, top: b.top, bottom: b.bottom },
+          outside: [
+            ...document.querySelectorAll(
+              '.instrument button,.instrument input',
+            ),
+          ]
+            .filter((el) => {
+              const r = el.getBoundingClientRect();
+              return (
+                r.width &&
+                r.height &&
+                (r.left < b.left - 1 ||
+                  r.right > b.right + 1 ||
+                  r.top < b.top - 1 ||
+                  r.bottom > b.bottom + 1)
+              );
+            })
+            .map((el) => el.getAttribute('aria-label')),
         };
       });
       assert.ok(
         geometry.scrollWidth <= viewport.width,
-        `study ${study} no horizontal overflow at ${viewport.width}`,
+        `no horizontal overflow study ${study} at ${viewport.width}`,
       );
-      assert.equal(
+      assert.deepEqual(
         geometry.outside,
-        0,
-        `study ${study} controls remain inside their instrument at ${viewport.width}`,
+        [],
+        `all controls inside study ${study} at ${viewport.width}`,
       );
       if (viewport.width > 760) {
         assert.equal(geometry.scrollHeight, viewport.height);
         assert.ok(
           geometry.board.top > 0 &&
             geometry.board.bottom < viewport.height - 45,
-          'desktop composition fits in one screen',
+          'one-screen desktop composition',
         );
       }
-      const filename = `study-${study}-${viewport.width}x${viewport.height}${process.env.BROWSER === 'firefox' ? '-firefox' : ''}.png`;
+      const filename = `study-${study}-${viewport.width}x${viewport.height}.png`;
       await page.screenshot({
         path: new URL(filename, out).pathname,
         fullPage: true,
@@ -581,24 +398,20 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  // Explicit unsupported state, not a CSS material fallback or a blank page.
-  const unsupported = await browser.newPage();
-  await unsupported.addInitScript(() =>
+  const unavailable = await browser.newPage();
+  await unavailable.addInitScript(() =>
     Object.defineProperty(navigator, 'gpu', { get: () => undefined }),
   );
-  await unsupported.goto(base);
-  await unsupported.getByRole('alert').waitFor();
-  assert.equal(await unsupported.locator('canvas').count(), 0);
-  await unsupported.close();
+  await unavailable.goto(base);
+  await unavailable.getByRole('alert').waitFor();
+  assert.equal(await unavailable.locator('canvas').count(), 0);
+  await unavailable.close();
   await writeFile(
-    new URL(
-      `results${process.env.BROWSER === 'firefox' ? '-firefox' : ''}.json`,
-      out,
-    ),
+    new URL('results.json', out),
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: 3 everyday studies; calendar, mixed multi-selection, dropdown keyboard/dismissal, search, sorting, table/grid, shortcuts; four cached pipelines; one live device; idle/reduced-motion; history; 5 responsive sizes; no WebGPU errors; explicit unsupported state.',
+    'PASS: 3 tactile splash studies; rotor motion/speed/direction/grille, native keys, light bank, detents, faders, reactions, pills; one device/five cached pipelines/zero copies; motion stops at idle, reduced-motion, hidden or unmount; 15 responsive screenshots; archive preserved; no WebGPU errors.',
   );
 } finally {
   server?.kill();

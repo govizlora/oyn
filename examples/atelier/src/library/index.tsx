@@ -259,6 +259,7 @@ export function ObjectLibrary({
               className="library-specimen"
               aria-labelledby={`object-${spec.id}`}
               data-object={spec.id}
+              data-layout={spec.layout}
             >
               <Surface elevation={3} tone="chalk" className="specimen-plate">
                 <header className="specimen-header">
@@ -277,7 +278,9 @@ export function ObjectLibrary({
                   </button>
                 </header>
                 <div className="specimen-stage">
-                  <div className={`object-demo demo-${spec.id}`}>
+                  <div
+                    className={`${spec.layout === 'composition' ? 'composition-demo' : 'object-demo'} demo-${spec.id}`}
+                  >
                     <Demo />
                   </div>
                 </div>

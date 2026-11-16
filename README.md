@@ -2,49 +2,38 @@
 
 Experimental GPU surfaces with native DOM layout and interaction.
 
-## Ceramic studies — current homepage
+## Desktop Ceramic homepage
 
-`npm run dev` starts the three **desktop-first, full-viewport, light-mode**
-compositions at http://127.0.0.1:5177. Use the three small pictograms at the bottom,
-or open a study directly:
+`npm run dev` serves the atelier at **http://127.0.0.1:5177**. Three light-mode,
+full-viewport desktop studies: Quiet (`?study=1`), Air (`?study=2`, kinetic fan and
+controls), Play (`?study=3`, lamps, keyboard, faders, bubbles and pills). Native HTML
+owns interaction; Ceramic and app-local optical materials provide WebGPU rendering.
+No marketing copy, image mockups or UI-kit dependency. The last bottom pictogram
+opens the component library. Core Ceramic defaults remain unchanged.
 
-- `/?study=1` — **Quiet / Porcelain**: a restrained white Ceramic control study.
-- `/?study=2` — **Focus / Daily objects**: a duration dial, calendar and daily list.
-- `/?study=3` — **Play / Everyday desktop**: tactile calendar, searchable/selectable
-  file table, grid view, multi-select filters, dropdowns, colored tags, display
-  controls, keyboard shortcuts and an amber phosphor code screen.
+`npm run build` outputs root `dist/`; `npm run test:atelier` runs headless Chrome
+checks for the new splash, shared motion policy and preserved original compositions.
+Fans start off. A powered moving fan uses one shared numeric clock, stopped when
+hidden or reduced motion is requested; Surface remains the sole render scheduler.
+See [the study notes](examples/atelier/README.md). No push or public deployment.
 
-No hero copy, stock images, custom fonts, or UI-kit dependency. Small functional
-labels are part of the interface. The actual controls are native HTML; Ceramic
-and a local phosphor material supply their WebGPU paint through **one
-SurfaceProvider**. These are local interactive UI prototypes, not OS controls,
-real file storage, a countdown or an audio engine. No idle animation clock or
-hidden persistence. The original Ceramic defaults are unchanged.
+The shadcn migration remains separate: `dev:shadcn` (:5176) / `build:shadcn`.
+MUI and the historical benchmark are also retained.
 
-`npm run build` produces this homepage in root `dist/`. `npm run test:atelier`
-builds and checks production in **headless Chrome**, including interaction,
-WebGPU counts, screenshot review sizes, history, and explicit unsupported state.
-See [the study notes](examples/atelier/README.md). Nothing is deployed by these commands.
+## Object library — 54 objects + 2 compositions
 
-The shadcn migration remains separate: `npm run dev:shadcn` on :5176 and
-`npm run build:shadcn`. MUI and the historical benchmark are also retained.
-
-## Object library — 48 interactive studies
-
-The homepage's **Object library** entry opens `/?view=library`. Eight rooms cover
-Touch, Navigate, Make, Arrange, Respond, Time, Play and Everyday. This expands the
-exploration beyond fixed compositions: dropdowns, tables, windows, inputs, paper,
-files, color/type/layout tools, calendars, notifications and playful GPU objects.
+`/?view=library&room=hardware` opens the new tactile objects. Ten rooms contain
+56 entries, including all previous objects. The text-heavy Daily objects and
+Everyday desktop compositions are **preserved intact** in the final Archive room
+(`/?view=library&room=archive`): calendars, tasks, tables, dropdowns and CRT code.
 
 Star objects to keep a browser-local shortlist; **Picked** collects them and
-**Export selection** downloads source references for recomposition. Each object
-also has a direct inspection URL. Only six specimens are mounted per catalog page.
-These are app-local component explorations, not a published package or real OS/
-backend operations. The three original homepage studies remain accessible.
+**Export selection** downloads named source references for recomposition. Each
+entry has an isolated URL. Up to six entries mount per page. Local explorations,
+not a published package, OS controls, real messages or backend operations.
 
-`npm run test:library` runs the production, headless Chrome suite for all 48 objects,
-persistence/export, real shader updates, keyboard interaction and responsive layouts.
-See [the collection and composition notes](examples/atelier/src/library/README.md).
+`npm run test:library` tests all entries, persistence/export, actual shader changes,
+keyboard interaction and responsive layouts. See [the collection notes](examples/atelier/src/library/README.md).
 
 ## Support policy
 

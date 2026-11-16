@@ -7,8 +7,16 @@ import * as Feedback from './feedback';
 import * as Time from './time';
 import * as Curiosities from './curiosities';
 import * as Systems from './systems';
+import * as Hardware from './hardware';
+import * as Archive from './archive';
 
 export const rooms = [
+  {
+    id: 'hardware',
+    name: 'Hardware',
+    subtitle: 'Things you want to touch',
+    icon: 'power',
+  },
   {
     id: 'systems',
     name: 'Everyday',
@@ -57,6 +65,12 @@ export const rooms = [
     subtitle: 'Useful things with a curious side',
     icon: 'grid',
   },
+  {
+    id: 'archive',
+    name: 'Archive',
+    subtitle: 'A place for the everyday',
+    icon: 'folder',
+  },
 ] as const;
 export type RoomId = (typeof rooms)[number]['id'];
 export type ObjectSpec = {
@@ -68,6 +82,7 @@ export type ObjectSpec = {
   tags: string;
   number: number;
   source: string;
+  layout?: 'composition';
 };
 type Entry = [
   id: string,
@@ -439,7 +454,68 @@ export const objects: ObjectSpec[] = [
       'inspector number dimensions ratio lock',
     ],
   ]),
+  ...group('hardware', 'hardware', [
+    [
+      'moving-air',
+      'Moving air',
+      'MovingAir',
+      Hardware.MovingAir,
+      'fan rotor spin speed knob',
+    ],
+    [
+      'light-bank',
+      'Little lights',
+      'LightBank',
+      Hardware.LightBank,
+      'led indicator light glow switch',
+    ],
+    [
+      'three-positions',
+      'Three positions',
+      'ThreePositions',
+      Hardware.ThreePositions,
+      'detent radio toggle lever',
+    ],
+    [
+      'little-keys',
+      'Little keys',
+      'LittleKeys',
+      Hardware.LittleKeys,
+      'keyboard keys keycap command',
+    ],
+    [
+      'soft-messages',
+      'Soft messages',
+      'SoftMessages',
+      Hardware.SoftMessages,
+      'chat bubble reaction heart',
+    ],
+    [
+      'candy-switches',
+      'Candy switches',
+      'CandySwitches',
+      Hardware.CandySwitches,
+      'pill tag checkbox toggle',
+    ],
+  ]),
+  ...group('archive', 'archive', [
+    [
+      'archive-focus',
+      'Daily objects',
+      'FocusArchive',
+      Archive.FocusArchive,
+      'archive focus todo tasks calendar full composition',
+    ],
+    [
+      'archive-desktop',
+      'Everyday desktop',
+      'DesktopArchive',
+      Archive.DesktopArchive,
+      'archive desktop table list files calendar full composition',
+    ],
+  ]),
 ].map((spec, i) => ({
+  ...(spec.room === 'archive' ? { layout: 'composition' as const } : {}),
   ...spec,
   number: i + 1,
   source: `examples/atelier/src/library/${spec.source}.tsx`,

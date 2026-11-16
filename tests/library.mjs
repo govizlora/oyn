@@ -612,6 +612,63 @@ try {
   assert.equal(gpu.pipelines, 4);
   assert.equal(gpu.copies, 0);
   results.push({ interactions: '48 specimens passed', gpu });
+  await room('Hardware');
+  await spec('moving-air')
+    .getByRole('button', { name: 'Rotor power', exact: true })
+    .click();
+  await setRange('Rotor speed', 0);
+  assert.equal(
+    await spec('moving-air').getByRole('img').getAttribute('aria-label'),
+    'Rotor, stopped, 5 blades',
+  );
+  await spec('light-bank')
+    .getByRole('button', { name: 'Lamp 2', exact: true })
+    .click();
+  assert.equal(
+    await spec('light-bank')
+      .getByRole('button', { name: 'Lamp 2', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await setRange('Lamp intensity', 30);
+  await page
+    .getByRole('radio', { name: 'Detent position: 3', exact: true })
+    .check();
+  assert.equal(
+    await spec('three-positions')
+      .locator('.detent-readout i[data-on="true"]')
+      .count(),
+    1,
+  );
+  await page.getByRole('button', { name: 'Key F', exact: true }).click();
+  assert.equal(await spec('little-keys').locator('output').innerText(), 'F');
+  await page
+    .getByRole('button', { name: 'Send spark reaction', exact: true })
+    .click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'Change second bubble: spark', exact: true })
+      .count(),
+    1,
+  );
+  await page.getByRole('checkbox', { name: 'Pill moon', exact: true }).check();
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Pill sun', exact: true })
+      .isChecked(),
+    true,
+  );
+  await room('Archive');
+  assert.equal(
+    await page.locator('.library-specimen[data-layout="composition"]').count(),
+    2,
+  );
+  assert.equal(await page.locator('.task-list').count(), 1);
+  assert.equal(await page.locator('.file-table').count(), 1);
+  assert.equal((await page.evaluate(() => window.gpuStats)).pipelines, 5);
+  results.push({
+    interactions: '6 hardware objects and 2 preserved compositions passed',
+  });
   await page.getByRole('button', { name: /^Picked/ }).click();
   assert.equal(await page.locator('.library-specimen').count(), 3);
   assert.deepEqual(
@@ -669,7 +726,7 @@ try {
   );
   await room('All objects');
   const allIds = [];
-  for (let p = 0; p < 8; p++) {
+  for (let p = 0; p < 10; p++) {
     await settle();
     allIds.push(
       ...(await page
@@ -677,12 +734,12 @@ try {
         .evaluateAll((els) => els.map((el) => el.dataset.object))),
     );
     assert.ok((await page.locator('.library-specimen').count()) <= 6);
-    if (p < 7)
+    if (p < 9)
       await page
         .getByRole('button', { name: 'Next library page', exact: true })
         .click();
   }
-  assert.equal(new Set(allIds).size, 48);
+  assert.equal(new Set(allIds).size, 56);
   await page
     .getByRole('button', { name: 'Back to homepage', exact: true })
     .click();
@@ -701,6 +758,8 @@ try {
     'time',
     'curiosities',
     'systems',
+    'hardware',
+    'archive',
   ];
   for (const width of [1440, 1024, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
@@ -714,7 +773,7 @@ try {
         canvases: document.querySelectorAll('canvas').length,
         outside: [
           ...document.querySelectorAll(
-            '.object-demo button,.object-demo input,.object-demo textarea',
+            '.specimen-stage button,.specimen-stage input,.specimen-stage textarea',
           ),
         ]
           .filter((el) => {
@@ -806,7 +865,7 @@ try {
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: 48 interactive objects; 8 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/four pipelines/zero copies; 24 responsive screenshots; idle/reduced-motion; explicit unsupported state.',
+    'PASS: 54 interactive objects + 2 preserved compositions; 10 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/zero copies; 30 responsive screenshots; idle/reduced-motion; explicit unsupported state.',
   );
 } finally {
   server?.kill('SIGTERM');
