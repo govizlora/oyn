@@ -1,8 +1,20 @@
-# Ceramic studies
+# Oyn Atelier
 
-Three desktop-first, full-viewport homepage explorations. Light only, no marketing
-copy: tactile ceramic, quiet geometry and restrained hardware-inspired color.
-The splash is for a desktop's **first screen**, not a phone mockup or dashboard.
+The default first screen is **Sculpted Ceramic**: nine functional control families
+exploring dished keys, thumb wheels, dimple pads, bridge switches, pivot rockers,
+thumb latches, detent rails, saddle faders and pocket dials.
+
+`@oyn/material-ceramic/sculpted` is an opt-in sibling material. It shares Ceramic's
+frame, rounded-silhouette cast shadows and shadow bounds, but uses a separate
+primitive-based face shader: a flat rounded solid minus one or two spherical
+cutters, with hard boolean intersections and a small outer-edge bevel. Overlapping
+cutters use a minimum, never an additive or smooth blend. The sphere radius is
+derived from the circular opening and depth; cuts are limited to a hemisphere.
+Normals and lip occlusion come from that same cut geometry. The original material and
+its defaults are unchanged. This is a 2.5D surface model, not arbitrary meshes:
+depressions are not through-holes, and tilt affects the face normal, not the cast
+silhouette. Rocker faces are tilted planes rather than inflated cushions. Geometry updates retain the material instance. CSS owns layout and ink,
+not optical bevels or shadows. All controls support keyboard interaction.
 
 ## Open
 
@@ -13,6 +25,8 @@ npm run test:atelier        # production, headless Chrome, including the archive
 npm run test:library        # full collection and selection workflow
 ```
 
+- `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
+  Run `npm run test:sculpted` for production headless checks.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
 - `/?study=2`: **Air — Kinetic objects**. Swept ceramic rotor, speed dial, reverse,

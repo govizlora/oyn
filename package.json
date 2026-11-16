@@ -31,7 +31,8 @@
     "build:shadcn": "npm run build:packages && npm run build -w @oyn/example-shadcn",
     "test:atelier": "npm run build && node tests/motion-clock.mjs && node tests/atelier.mjs && node tests/atelier-archive.mjs",
     "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir",
-    "test:library": "npm run build && node tests/library.mjs"
+    "test:library": "npm run build && node tests/library.mjs",
+    "test:sculpted": "npm run build && node tests/sculpted.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

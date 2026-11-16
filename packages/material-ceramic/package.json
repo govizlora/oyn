@@ -10,6 +10,11 @@
       "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
       "import": "./dist/index.js"
+    },
+    "./sculpted": {
+      "types": "./dist/sculpted.d.ts",
+      "development": "./src/sculpted.ts",
+      "import": "./dist/sculpted.js"
     }
   },
   "scripts": {

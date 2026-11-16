@@ -5,10 +5,12 @@ import { QuietStudy } from './studies';
 import { AirStudy, PlaygroundStudy } from './kinetic-studies';
 import { ObjectLibrary, type LibraryLocation } from './library';
 import { objects, rooms } from './library/registry';
+import { SculptedStudy } from './sculpted-study';
 import './style.css';
 import './desktop.css';
 import './library/library.css';
 import './kinetic.css';
+import './sculpted.css';
 
 const studies = [QuietStudy, AirStudy, PlaygroundStudy];
 const names = [
@@ -24,6 +26,7 @@ function readLocation() {
   return {
     study: n >= 1 && n <= studies.length && Number.isInteger(n) ? n - 1 : 0,
     library: params.get('view') === 'library',
+    landing: !params.has('study') && params.get('view') !== 'library',
     room:
       object?.room ??
       (rooms.some((room) => room.id === requested) ||
@@ -46,8 +49,10 @@ function App() {
   useEffect(() => {
     document.title = route.library
       ? 'Oyn — Object library'
-      : `Oyn — ${names[study]}`;
-  }, [study, route.library]);
+      : route.landing
+        ? 'Oyn — Sculpted ceramic'
+        : `Oyn — ${names[study]}`;
+  }, [study, route.library, route.landing]);
   const visit = (params: Record<string, string>) => {
     const url = new URL(location.href);
     for (const key of ['study', 'view', 'room', 'object'])
@@ -59,17 +64,18 @@ function App() {
     window.scrollTo(0, 0);
   };
   const select = (value: number) => {
-    if (value !== study || route.library) visit({ study: String(value + 1) });
+    if (value !== study || route.library || route.landing)
+      visit({ study: String(value + 1) });
   };
   const library = ({ room, object }: LibraryLocation) =>
     visit({ view: 'library', room, ...(object ? { object } : {}) });
   return (
     <main
-      aria-label="Interactive Ceramic studies"
-      className={`atelier ${route.library ? 'atelier-library' : ''}`}
+      aria-label="Oyn interactive material studies"
+      className={`atelier ${route.library ? 'atelier-library' : ''} ${route.landing ? 'atelier-sculpture' : ''}`}
       data-study={study + 1}
     >
-      {!route.library && (
+      {!route.library && !route.landing && (
         <>
           <div className="corner-mark" aria-hidden="true">
             <span />
@@ -90,7 +96,12 @@ function App() {
         }}
       >
         {!error &&
-          (route.library ? (
+          (route.landing ? (
+            <SculptedStudy
+              explore={() => library({ room: 'hardware' })}
+              studies={() => select(0)}
+            />
+          ) : route.library ? (
             <ObjectLibrary
               key={`library:${route.room}:${route.object ?? ''}`}
               room={route.room}
@@ -104,7 +115,7 @@ function App() {
             </div>
           ))}
       </SurfaceProvider>
-      {!route.library && (
+      {!route.library && !route.landing && (
         <nav className="study-selector" aria-label="Ceramic studies">
           <div role="radiogroup" aria-label="Select a study">
             {names.map((name, i) => (
