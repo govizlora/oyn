@@ -1,14 +1,16 @@
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SurfaceProvider } from '@oyn/surface';
-import { QuietStudy, SignalStudy, PlayStudy } from './studies';
+import { QuietStudy } from './studies';
+import { FocusStudy, PlayStudy } from './desktop';
 import './style.css';
+import './desktop.css';
 
-const studies = [QuietStudy, SignalStudy, PlayStudy];
+const studies = [QuietStudy, FocusStudy, PlayStudy];
 const names = [
   'Quiet · Porcelain',
-  'Signal · Soft machine',
-  'Play · Future instrument',
+  'Focus · Daily objects',
+  'Play · Everyday desktop',
 ];
 function readStudy() {
   const n = Number(new URL(location.href).searchParams.get('study'));

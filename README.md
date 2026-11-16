@@ -8,16 +8,18 @@ Experimental GPU surfaces with native DOM layout and interaction.
 compositions at http://127.0.0.1:5177. Use the three small pictograms at the bottom,
 or open a study directly:
 
-- `/?study=1` — **Quiet / Porcelain**: a restrained white Ceramic instrument.
-- `/?study=2` — **Signal / Soft machine**: sage, a large dial, and a phosphor scope.
-- `/?study=3` — **Play / Future instrument**: a dense, colorful control surface with
-  six dials, four faders, a keyboard, pads, a sequencer and two GPU displays.
+- `/?study=1` — **Quiet / Porcelain**: a restrained white Ceramic control study.
+- `/?study=2` — **Focus / Daily objects**: a duration dial, calendar and daily list.
+- `/?study=3` — **Play / Everyday desktop**: tactile calendar, searchable/selectable
+  file table, grid view, multi-select filters, dropdowns, colored tags, display
+  controls, keyboard shortcuts and an amber phosphor code screen.
 
-No hero copy, dashboards, fonts, stock images, or UI-kit dependency. The actual
-controls are native HTML; Ceramic and a local phosphor material supply their
-WebGPU paint through **one SurfaceProvider**. This is a visual instrument, not an
-audio engine. Play explicitly starts signal motion; idle/reduced-motion/hidden
-pages do not run that clock. The original Ceramic defaults are unchanged.
+No hero copy, stock images, custom fonts, or UI-kit dependency. Small functional
+labels are part of the interface. The actual controls are native HTML; Ceramic
+and a local phosphor material supply their WebGPU paint through **one
+SurfaceProvider**. These are local interactive UI prototypes, not OS controls,
+real file storage, a countdown or an audio engine. No idle animation clock or
+hidden persistence. The original Ceramic defaults are unchanged.
 
 `npm run build` produces this homepage in root `dist/`. `npm run test:atelier`
 builds and checks production in **headless Chrome**, including interaction,

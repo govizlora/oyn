@@ -137,14 +137,13 @@ fn textPixel(p:vec2f)->f32 {
   return vec4f(result*mask,mask);
 }`;
 
-export const program = `CONST WAVE = (T) => {
-  SIN(T * 0.8) * GAIN
-}
+export const program = `SURFACE.BIND(INPUT)
+LAYOUT.GRID(12)
 
-SURFACE.CONNECT(WAVE)
-CLOCK.SYNC(120)
+SELECT.MULTIPLE()
+LIGHT.FOLLOW(POINTER)
 
-> SIGNAL.READY
+> READY
 > _`;
 function makePhosphor(kind: number, amber: boolean): Material {
   const cells = Array(384).fill(0);

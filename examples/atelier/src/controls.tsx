@@ -27,7 +27,7 @@ export const css = (variables: Record<string, string | number>) =>
 
 // All solid surfaces, including wells, share Ceramic. CSS paints only ink and
 // layout, never a second approximation of a surface's bevel or shadow.
-function useCeramic<T extends HTMLElement>(
+export function useCeramic<T extends HTMLElement>(
   tone: Tone,
   elevation: number,
   budget = Math.max(elevation, 0),
@@ -96,7 +96,28 @@ export type Glyph =
   | 'shuffle'
   | 'volume'
   | 'moon'
-  | 'diamond';
+  | 'diamond'
+  | 'folder'
+  | 'calendar'
+  | 'sliders'
+  | 'search'
+  | 'bell'
+  | 'check'
+  | 'down'
+  | 'left'
+  | 'right'
+  | 'file'
+  | 'cloud'
+  | 'mail'
+  | 'columns'
+  | 'list'
+  | 'command'
+  | 'lock'
+  | 'wifi'
+  | 'bluetooth'
+  | 'star'
+  | 'expand'
+  | 'more';
 export function Icon({ name, size = 20 }: { name: Glyph; size?: number }) {
   const paths: Record<Glyph, ReactNode> = {
     play: <path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none" />,
@@ -169,6 +190,78 @@ export function Icon({ name, size = 20 }: { name: Glyph; size?: number }) {
     ),
     moon: <path d="M18 15A8 8 0 0 1 9 5a8 8 0 1 0 9 10Z" />,
     diamond: <path d="m12 4 8 8-8 8-8-8Z" />,
+    folder: <path d="M3 7V5h7l2 3h9v11H3Z" />,
+    calendar: (
+      <>
+        <rect x="4" y="5" width="16" height="16" rx="3" />
+        <path d="M8 3v4m8-4v4M4 10h16m-12 4h2m4 0h2m-8 3h2" />
+      </>
+    ),
+    sliders: (
+      <>
+        <path d="M6 3v6m0 4v8M12 3v11m0 4v3M18 3v3m0 4v11" />
+        <path d="M3 9h6v4H3Zm6 5h6v4H9Zm6-8h6v4h-6Z" />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="10" cy="10" r="6" />
+        <path d="m15 15 5 5" />
+      </>
+    ),
+    bell: (
+      <>
+        <path d="M5 17h14l-2-4V9a5 5 0 0 0-10 0v4ZM10 20h4" />
+      </>
+    ),
+    check: <path d="m5 12 4 4 10-10" />,
+    down: <path d="m7 9 5 5 5-5" />,
+    left: <path d="m14 6-6 6 6 6" />,
+    right: <path d="m10 6 6 6-6 6" />,
+    file: (
+      <>
+        <path d="M5 3h9l5 5v13H5ZM14 3v6h5M8 13h8m-8 4h6" />
+      </>
+    ),
+    cloud: <path d="M6 18a4 4 0 0 1-1-8 7 7 0 0 1 13-1 4.5 4.5 0 0 1 0 9Z" />,
+    mail: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="m3 7 9 6 9-6" />
+      </>
+    ),
+    columns: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16m6-16v16" />
+      </>
+    ),
+    list: <path d="M8 6h12M8 12h12M8 18h12M3 6h1m-1 6h1m-1 6h1" />,
+    command: (
+      <path d="M8 8h8v8H8Zm0 0H5a3 3 0 1 1 3-3Zm8 0V5a3 3 0 1 1 3 3Zm0 8h3a3 3 0 1 1-3 3Zm-8 0v3a3 3 0 1 1-3-3Z" />
+    ),
+    lock: (
+      <>
+        <rect x="5" y="10" width="14" height="11" rx="3" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3" />
+      </>
+    ),
+    wifi: (
+      <>
+        <path d="M3 8a14 14 0 0 1 18 0M6 12a9 9 0 0 1 12 0m-9 4a4 4 0 0 1 6 0" />
+        <circle cx="12" cy="20" r=".7" fill="currentColor" />
+      </>
+    ),
+    bluetooth: <path d="M7 6l10 12-5 4V2l5 4L7 18" />,
+    star: <path d="m12 3 3 6 6 1-4.5 4.5 1 6.5-5.5-3-5.5 3 1-6.5L3 10l6-1Z" />,
+    expand: <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />,
+    more: (
+      <>
+        <circle cx="5" cy="12" r="1" />
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
+      </>
+    ),
   };
   return (
     <svg
@@ -324,6 +417,7 @@ export function Dial({
   className = '',
   ticks = true,
   inset = true,
+  children,
 }: {
   label: string;
   value: number;
@@ -332,6 +426,7 @@ export function Dial({
   className?: string;
   ticks?: boolean;
   inset?: boolean;
+  children?: ReactNode;
 }) {
   const drag = useRef<{ y: number; value: number } | null>(null);
   const angle = -135 + value * 2.7;
@@ -363,6 +458,7 @@ export function Dial({
             <i />
           </span>
           <span className="dial-center" />
+          {children}
         </Surface>
       </Surface>
       <input
@@ -488,6 +584,26 @@ export function Meter({
       {Array.from({ length: columns }, (_, i) => (
         <i key={i} data-lit={i / columns < value / 100} />
       ))}
+    </div>
+  );
+}
+
+export function InstrumentHeader({ children }: { children?: ReactNode }) {
+  return (
+    <div className="instrument-header">
+      <span className="maker-mark" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <div className="header-detail">
+        {children ?? (
+          <>
+            <span className="serial-marks" />
+            <Led />
+          </>
+        )}
+      </div>
     </div>
   );
 }

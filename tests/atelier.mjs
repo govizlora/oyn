@@ -118,16 +118,16 @@ try {
   await page.goto(base + '/?study=1');
   await ready();
   assert.equal(await page.locator('.instrument canvas').count(), 32);
-  const volume = page.getByRole('slider', {
-    name: 'Master volume',
+  const brightness = page.getByRole('slider', {
+    name: 'Display brightness',
     exact: true,
   });
-  await volume.focus();
-  await volume.press('End');
-  assert.equal(await volume.inputValue(), '100');
-  await volume.press('Home');
-  assert.equal(await volume.inputValue(), '0');
-  const knob = await volume.boundingBox();
+  await brightness.focus();
+  await brightness.press('End');
+  assert.equal(await brightness.inputValue(), '100');
+  await brightness.press('Home');
+  assert.equal(await brightness.inputValue(), '0');
+  const knob = await brightness.boundingBox();
   await page.mouse.move(knob.x + knob.width / 2, knob.y + knob.height / 2);
   await page.mouse.down();
   await page.mouse.move(
@@ -136,159 +136,364 @@ try {
     { steps: 8 },
   );
   await page.mouse.up();
-  assert.equal(await volume.inputValue(), '52');
+  assert.equal(await brightness.inputValue(), '52');
   await page.getByRole('switch', { name: 'Power', exact: true }).press('Space');
   assert.equal(
     await page.getByRole('switch', { name: 'Power', exact: true }).isChecked(),
     false,
   );
   await page
-    .getByRole('radio', { name: 'Signal shape: circle', exact: true })
+    .getByRole('radio', { name: 'Window arrangement: columns', exact: true })
     .check();
-  await selected('Signal shape: circle');
   await page
-    .getByRole('radio', { name: 'Signal shape: circle', exact: true })
+    .getByRole('radio', { name: 'Window arrangement: columns', exact: true })
     .press('ArrowRight');
-  await selected('Signal shape: grid');
-  const pad = page.getByRole('button', { name: 'Ceramic pad 2', exact: true });
-  await pad.click();
-  assert.equal(await pad.getAttribute('aria-pressed'), 'true');
+  await selected('Window arrangement: list');
+  await page
+    .getByRole('button', { name: 'Favorite appearance', exact: true })
+    .click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'Favorite appearance', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
   await page.getByRole('radio', { name: 'ink finish', exact: true }).check();
   await selected('ink finish');
-  const balance = page.getByRole('slider', {
-    name: 'Signal balance',
-    exact: true,
-  });
-  await balance.focus();
-  await balance.press('End');
-  assert.equal(await balance.inputValue(), '100');
+
   await page
-    .getByRole('radio', { name: 'Signal · Soft machine', exact: true })
+    .getByRole('radio', { name: 'Focus · Daily objects', exact: true })
     .check();
   await ready();
   assert.equal(new URL(page.url()).searchParams.get('study'), '2');
-  assert.equal(await page.locator('.instrument canvas').count(), 22);
-  const screen = page.locator('.phosphor canvas');
-  await renderChanged(screen, async () => {
+  assert.equal(await page.locator('.instrument canvas').count(), 15);
+  await page.getByRole('radio', { name: '45 minutes', exact: true }).check();
+  assert.equal(
     await page
-      .getByRole('slider', { name: 'Signal amplitude', exact: true })
-      .focus();
-    await page
-      .getByRole('slider', { name: 'Signal amplitude', exact: true })
-      .press('Home');
-  });
-  await renderChanged(screen, () =>
-    page.getByRole('radio', { name: 'Display: circle', exact: true }).check(),
+      .getByRole('slider', { name: 'Focus duration', exact: true })
+      .inputValue(),
+    '45',
   );
-  const vertical = page.getByRole('slider', {
-    name: 'Signal channel 1',
+  await page
+    .getByRole('checkbox', { name: 'A few pages', exact: true })
+    .check();
+  assert.equal(
+    await page.locator('.task-heading').innerText(),
+    '18 / 11\n2 / 3',
+  );
+  await page
+    .getByRole('switch', { name: 'Quiet time enabled', exact: true })
+    .check();
+  assert.ok(
+    (await page.locator('.focus-status').innerText()).includes(
+      'Do not disturb',
+    ),
+  );
+  await page
+    .getByRole('button', { name: 'November 18, 2026', exact: true })
+    .focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'November 19, 2026', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await page.keyboard.press('PageDown');
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'December 19, 2026', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await page
+    .getByRole('button', { name: 'December 31, 2026', exact: true })
+    .click();
+  await page.keyboard.press('PageDown');
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'January 31, 2027', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await page.keyboard.press('PageDown');
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'February 28, 2027', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+    'month navigation clamps the day correctly',
+  );
+  // Clicking the already-selected date must not leave a delayed focus request.
+  await page
+    .getByRole('button', { name: 'February 28, 2027', exact: true })
+    .click();
+  const previousMonth = page.getByRole('button', {
+    name: 'Previous month',
     exact: true,
   });
-  await vertical.focus();
-  await vertical.press('ArrowUp');
-  assert.equal(await vertical.inputValue(), '63');
-  await page.getByRole('button', { name: 'Reset signal', exact: true }).click();
-  assert.equal(await vertical.inputValue(), '62');
-  await page.getByRole('button', { name: 'Play signal', exact: true }).click();
-  await page.mouse.move(20, 20);
-  await settle();
-  let a = await screen.screenshot();
-  await page.waitForTimeout(200);
-  assert.ok(
-    !a.equals(await screen.screenshot()),
-    'playing animates the phosphor signal',
+  await previousMonth.click();
+  assert.equal(
+    await page.locator('.calendar-heading strong').innerText(),
+    'January',
   );
-  await page.getByRole('button', { name: 'Pause signal', exact: true }).click();
-  await page.mouse.move(20, 20);
-  await settle();
-  a = await screen.screenshot();
-  await page.waitForTimeout(200);
-  assert.ok(
-    a.equals(await screen.screenshot()),
-    'paused signal is completely idle',
+  await page.getByRole('button', { name: 'Next month', exact: true }).click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'Next month', exact: true })
+      .evaluate((el) => el === document.activeElement),
+    true,
+    'returning to the selected month preserves month-navigation focus',
   );
+  await previousMonth.click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'January 1, 2027', exact: true })
+      .getAttribute('tabindex'),
+    '0',
+  );
+
   await page
-    .getByRole('radio', { name: 'Play · Future instrument', exact: true })
+    .getByRole('radio', { name: 'Play · Everyday desktop', exact: true })
     .check();
   await ready();
-  assert.equal(await page.locator('.instrument canvas').count(), 59);
-  const playScreen = page.locator('.play-screen-housing .phosphor canvas');
-  for (const label of ['grid', 'circle', 'diamond', 'wave']) {
-    await renderChanged(playScreen, () =>
-      page
-        .getByRole('radio', { name: `Oscillator: ${label}`, exact: true })
-        .check(),
-    );
-  }
-  await page.getByRole('radio', { name: 'Position 10', exact: true }).check();
-  await selected('Position 10');
-  await page
-    .getByRole('button', { name: 'Advance sequence', exact: true })
-    .click();
-  await selected('Position 11');
-  await page.getByRole('button', { name: 'Note 8', exact: true }).click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Note 8', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  await page.getByRole('button', { name: 'Accidental 5', exact: true }).click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Accidental 5', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  await page.getByRole('button', { name: 'Drum pad 1', exact: true }).click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Drum pad 1', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  await page.getByRole('button', { name: 'Record', exact: true }).click();
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Record', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  assert.equal(
-    await page
-      .getByRole('button', { name: 'Drum pad 1', exact: true })
-      .getAttribute('aria-pressed'),
-    'true',
-    'record and pad states are independent',
-  );
-  await renderChanged(playScreen, () =>
+  assert.equal(await page.locator('.instrument canvas').count(), 50);
+  const all = page.getByRole('checkbox', {
+    name: 'Select all visible files',
+    exact: true,
+  });
+  assert.equal(await all.evaluate((input) => input.indeterminate), true);
+  await renderChanged(page.locator('.file-table'), () =>
     page
-      .getByRole('switch', { name: 'Instrument power', exact: true })
-      .uncheck(),
+      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
+      .check(),
+  );
+  assert.match(await page.locator('.selection-count').innerText(), /^03/);
+  await all.check();
+  assert.match(await page.locator('.selection-count').innerText(), /^04/);
+  assert.equal(await all.evaluate((input) => input.indeterminate), false);
+  await all.uncheck();
+  assert.match(await page.locator('.selection-count').innerText(), /^00/);
+  await page
+    .getByRole('checkbox', { name: 'Select Soft forms', exact: true })
+    .check();
+
+  const sort = page.locator('.files-toolbar summary');
+  await sort.focus();
+  await sort.press('ArrowDown');
+  assert.equal(
+    await page.locator('.files-toolbar details').evaluate((el) => el.open),
+    true,
+  );
+  assert.equal(
+    await page
+      .getByRole('radio', { name: 'Sort: Recent', exact: true })
+      .evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await page.keyboard.press('ArrowDown');
+  await settle();
+  assert.equal(
+    await page.locator('.files-toolbar details').evaluate((el) => el.open),
+    false,
+  );
+  assert.equal(
+    await page.locator('.file-identity strong').first().innerText(),
+    'Daylight',
+  );
+  assert.equal(
+    await sort.evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await sort.click();
+  await page.getByRole('radio', { name: 'Sort: Size', exact: true }).check();
+  assert.equal(
+    await page.locator('.file-identity strong').first().innerText(),
+    'Daylight',
+  );
+  await sort.click();
+  await page.getByRole('radio', { name: 'Sort: Recent', exact: true }).check();
+  assert.equal(
+    await page.locator('.file-identity strong').first().innerText(),
+    'Soft forms',
+  );
+
+  const filter = page.locator('.files-heading summary');
+  await filter.click();
+  await page
+    .getByRole('checkbox', { name: 'Show Notes', exact: true })
+    .uncheck();
+  assert.equal(await page.locator('.file-table tbody tr').count(), 3);
+  assert.equal(
+    await page.locator('.files-heading details').evaluate((el) => el.open),
+    true,
+    'multi-select stays open',
+  );
+  await page.screenshot({
+    path: new URL('everyday-dropdown.png', out).pathname,
+  });
+  await page.keyboard.press('Escape');
+  assert.equal(
+    await page.locator('.files-heading details').evaluate((el) => el.open),
+    false,
+  );
+  assert.equal(
+    await filter.evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await filter.click();
+  await page.getByRole('checkbox', { name: 'Show Notes', exact: true }).check();
+  await page
+    .getByRole('slider', { name: 'Screen brightness', exact: true })
+    .focus();
+  assert.equal(
+    await page.locator('.files-heading details').evaluate((el) => el.open),
+    false,
+    'tab/focus departure dismisses a dropdown',
+  );
+
+  const find = page.getByRole('searchbox', { name: 'Find files', exact: true });
+  await page.keyboard.press('Meta+k');
+  assert.equal(
+    await find.evaluate((el) => el === document.activeElement),
+    true,
+  );
+  const organizeY = await page
+    .locator('.organize-panel')
+    .evaluate((el) => el.getBoundingClientRect().y);
+  await find.fill('field');
+  assert.equal(await page.locator('.file-table tbody tr').count(), 1);
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
+      .isChecked(),
+    false,
+  );
+  await all.check();
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Select Field notes', exact: true })
+      .isChecked(),
+    true,
+  );
+  await find.fill('nothing-matches');
+  assert.equal(await page.getByText('No matches', { exact: true }).count(), 1);
+  assert.equal(
+    await page
+      .locator('.organize-panel')
+      .evaluate((el) => el.getBoundingClientRect().y),
+    organizeY,
+    'filtering does not move adjacent modules',
   );
   await page
-    .getByRole('switch', { name: 'Instrument power', exact: true })
+    .getByRole('button', { name: 'Clear filters', exact: true })
+    .click();
+  assert.equal(await page.locator('.file-table tbody tr').count(), 4);
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Select Soft forms', exact: true })
+      .isChecked(),
+    true,
+    'hidden selections survive filtering',
+  );
+  await page.getByRole('radio', { name: 'grid view', exact: true }).check();
+  assert.equal(await page.locator('.file-tile').count(), 4);
+  await page
+    .getByRole('checkbox', { name: 'Select Daylight', exact: true })
     .check();
+  await page.screenshot({ path: new URL('everyday-grid.png', out).pathname });
+  await page.getByRole('radio', { name: 'list view', exact: true }).check();
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Select Daylight', exact: true })
+      .isChecked(),
+    true,
+  );
+  await page
+    .getByRole('button', { name: 'Clear selection', exact: true })
+    .click();
+  assert.match(await page.locator('.selection-count').innerText(), /^00/);
+  await page.getByRole('checkbox', { name: 'Later', exact: true }).check();
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Ideas', exact: true })
+      .isChecked(),
+    true,
+  );
+  await page.getByRole('checkbox', { name: 'Personal', exact: true }).uncheck();
+  assert.equal(
+    await page
+      .getByRole('checkbox', { name: 'Later', exact: true })
+      .isChecked(),
+    true,
+  );
+  const display = page.getByRole('slider', {
+    name: 'Screen brightness',
+    exact: true,
+  });
+  await display.focus();
+  await display.press('End');
+  assert.equal(await display.inputValue(), '100');
+  await page
+    .getByRole('radio', { name: 'Display profile: moon', exact: true })
+    .check();
+  await selected('Display profile: moon');
+  await page.getByRole('switch', { name: 'Wi-Fi', exact: true }).uncheck();
+  assert.equal(
+    await page.getByRole('switch', { name: 'Wi-Fi', exact: true }).isChecked(),
+    false,
+  );
+  await page.locator('.workspace-menu summary').click();
+  await page
+    .getByRole('radio', { name: 'Workspace: Shared', exact: true })
+    .check();
+  assert.ok(
+    (await page.locator('.workspace-menu summary').innerText()).includes(
+      'Shared',
+    ),
+  );
+  await page
+    .getByRole('button', { name: 'Open calendar', exact: true })
+    .click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'November 18, 2026', exact: true })
+      .evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await page
+    .getByRole('button', { name: 'Previous selected day', exact: true })
+    .click();
+  assert.equal(
+    await page
+      .getByRole('button', { name: 'November 17, 2026', exact: true })
+      .getAttribute('aria-pressed'),
+    'true',
+  );
+  await page
+    .getByRole('button', { name: 'Star workspace', exact: true })
+    .click();
+  assert.equal(await page.locator('.workspace-status').innerText(), 'Starred');
+  await page
+    .getByRole('button', { name: 'Open control center', exact: true })
+    .click();
+  assert.equal(
+    await display.evaluate((el) => el === document.activeElement),
+    true,
+  );
+
   const stats = await page.evaluate(() => window.gpuStats);
-  assert.equal(
-    stats.devices - stats.destroyed,
-    1,
-    'one live device across all three studies',
-  );
+  assert.equal(stats.devices - stats.destroyed, 1);
+  assert.equal(stats.pipelines, 4);
   assert.equal(stats.copies, 0);
-  assert.equal(
-    stats.pipelines,
-    4,
-    'one cached program per material, not per element',
-  );
   await page.mouse.move(20, 20);
   await settle();
   const idle = await page.evaluate(() => window.gpuStats.submits);
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(250);
   assert.equal(
     await page.evaluate(() => window.gpuStats.submits),
     idle,
-    'no idle draw loop',
+    'no idle render or simulation clock',
   );
   await page.goBack();
   await ready();
@@ -296,43 +501,18 @@ try {
   await page.goForward();
   await ready();
   assert.equal(await page.locator('.atelier').getAttribute('data-study'), '3');
-  // Reduced motion suppresses the optional display clock, including a live preference change.
-  await page.getByRole('button', { name: 'Play signal', exact: true }).click();
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.mouse.move(20, 20);
-  await settle();
-  a = await playScreen.screenshot();
-  await page.waitForTimeout(250);
-  assert.ok(
-    a.equals(await playScreen.screenshot()),
-    'reduced motion has no signal clock',
-  );
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page
-    .getByRole('switch', { name: 'Instrument power', exact: true })
-    .uncheck();
-  await page.mouse.move(20, 20);
-  await settle();
-  const poweredOff = await page.evaluate(() => window.gpuStats.submits);
-  await page.waitForTimeout(250);
-  assert.equal(
-    await page.evaluate(() => window.gpuStats.submits),
-    poweredOff,
-    'power off suspends the signal clock',
-  );
-  await page
-    .getByRole('switch', { name: 'Instrument power', exact: true })
+    .getByRole('radio', { name: 'Display profile: moon', exact: true })
     .check();
-  await page
-    .getByRole('button', { name: 'Reset instrument', exact: true })
-    .click();
-  await selected('Position 4');
+  await settle();
   assert.equal(
     await page
-      .getByRole('button', { name: 'Play signal', exact: true })
-      .getAttribute('aria-pressed'),
-    'false',
+      .locator('.system-controls .segment-thumb')
+      .evaluate((el) => getComputedStyle(el).transitionDuration),
+    '0s',
   );
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   results.push({ interactions: 'passed', gpu: stats });
   // Clean-state visual review at large, common laptop, compact, and narrow sizes.
   for (const viewport of [
@@ -418,7 +598,7 @@ try {
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: 3 studies; native keyboard/pointer controls; live GPU feedback; four cached pipelines; one live device; idle/reduced-motion; history; 5 responsive sizes; no WebGPU errors; explicit unsupported state.',
+    'PASS: 3 everyday studies; calendar, mixed multi-selection, dropdown keyboard/dismissal, search, sorting, table/grid, shortcuts; four cached pipelines; one live device; idle/reduced-motion; history; 5 responsive sizes; no WebGPU errors; explicit unsupported state.',
   );
 } finally {
   server?.kill();
