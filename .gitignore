@@ -1,0 +1,15 @@
+node_modules/
+dist/
+test-results/
+.DS_Store
+
+# Local caches, reports and credentials
+.vite/
+.cache/
+coverage/
+playwright-report/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example

@@ -1,0 +1,21 @@
+{
+  "name": "@oyn/material-ceramic",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@oyn/surface": "0.0.0"
+  }
+}
