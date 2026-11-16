@@ -1,3 +1,7 @@
+import * as OriginalDropdown from "@original/ui/dropdown-menu";
+import * as CeramicDropdown from "@/ceramic/dropdown-menu";
+import * as OriginalSelect from "@original/ui/select";
+import * as CeramicSelect from "@/ceramic/select";
 import { createElement, type ComponentProps, type ComponentType } from "react";
 import { useAppearance } from "./appearance";
 import * as OriginalButton from "@original/ui/button";
@@ -12,7 +16,22 @@ import * as CeramicTabs from "@/ceramic/tabs";
 import { OriginalPanelSurface } from "./panel-surface";
 import { PanelSurface as CeramicPanelSurface } from "@/ceramic/panel";
 
+import { SidebarMenuButton as OriginalSidebarMenuButton } from "@original/ui/sidebar";
+import { SidebarMenuButton as CeramicSidebarMenuButton } from "@/ceramic/sidebar";
+
 const original = {
+  DropdownMenuContent: OriginalDropdown.DropdownMenuContent,
+  DropdownMenuItem: OriginalDropdown.DropdownMenuItem,
+  DropdownMenuCheckboxItem: OriginalDropdown.DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem: OriginalDropdown.DropdownMenuRadioItem,
+  DropdownMenuSubTrigger: OriginalDropdown.DropdownMenuSubTrigger,
+  DropdownMenuSubContent: OriginalDropdown.DropdownMenuSubContent,
+
+  SelectTrigger: OriginalSelect.SelectTrigger,
+  SelectContent: OriginalSelect.SelectContent,
+  SelectItem: OriginalSelect.SelectItem,
+
+  SidebarMenuButton: OriginalSidebarMenuButton,
   PanelSurface: OriginalPanelSurface,
   Button: OriginalButton.Button,
   Card: OriginalCard.Card,
@@ -38,6 +57,18 @@ const original = {
   TabsContent: OriginalTabs.TabsContent,
 };
 const ceramic: typeof original = {
+  DropdownMenuContent: CeramicDropdown.DropdownMenuContent,
+  DropdownMenuItem: CeramicDropdown.DropdownMenuItem,
+  DropdownMenuCheckboxItem: CeramicDropdown.DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem: CeramicDropdown.DropdownMenuRadioItem,
+  DropdownMenuSubTrigger: CeramicDropdown.DropdownMenuSubTrigger,
+  DropdownMenuSubContent: CeramicDropdown.DropdownMenuSubContent,
+
+  SelectTrigger: CeramicSelect.SelectTrigger,
+  SelectContent: CeramicSelect.SelectContent,
+  SelectItem: CeramicSelect.SelectItem,
+
+  SidebarMenuButton: CeramicSidebarMenuButton,
   PanelSurface: CeramicPanelSurface,
   Button: CeramicButton.Button,
   Card: CeramicCard.Card,

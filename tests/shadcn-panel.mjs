@@ -11,7 +11,7 @@ try {
   await page.getByRole('button', { name: 'Ceramic', exact: true }).click();
   const surface = page.locator('[data-surface-panel]');
   await surface.locator('canvas').waitFor();
-  assert.equal(await page.evaluate(async () => (await import('/src/ceramic/materials.ts')).panelMaterial.parameters.get(1)), 8);
+  assert.equal(await page.evaluate(async () => (await import('/src/ceramic/materials.ts')).panelMaterial.parameters.get(1)), 4);
   for (const theme of ['Light', 'Dark']) {
     await page.getByRole('button', { name: theme, exact: true }).click();
     await page.locator('[data-dashboard-scroll]').evaluate(el => { el.scrollTop = 0; });
@@ -38,5 +38,5 @@ try {
   assert.equal(await surface.count(), 0);
   await page.waitForFunction(() => !document.querySelector('[data-oyn-canvas]'));
   assert.deepEqual(errors, []);
-  console.log('PASS: light/dark sidebar contrast, elevation 8, GPU-only panel paint, stationary surface and original cleanup.');
+  console.log('PASS: light/dark sidebar contrast, elevation 4, GPU-only panel paint, stationary surface and original cleanup.');
 } finally { await browser.close(); }

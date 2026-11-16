@@ -22,7 +22,8 @@ export type SurfaceMode = 'light' | 'dark';
 export type Material = Readonly<{
   /** Resolve inherited appearance without mutating a material shared by providers. */
   resolveMode?(mode: SurfaceMode): Material;
-  /** WGSL: vertex entry `vertex`, binding 0 frame, binding 1 parameters. */
+  /** May switch with parameter notifications; keep the parameter block layout stable.
+   * WGSL: vertex entry `vertex`, binding 0 frame, binding 1 parameters. */
   shader: string;
   parameters: Parameters;
   /** Fragment entry points, drawn in this order within this surface only. */

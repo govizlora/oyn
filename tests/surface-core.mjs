@@ -32,7 +32,7 @@ let listener; let detached = false;
 const material = ceramic({ elevation: 12, maxElevation: 18 });
 const unbind = bindMotion({ get: () => 10, on: (event, fn) => { assert.equal(event, 'change'); listener = fn; return () => { detached = true; }; } }, material.setElevation);
 assert.equal(material.parameters.get(1), 10); listener(3); assert.equal(material.parameters.get(1), 3); unbind(); assert.ok(detached);
-for (const elevation of [-1, NaN, Infinity, 480]) assert.throws(() => ceramic({ elevation }));
+for (const elevation of [NaN, Infinity, -Infinity, 480]) assert.throws(() => ceramic({ elevation }));
 assert.ok(shadowBounds(1200, 100, 12).x > shadowBounds(120, 100, 12).x);
 assert.deepEqual(shadowBounds(120, 40, 0), { x: 2, y: 2 });
 

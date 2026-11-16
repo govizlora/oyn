@@ -5,6 +5,13 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1100, height: 1000 }, deviceScaleFactor: 2 });
   page.setDefaultTimeout(10000);
+  // Stress stacking with a long shadow; the production elevation 4 intentionally
+  // no longer reaches this patch beyond the sidebar's 8px padding.
+  await page.route('**/src/ceramic/materials.ts*', async route => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace(/panelMaterial = ceramic\(\{ elevation: 4 \}\)/, 'panelMaterial = ceramic({ elevation: 16 })');
+    await route.fulfill({ response, body });
+  });
   await page.goto('http://127.0.0.1:5176');
   await page.getByRole('button', { name: 'Ceramic', exact: true }).click();
   await page.getByRole('button', { name: 'Light', exact: true }).click();

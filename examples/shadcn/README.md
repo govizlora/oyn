@@ -61,3 +61,11 @@ The main content panel separates its stationary background surface from the
 stable scrolling viewport. Ceramic uses elevation 8 with no duplicate CSS shadow;
 Original uses the original inset panel CSS paint. The sidebar/frame is darker
 than the content in light mode and lighter in dark mode.
+
+### Navigation depth motion
+
+Ceramic menu items animate their own material elevation from an almost-flat negative value to -4 on hover and -6 while pressed. A shared animation clock drives a critically damped spring; interrupted gestures preserve position and velocity. Exit settles before detaching the surface. Reduced-motion preferences bypass the spring. No opacity, scale, or cross-zero shader transition is layered onto the depth animation.
+
+### Selects and dropdown popups
+
+Select triggers rest at elevation -2.3; hover/focus and press use the same -4 / -6 recess interaction and spring as sidebar navigation. Radix retains keyboard focus, selection, disabled behavior, and dismissal. Popup cards use elevation 16 and no CSS background/shadow; scrolling belongs to an inner viewport so the exterior shadow remains visible. Submenus are portaled outside parent scrolling. Ordinary, checkbox, radio, and submenu items share one recess interaction hook. Original mode continues to use the untouched upstream components.

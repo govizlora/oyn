@@ -7,7 +7,7 @@ const material = ceramic({ elevation: 12 });
 material.setElevation(3); // direct numeric update; no React or bitmap resize
 ```
 
-Options: `color` (RGB/HEX or `{ light, dark }`), `mode` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation must be finite and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial binding height. If omitted, the elevation at binding supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
+Options: `color` (RGB/HEX or `{ light, dark }`), `mode` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial binding height. If omitted, the elevation at binding supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
 For upward springs, reserve space explicitly: `ceramic({ elevation: 12, maxElevation: 18 })`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
@@ -17,7 +17,7 @@ Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` s
 
 ## Tuned defaults and overrides
 
-`defaults.json` is the checked-in GPU Surfaces story preset, with `surfaceHeight` renamed to `elevation` (no alias). `ceramicDefaults` exports this frozen preset. Only explicitly supplied values override it.
+`defaults.json` is the checked-in preset based on the GPU Surfaces story, with `surfaceHeight` renamed to `elevation` (no alias). `ceramicDefaults` exports this frozen preset. Cast/contact shadow strengths are tuned to 0.09 / 0.015 (25% lighter than the source story); geometry and light placement are unchanged. Only explicitly supplied values override it.
 
 All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `lightSurface`, `lightSurfaceTop`, `lightSurfaceShade`, `darkSurface`, plus `elevation` and optional `maxElevation`. `color` explicitly overrides the selected mode's grayscale surface value. Replace the material to change optical configuration; only elevation has an animation setter. The shadow configuration feeds both uniforms and bounds.
 
@@ -53,12 +53,24 @@ With the Surface demo running on port 5176, `npm run test:ceramic-shadow` compar
 the production GPU kernel against dense CPU integration for dialog, card, button,
 square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 
-### Inset surfaces
+### Signed elevation
 
-`inset()` is the recessed floor/wall material ported from Still Creek's concave
-surface optics and preset. It uses the same Surface provider, frame coordinates,
-and rounded-rectangle geometry as Ceramic, with one surface pass and no exterior
-cast shadow. `inset({ depth: 2.3, wallAngle: 50, curve: 2 })` accepts numeric
-options; `insetDefaults` exposes the full preset. Light/dark mode inherits from
-the provider unless explicitly supplied. Focus/loading emission and glass are
-not included. Layout radius belongs to the host element, not the material.
+`ceramic({ elevation: -2 })` renders a recess using Still Creek's concave
+floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised.
+Recess floors use the same resolved Ceramic color (including brightness/color overrides),
+not a separate darker palette. Depth controls floor coverage via `1 - exp(-depth)`;
+floor color darkens by `min(depth * 0.006, 0.06)`, equivalent to a subtle black overlay,
+while wall lighting supplies the edge shading. This bounded linear mapping is
+a visual approximation, not a physical light-transport model.
+All use the same material API and Surface binding; no nested wrapper is needed.
+The old standalone `inset()` entry point is removed.
+
+`setElevation()` follows the same sign selection and updates all cached theme
+variants. Negative values use a surface-only program with no exterior shadow;
+nonnegative values use the raised program. The renderer switches cached programs
+without replacing the canvas. Cross-zero updates are supported, but cross-zero
+animations are not guaranteed visually continuous. Animate within one sign.
+
+`maxElevation` remains a nonnegative exterior shadow budget: reserve it when a
+surface initialized recessed or flat will later become raised. Negative depth
+does not require extra shadow space. Layout radius still belongs to the host.

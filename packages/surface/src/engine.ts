@@ -34,7 +34,7 @@ export function createEngine(meshes: Map<HTMLElement, Mesh>, report: (error: unk
           } catch (error) { presentation.dispose(); throw error; }
         } else if (entry.material !== mesh.material) {
           entry.unsubscribe();
-          if (entry.material.shader !== mesh.material.shader || JSON.stringify(entry.material.passes) !== JSON.stringify(mesh.material.passes) || entry.target.size !== mesh.material.parameters.length * 4) {
+          if (entry.target.size !== mesh.material.parameters.length * 4) {
             renderer.release(entry.target);
             entry.target = renderer.createTarget(entry.presentation.canvas, mesh.material);
           }

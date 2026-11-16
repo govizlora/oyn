@@ -1,10 +1,11 @@
 import { createParameters, type Material, type SurfaceMode } from '@oyn/surface';
+import { insetWGSL, insetParameters } from './inset.js';
 import { ceramicWGSL } from './shaders.js';
 import { shadowBounds, validateElevation } from './bounds.js';
 import { parseColor } from './color.js';
 import defaults from './defaults.json' with { type: 'json' };
 
-/** Snapshot of the tuned GPU Surfaces story. Workspace colors are application guidance. */
+/** Tuned defaults based on the GPU Surfaces story. Workspace colors are application guidance. */
 export const ceramicDefaults = Object.freeze(defaults);
 export type CeramicOptions = Partial<Omit<typeof defaults, 'lightWorkspace' | 'darkWorkspace'>> & {
   color?: string | Record<SurfaceMode, string>;
@@ -21,7 +22,7 @@ export function ceramic(options: CeramicOptions = {}): CeramicMaterial {
     if (value !== undefined) settings[key] = value;
   }
   for (const [name, value] of Object.entries(settings)) {
-    if (!Number.isFinite(value) || !Number.isFinite(Math.fround(value)) || value < 0) throw Error(`Invalid Ceramic ${name}.`);
+    if (!Number.isFinite(value) || !Number.isFinite(Math.fround(value)) || (value < 0 && name !== 'elevation')) throw Error(`Invalid Ceramic ${name}.`);
   }
   for (const key of ['shadowStrength', 'contactShadowStrength', 'lightReflectionSpread', 'lightEdgeShade', 'lightSurfaceTop', 'lightSurfaceShade'] as const) {
     if (settings[key] > 1) throw Error(`Ceramic ${key} must be in [0, 1].`);
@@ -29,13 +30,18 @@ export function ceramic(options: CeramicOptions = {}): CeramicMaterial {
   if (settings.lightSurface > 255 || settings.darkSurface > 255) throw Error('Ceramic surface brightness must be in [0, 255].');
   if (settings.lightZ < 1 || settings.shadowLightHeight <= 0 || settings.sharpness <= 0) throw Error('Invalid Ceramic light height or sharpness.');
   const lightHeight = Math.fround(settings.shadowLightHeight);
-  validateElevation(settings.elevation, lightHeight);
+  const validateSignedElevation = (value: number) => {
+    if (!Number.isFinite(value) || !Number.isFinite(Math.fround(value))) throw Error('Ceramic elevation must be a finite f32.');
+    validateElevation(Math.max(0, value), lightHeight);
+  };
+  validateSignedElevation(settings.elevation);
+  let elevation = settings.elevation;
   if (options.maxElevation !== undefined) validateElevation(options.maxElevation, lightHeight);
   const dark = options.mode === 'dark';
   const brightness = dark ? settings.darkSurface : settings.lightSurface;
   const rgb = parseColor((typeof options.color === 'string' ? options.color : options.color?.[dark ? 'dark' : 'light']) ?? `rgb(${brightness} ${brightness} ${brightness})`);
   const parameters = createParameters([
-    0, settings.elevation, dark ? settings.rim : settings.lightRim, 0,
+    0, Math.max(0, elevation), dark ? settings.rim : settings.lightRim, 0,
     ...rgb, 0, Number(dark), Number(!dark), 0, 0,
     lightHeight, settings.shadowLightSize, settings.shadowStrength, settings.contactShadowStrength,
     settings.lightZ, settings.reflectionStrength, settings.sharpness, settings.darkFrost,
@@ -43,25 +49,40 @@ export function ceramic(options: CeramicOptions = {}): CeramicMaterial {
     settings.lightSurfaceTop, settings.lightSurfaceShade, 0, 0,
   ]);
   // Bounds and GPU consume the same f32 optical parameters.
-  const shadow = parameters.snapshot().slice(12, 16);
+  const raised = parameters.snapshot();
+  const shadow = raised.slice(12, 16);
+  const raisedPasses = ['shadow', 'surface'];
+  const insetPasses = ['surface'];
+  function updateElevation(value: number) {
+    validateSignedElevation(value);
+    const wasInset = elevation < 0;
+    if (value >= 0 && !wasInset) { elevation = value; parameters.set(1, value); return; }
+    const values = value < 0
+      ? [...insetParameters(-value, rgb), ...Array(12).fill(0)]
+      : Array.from(raised);
+    if (value >= 0) values[1] = value;
+    if (!values.every(v => Number.isFinite(Math.fround(v)))) throw Error('Ceramic elevation exceeds optical parameter range.');
+    elevation = value;
+    values.forEach((v, i) => parameters.set(i, v));
+  }
+  updateElevation(elevation);
   // Cache per-mode instances: sharing the source across differently themed providers is safe.
   const variants = new Map<SurfaceMode, CeramicMaterial>();
   return {
     resolveMode: options.mode === undefined ? mode => {
       let material = variants.get(mode);
       if (!material) {
-        material = ceramic({ ...options, mode, elevation: parameters.get(1) });
+        material = ceramic({ ...options, mode, elevation });
         variants.set(mode, material);
       }
       return material;
     } : undefined,
-    shader: ceramicWGSL, parameters, passes: ['shadow', 'surface'],
+    get shader() { return elevation < 0 ? insetWGSL : ceramicWGSL; }, parameters,
+    get passes() { return elevation < 0 ? insetPasses : raisedPasses; },
     bounds: {
-      get initial() { return parameters.get(1); }, max: options.maxElevation,
+      get initial() { return Math.max(0, elevation); }, max: options.maxElevation,
       measure: (width, height, budget) => shadowBounds(width, height, budget, shadow),
     },
-    setElevation(value: number) { validateElevation(value, lightHeight); parameters.set(1, value); variants.forEach(material => material.setElevation(value)); },
+    setElevation(value: number) { updateElevation(value); variants.forEach(material => material.setElevation(value)); },
   };
 }
-
-export { inset, insetDefaults, type InsetOptions } from './inset.js';

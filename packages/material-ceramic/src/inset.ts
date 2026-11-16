@@ -1,4 +1,3 @@
-import { createParameters, type Material, type SurfaceMode } from '@oyn/surface';
 import { frameWGSL } from './effects/frame.js';
 import { geometryWGSL } from './effects/geometry.js';
 
@@ -6,11 +5,10 @@ import { geometryWGSL } from './effects/geometry.js';
 export const insetDefaults = Object.freeze({
   depth: 2.3, wallAngle: 50, curve: 2, highlightStrength: 1.2,
   highlightSharpness: 80.8, diffuseStrength: 0.15, diffuseFalloff: 2.14,
+  floorShadePerDepth: 0.006, maxFloorShade: 0.06,
   ambientShade: 0.05, directionalShade: 0.2, shadeFalloff: 0.8,
-  lightFloor: 226.56, darkFloor: 0,
 });
-export type InsetOptions = { [K in keyof typeof insetDefaults]?: number } & { mode?: SurfaceMode };
-const shader = /* wgsl */ `
+export const insetWGSL = /* wgsl */ `
 ${frameWGSL}
 struct Parameters { floor: vec4f, wall: vec4f, highlight: vec4f, shade: vec4f }
 @group(0) @binding(1) var<uniform> material: Parameters;
@@ -37,29 +35,23 @@ ${geometryWGSL}
   let backlit = smoothstep(0, material.shade.z, -direction);
   let shade = band * clamp(material.shade.x + material.shade.y * backlit, 0, 1);
   let coverage = mask * (1 - exp(-material.wall.w));
-  return over(vec4f(vec3f(highlight), highlight + shade * (1-highlight)), vec4f(material.floor.xyz * coverage, coverage));
+  // Equivalent to a subtle black overlay on the Ceramic base color.
+  // Coverage handles the near-flat fade; this alone controls floor darkening.
+  let floorShade = min(material.wall.w * material.floor.w, material.shade.w);
+  let floorColor = material.floor.xyz * (1.0f - floorShade);
+  return over(vec4f(vec3f(highlight), highlight + shade * (1-highlight)), vec4f(floorColor * coverage, coverage));
 }
 `;
-export function inset(options: InsetOptions = {}): Material {
-  const s = { ...insetDefaults, ...options };
-  for (const key of Object.keys(insetDefaults) as (keyof typeof insetDefaults)[]) {
-    if (!Number.isFinite(s[key]) || !Number.isFinite(Math.fround(s[key])) || s[key] < 0) throw Error(`Invalid inset ${key}.`);
-  }
-  if (s.wallAngle <= 0 || s.wallAngle >= 90 || s.shadeFalloff <= 0 || s.lightFloor > 255 || s.darkFloor > 255) throw Error('Invalid inset wall or floor.');
-  const angle = s.wallAngle * Math.PI / 180;
-  let slope = 0;
-  for (let i = 0; i < 256; i++) slope += Math.tan(angle * ((i + 0.5) / 256) ** s.curve) / 256;
-  const floor = (s.mode === 'dark' ? s.darkFloor : s.lightFloor) / 255;
-  const variants = new Map<SurfaceMode, Material>();
-  return {
-    resolveMode: options.mode === undefined ? mode => {
-      if (!variants.has(mode)) variants.set(mode, inset({ ...options, mode }));
-      return variants.get(mode)!;
-    } : undefined,
-    shader, passes: ['surface'],
-    parameters: createParameters([floor, floor, floor, 0, s.depth / slope, angle, s.curve, s.depth,
-      s.highlightStrength, s.highlightSharpness, s.diffuseStrength, s.diffuseFalloff,
-      s.ambientShade, s.directionalShade, s.shadeFalloff, 0]),
-    bounds: { initial: 0, measure: () => ({ x: 1, y: 1 }) },
-  };
+
+// Internal optics only: floor color comes from Ceramic, not a second inset palette.
+// Signed elevation is the public depth control.
+const angle = insetDefaults.wallAngle * Math.PI / 180;
+let slope = 0;
+for (let i = 0; i < 256; i++) slope += Math.tan(angle * ((i + 0.5) / 256) ** insetDefaults.curve) / 256;
+
+export function insetParameters(depth: number, color: readonly number[]) {
+  const s = insetDefaults;
+  return [...color, s.floorShadePerDepth, depth / slope, angle, s.curve, depth,
+    s.highlightStrength, s.highlightSharpness, s.diffuseStrength, s.diffuseFalloff,
+    s.ambientShade, s.directionalShade, s.shadeFalloff, s.maxFloorShade];
 }

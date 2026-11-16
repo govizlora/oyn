@@ -1,7 +1,7 @@
 /// <reference types="@webgpu/types" />
 import type { Material } from './material.js';
 
-export type Target = { context: GPUCanvasContext; frame: GPUBuffer; parameters: GPUBuffer; bind: GPUBindGroup; pipelines: GPURenderPipeline[]; size: number };
+export type Target = { context: GPUCanvasContext; frame: GPUBuffer; parameters: GPUBuffer; bind: GPUBindGroup; pipelines: GPURenderPipeline[]; size: number; shader: string; passes: readonly string[] };
 /** One device per Provider; no DOM ancestry, geometry inference or animation policy. */
 export async function createRenderer(fail: (error: unknown) => void) {
   if (!navigator.gpu) throw Error('Surface requires WebGPU on HTTPS/localhost. No fallback is installed.');
@@ -41,7 +41,7 @@ export async function createRenderer(fail: (error: unknown) => void) {
     const frame = device.createBuffer({ size: 48, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     const parameters = device.createBuffer({ size, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     const bind = device.createBindGroup({ layout, entries: [{ binding: 0, resource: { buffer: frame } }, { binding: 1, resource: { buffer: parameters } }] });
-    const target = { context, frame, parameters, bind, pipelines: programs, size };
+    const target = { context, frame, parameters, bind, pipelines: programs, size, shader: material.shader, passes: material.passes };
     targets.add(target);
     context.configure({ device, format, alphaMode: 'premultiplied' });
     return target;
@@ -53,6 +53,11 @@ export async function createRenderer(fail: (error: unknown) => void) {
     if (!items.length || disposed) return;
     const encoder = device.createCommandEncoder();
     for (const { target, material, frame } of items) {
+      if (target.shader !== material.shader || target.passes !== material.passes) {
+        target.pipelines = pipelines(material);
+        target.shader = material.shader;
+        target.passes = material.passes;
+      }
       device.queue.writeBuffer(target.frame, 0, frame);
       device.queue.writeBuffer(target.parameters, 0, material.parameters.snapshot());
       const pass = encoder.beginRenderPass({ colorAttachments: [{ view: target.context.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 0] }] });
