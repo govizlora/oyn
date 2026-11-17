@@ -1,5 +1,5 @@
 import { SHADOW } from '../optics.js';
-export const shadowWGSL = /* wgsl */ `
+export const gaussianCoverageWGSL = /* wgsl */ `
 // Gaussian convolution of the actual rounded silhouette, not a distance-field ramp.
 // Integrate X analytically; the straight Y band is analytic too. Only circular
 // corner bands need quadrature. This gives corners less coverage than flat edges.
@@ -36,20 +36,41 @@ fn roundedCoverage(p:vec2f,b:vec2f,r:f32,blur:f32)->f32 {
   }
   return clamp(result,0,1);
 }
-@fragment fn shadow(in:VertexOut)->@location(0) vec4f {
-  let halfSize=in.card.zw*0.5; let p=in.local-halfSize;
-  let radius=min(frame.geometry.x,min(halfSize.x,halfSize.y));let height=material.shape.y;
+
+`;
+/** Optical integration is shared. Each geometry supplies slice coverage and
+ * projected distance; the Gaussian/card solution remains analytic. */
+export const ceramicShadowWGSL = /* wgsl */ `
+fn ceramicShadow(p:vec2f,delta:vec2f,height:f32,settings:vec4f)->vec4f {
   if(height <= 0){return vec4f(0);}
-  let delta=in.card.xy+halfSize-frame.viewportLight.zw;
-  let shadowDelta=delta*material.shadow.x/length(vec3f(delta,material.shadow.x));
+  let shadowDelta=delta*settings.x/length(vec3f(delta,settings.x));
   var blocked=0.0;
   for(var i=1;i<=6;i++){
-    let h=height*f32(i)/6;let ratio=h/(material.shadow.x-h);let scale=1+ratio;
+    let h=height*f32(i)/6;let ratio=h/(settings.x-h);let scale=1+ratio;
     let projected=p-shadowDelta*ratio;
-    blocked+=roundedCoverage(projected,halfSize*scale,radius*scale,material.shadow.y*ratio*0.5)/6;
+    blocked+=geometryShadowCoverage(projected,scale,settings.y*ratio*0.5,h)/6;
   }
-  let d=roundedRect(p,halfSize,radius);
-  let ao=exp(-max(d,0)/max(${SHADOW.minAoFalloff},height*${SHADOW.aoFalloff}))*material.shadow.w*min(height,1);
-  return vec4f(0,0,0,blocked*material.shadow.z+ao*(1-material.shadow.z));
+  let d=geometryShadowDistance(p);
+  let ao=exp(-max(d,0)/max(${SHADOW.minAoFalloff},height*${SHADOW.aoFalloff}))*settings.w*min(height,1);
+  // Contact darkening attenuates the light remaining at this pixel, not the
+  // global shadow-strength setting. Unshadowed edges retain their contact cue.
+  let projectedOpacity=blocked*settings.z;
+  return vec4f(0,0,0,projectedOpacity+ao*(1-projectedOpacity));
+}
+`;
+export const shadowWGSL = /* wgsl */ `
+${gaussianCoverageWGSL}
+fn geometryShadowCoverage(p:vec2f,scale:f32,blur:f32,height:f32)->f32 {
+ let b=frame.rect.zw*0.5;let r=min(frame.geometry.x,min(b.x,b.y));
+ return roundedCoverage(p,b*scale,r*scale,blur);
+}
+fn geometryShadowDistance(p:vec2f)->f32 {
+ let b=frame.rect.zw*0.5;let r=min(frame.geometry.x,min(b.x,b.y));
+ return roundedRect(p,b,r);
+}
+${ceramicShadowWGSL}
+@fragment fn shadow(in:VertexOut)->@location(0) vec4f {
+ let b=in.card.zw*0.5;
+ return ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,material.shape.y,material.shadow);
 }
 `;
