@@ -1,6 +1,7 @@
+import { ceramic } from '@oyn/ceramic'
 import { useSurfaceMode } from '@oyn/surface'
 import { useSurface } from '@oyn/surface'
-import { neutralMaterial, destructiveMaterial, primaryMaterials } from '@/ceramic/materials'
+import { neutralProps, destructiveProps, primaryProps } from '@/ceramic/materials'
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -52,9 +53,9 @@ function Button({
     asChild?: boolean
   }) {
   const mode = useSurfaceMode()
-  const material = variant === 'default' ? primaryMaterials[mode] : variant === 'destructive' ? destructiveMaterial : neutralMaterial
+  const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps : neutralProps
   const filled = variant !== 'ghost' && variant !== 'link'
-  const ref = useSurface<HTMLButtonElement>({ material, enabled: filled }, forwardedRef)
+  const ref = useSurface({ appearance: ceramic, props: material, enabled: filled }, forwardedRef)
   const materialClass = variant === 'default' ? 'text-primary-foreground' : variant === 'destructive' ? 'text-white' : 'text-foreground'
   const Comp = asChild ? Slot.Root : "button"
 

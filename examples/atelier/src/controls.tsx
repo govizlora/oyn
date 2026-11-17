@@ -8,7 +8,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { ceramic } from '@oyn/material-ceramic';
+import { ceramic } from '@oyn/ceramic';
 import { useSurface } from '@oyn/surface';
 
 export type Tone =
@@ -34,27 +34,14 @@ export function useCeramic<T extends HTMLElement>(
   budget = Math.max(elevation, 0),
   rim = 3,
 ) {
-  const material = useMemo(() => {
-    const color = tone.startsWith('#')
-      ? tone.toLowerCase()
-      : ceramicColors[tone as Tone];
-    const ink = color === ceramicColors.ink;
-    return ceramic({
-      color,
-      elevation,
-      maxElevation: budget,
-      lightRim: ink ? 2 : rim,
-      lightSurfaceTop: ink ? 0.04 : 0.16,
-      lightEdgeShade: 0.04,
-      shadowStrength: 0.13,
-      contactShadowStrength: 0.03,
-    });
-  }, [tone, budget, rim]); // Live elevation has exactly one writer below.
-  useLayoutEffect(
-    () => material.setElevation(elevation),
-    [material, elevation],
-  );
-  return useSurface<T>({ material });
+  const color = tone.startsWith('#') ? tone.toLowerCase() : ceramicColors[tone as Tone];
+  const ink = color === ceramicColors.ink;
+  return useSurface({ appearance: ceramic, props: {
+    color, elevation, maxElevation: budget,
+    lightRim: ink ? 2 : rim,
+    lightSurfaceTop: ink ? 0.04 : 0.16,
+    lightEdgeShade: 0.04, shadowStrength: 0.13, contactShadowStrength: 0.03,
+  }});
 }
 
 export function Surface({

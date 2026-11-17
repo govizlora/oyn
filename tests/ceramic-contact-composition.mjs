@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
-import { ceramicShadowWGSL } from '../packages/material-ceramic/dist/effects/shadow.js';
+import { ceramicShadowWGSL } from '../packages/ceramic/dist/effects/shadow.js';
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','5199','--strictPort'],{stdio:'pipe'});
 let browser;
 try {

@@ -2,23 +2,42 @@
 
 Experimental GPU surfaces with native DOM layout and interaction.
 
-## Desktop Ceramic homepage
+## Ceramic homepage and shader architecture
 
-`npm run dev` serves the atelier at **http://127.0.0.1:5177**. Three light-mode,
-full-viewport desktop studies: Quiet (`?study=1`), Air (`?study=2`, kinetic fan and
-controls), Play (`?study=3`, lamps, keyboard, faders, bubbles and pills). Native HTML
-owns interaction; Ceramic and app-local optical materials provide WebGPU rendering.
-No marketing copy, image mockups or UI-kit dependency. The last bottom pictogram
-opens the component library. Core Ceramic defaults remain unchanged.
+`npm run dev` serves the atelier at **http://127.0.0.1:5177**. The homepage is a
+nine-family tactile control board: 22 controls using ten offline-baked profiles,
+shared Ceramic lighting, and native HTML interaction. Existing cards remain exact
+analytic geometry; inset wells retain their existing treatment.
 
-`npm run build` outputs root `dist/`; `npm run test:atelier` runs headless Chrome
-checks for the new splash, shared motion policy and preserved original compositions.
-Fans start off. A powered moving fan uses one shared numeric clock, stopped when
-hidden or reduced motion is requested; Surface remains the sole render scheduler.
-See [the study notes](examples/atelier/README.md). No push or public deployment.
+**Start with [the current architecture and next-chat handoff](HANDOFF.md)** for the
+implemented boundaries, source map, one-run 500-card benchmark, known limits and
+plan to make the approach canonical across shaders. That wider migration is not
+yet complete. Original Ceramic defaults remain unchanged.
+
+Quiet (`?study=1`), Air (`?study=2`) and Play (`?study=3`) remain available, along with
+the object library and archived compositions. `npm run build` outputs root `dist/`.
+`npm run test:sculpted` checks the homepage; `test:atelier` covers preserved studies
+and archive behavior. See [Atelier notes](examples/atelier/README.md) for routes.
 
 The shadcn migration remains separate: `dev:shadcn` (:5176) / `build:shadcn`.
 MUI and the historical benchmark are also retained.
+
+## Surface + Appearance API
+
+```tsx
+const ref = useSurface({
+  appearance: ceramic,
+  props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
+});
+return <button ref={ref}>Confirm</button>;
+```
+
+Mount under `SurfaceProvider`. `ceramic` is a stable definition; props update a
+persistent per-node appearance after commit. No manual memoization is required.
+Surface manages DOM/canvas, WebGPU, resources, scheduling and optional shared input
+facts. Ceramic interprets pointer state as light and owns hold/return/fixed policy.
+See [API decisions](docs/surface-api.md) and [Surface contracts](packages/surface/README.md).
+React Compiler validation remains future work, not a current compatibility claim.
 
 ## Object library — 54 objects + 2 compositions
 
@@ -41,7 +60,7 @@ Oyn supports **WebGPU only**, in a secure context (HTTPS or localhost) with an a
 
 `SurfaceProvider` reports initialization failures, device loss, invalid shaders and oversized canvases through `onError` (default: `console.error`) and disposes its rendering. Unsupported environments do not receive a substitute material effect.
 
-The current packages use one canvas per bound DOM element, with one GPUDevice, pipeline cache and scheduler per Provider. See [Surface](packages/surface/README.md) and [Ceramic](packages/material-ceramic/README.md) for the current API and limitations.
+The current packages use one canvas per bound DOM element, with one GPUDevice, pipeline cache and scheduler per Provider. See [Surface](packages/surface/README.md) and [Ceramic](packages/ceramic/README.md) for the current API and limitations.
 
 ## Historical WebGPU presentation experiment (2026-11-15)
 
@@ -72,7 +91,7 @@ Fixed scene: three columns; **120 cards**; 300×180 CSS px; 32px gaps; radius 16
 
 **Limit on this machine:** A needs a 2248×17216 texture, exceeding the adapter’s 16384 maximum dimension. A explicitly reports unsupported, and tests record that result rather than claiming a rendered pass. B is supported. No automatic DPR reduction, card reduction or architectural fallback is applied; visual tests skip only the unavailable A comparison.
 
-The WGSL port covers **light and dark Ceramic** optics (including dark specular/Fresnel, distance falloff and frosted edges), not every production material feature. Select Light/Dark in the page or add `&theme=dark`; both modes share the same pipelines, and switching only updates uniforms. Defaults come from `ceramic()` in the material package. A paused scene redraws once on a theme change. The two benchmark modes share one WGSL implementation. The current `@oyn/surface` and Ceramic packages are also WebGPU-only; their former GLSL implementation has been removed. The original MUI/shadcn demos are native UI baselines, while the Surface demo uses the current packages. Full example UI revalidation was not part of the package migration.
+The WGSL port covers **light and dark Ceramic** optics (including dark specular/Fresnel, distance falloff and frosted edges), not every production material feature. Select Light/Dark in the page or add `&theme=dark`; both modes share the same pipelines, and switching only updates uniforms. Defaults come from `createCeramicMaterial()` in the material package. A paused scene redraws once on a theme change. The two benchmark modes share one WGSL implementation. The current `@oyn/surface` and Ceramic packages are also WebGPU-only; their former GLSL implementation has been removed. The original MUI/shadcn demos are native UI baselines, while the Surface demo uses the current packages. Full example UI revalidation was not part of the package migration.
 
 Historical light-mode measurements and limitations: [performance report](test-results/webgpu/REPORT.md). Dark mode has functional and visual validation, but the complete performance matrix has not been rerun.
 
@@ -110,7 +129,7 @@ Mouse-follow lighting remains the default. Choose automatic lighting and auto-sc
 ## Packages
 
 - `packages/surface`: `@oyn/surface` — SurfaceProvider, useSurface, DOM integration and WebGPU rendering; one canvas per element and one device/scheduler per Provider.
-- `packages/material-ceramic`: `@oyn/material-ceramic` — composable shader fragments; explicit light/dark optical modes.
+- `packages/ceramic`: `@oyn/ceramic` — composable shader fragments; explicit light/dark optical modes.
 
 ## Dashboard comparison — separate migration example
 
@@ -132,4 +151,4 @@ See [dashboard provenance and changes](examples/shadcn/README.md).
 Tests against the running dashboard:
 `npm run test:shadcn`, `npm run test:theme`.
 
-See `HANDOFF.md` for historical research notes. Still Creek is read-only.
+See [HANDOFF.md](HANDOFF.md) for the current shader architecture and continuation plan. Still Creek is read-only.

@@ -1,5 +1,6 @@
+import { ceramicDomBinding } from '../../../packages/ceramic/src/interaction';
 import { useLayoutEffect, useMemo, type CSSProperties } from 'react';
-import { createParameters, useSurface, type Material } from '@oyn/surface';
+import { materialAppearance, createParameters, useSurface, type Material } from '@oyn/surface';
 
 const font: Record<string, string[]> = {
   A: ['01110', '10001', '11111', '10001', '10001'],
@@ -147,6 +148,7 @@ LIGHT.FOLLOW(POINTER)
 > _`;
 function makePhosphor(kind: number, amber: boolean): Material {
   return {
+    bind: ceramicDomBinding,
     shader,
     passes: ['surface'],
     parameters: createParameters([
@@ -212,7 +214,7 @@ export function Phosphor({
     );
     cells.forEach((cell, i) => material.parameters.set(i + 8, cell));
   }, [material, screenText]);
-  const ref = useSurface({ material });
+  const ref = useSurface({ appearance: materialAppearance, props: { material: material } });
   return (
     <div
       ref={ref}

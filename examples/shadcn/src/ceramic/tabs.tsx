@@ -1,10 +1,12 @@
 "use client"
 
+import { ceramic } from '@oyn/ceramic'
+
 import * as React from "react"
 import { Tabs as TabsPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
 import { useSurface } from "@oyn/surface"
-import { insetMaterial, neutralMaterial } from "@/ceramic/materials"
+import { insetProps, neutralProps } from "@/ceramic/materials"
 import { cn } from "@/lib/utils"
 
 
@@ -61,8 +63,8 @@ function TabsList({ className, variant = "default", ref: forwardedRef, children,
     };
   }, [forwardedRef]);
   const inset = variant === 'default';
-  const ref = useSurface({ material: insetMaterial, enabled: inset }, capture);
-  const indicatorRef = useSurface<HTMLSpanElement>({ material: neutralMaterial, enabled: inset });
+  const ref = useSurface({ appearance: ceramic, props: insetProps, enabled: inset }, capture);
+  const indicatorRef = useSurface({ appearance: ceramic, props: neutralProps, enabled: inset });
   const rect = useSelectionGeometry(host, inset);
   return (
     <TabsPrimitive.List ref={ref} data-slot="tabs-list" data-variant={variant} data-surface-tabs={inset ? '' : undefined}

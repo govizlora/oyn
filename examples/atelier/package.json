@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {
-    "@oyn/material-ceramic": "0.0.0",
+    "@oyn/ceramic": "0.0.0",
     "@oyn/surface": "0.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

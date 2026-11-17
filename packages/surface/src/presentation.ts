@@ -1,5 +1,5 @@
 import type { Mesh } from './scene.js';
-import type { Insets } from './material.js';
+import type { Insets, SurfaceBinding } from './material.js';
 
 /** A canvas belongs only to its own element. Native DOM owns clipping and stacking. */
 export function createPresentation(mesh: Mesh) {
@@ -19,11 +19,10 @@ export function createPresentation(mesh: Mesh) {
   canvas.style.cssText = 'position:absolute;pointer-events:none;display:block;';
   layer.append(canvas);
   host.append(layer);
-  let cachedBounds: DOMRect | undefined, radius = 0;
+  let cachedBounds: DOMRect | undefined;
   let width = 0, height = 0, pad: Insets = { x: 0, y: 0 };
   function measure(limit: number) {
     width = host.offsetWidth; height = host.offsetHeight;
-    radius = parseFloat(getComputedStyle(host).borderTopLeftRadius) || 0;
     cachedBounds = undefined;
     const { bounds } = mesh.material;
     const budget = Math.max(mesh.initialBudget, bounds.max ?? mesh.initialBudget);
@@ -37,15 +36,18 @@ export function createPresentation(mesh: Mesh) {
     canvas.style.width = `${cssW}px`; canvas.style.height = `${cssH}px`;
     canvas.style.left = `${-pad.x - host.clientLeft}px`; canvas.style.top = `${-pad.y - host.clientTop}px`;
   }
-  function frame(pointer: { x: number; y: number }, positionDirty: boolean) {
+  function frame(binding: SurfaceBinding | undefined, positionDirty: boolean) {
     if (!cachedBounds || positionDirty) cachedBounds = canvas.getBoundingClientRect();
     const bounds = cachedBounds;
     if (!host.isConnected || !width || !height || !bounds.width || !bounds.height) return null;
     const cssW = width + 2 * pad.x, cssH = height + 2 * pad.y;
-    return new Float32Array([cssW, cssH,
-      (pointer.x - bounds.left) * cssW / bounds.width, (pointer.y - bounds.top) * cssH / bounds.height,
+    const extras = binding?.frame?.({ element: host, width, height,
+      toLocal: point => ({ x: (point.x - bounds.left) * cssW / bounds.width, y: (point.y - bounds.top) * cssH / bounds.height }),
+    }) ?? [0, 0, 0];
+    if (extras.length !== 3 || !extras.every(v => Number.isFinite(v) && Number.isFinite(Math.fround(v)))) throw Error('Invalid appearance frame inputs.');
+    return new Float32Array([cssW, cssH, extras[0], extras[1],
       pad.x, pad.y, width, height,
-      radius, canvas.width / cssW, canvas.height / cssH, 0]);
+      extras[2], canvas.width / cssW, canvas.height / cssH, 0]);
   }
   function dispose() {
     layer.remove(); canvas.width = canvas.height = 0;

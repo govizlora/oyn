@@ -23,9 +23,11 @@ const specimens = [
 ] as const;
 export function SculptedStudy({
   explore,
+  exploration,
   studies,
 }: {
   explore: () => void;
+  exploration: () => void;
   studies: () => void;
 }) {
   return (
@@ -72,7 +74,7 @@ export function SculptedStudy({
         <button onClick={studies}>
           Original ceramic studies <span>↗</span>
         </button>
-        <span>PRESS · SLIDE · TURN</span>
+        <button onClick={exploration}>Geometry lab ↗</button>
       </footer>
     </section>
   );

@@ -1,5 +1,5 @@
 // Light/dark Ceramic benchmark port. Both presentation modes use this one module.
-// Optical equations match material-ceramic; production GLSL is unchanged.
+// Optical equations match ceramic; production GLSL is unchanged.
 export const ceramicWGSL = /* wgsl */ `
 struct Frame { viewportLight: vec4f, shape: vec4f, colorMode: vec4f, optics: vec4f }
 @group(0) @binding(0) var<uniform> frame: Frame;
@@ -47,7 +47,7 @@ fn coverage(d:f32,sigma:f32)->f32 {return 0.5-0.5*(2/(1+exp(clamp(-d*1.7/max(sig
   let ao=exp(-max(d,0)/max(0.5,height*0.35))*0.02;
   return vec4f(0,0,0,blocked*0.12+ao*(1-0.12));
 }
-// Matches packages/material-ceramic/src/effects/dark-reflection.ts.
+// Matches packages/ceramic/src/effects/dark-reflection.ts.
 fn darkReflection(grad:vec2f,edge:f32,rimMask:f32,halfVec:vec3f,toLight:vec2f)->vec4f {
   let viewDir=vec3f(0,0,1);
   let edgeCurve=pow(edge,1.15);let specCurve=pow(edge,2.25);

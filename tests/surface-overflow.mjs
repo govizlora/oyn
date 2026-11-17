@@ -19,7 +19,7 @@ try {
       await page.waitForTimeout(350);
       const original = await metrics();
       await page.getByRole('button', { name: 'Ceramic', exact: true }).click();
-      await page.waitForFunction(() => document.querySelectorAll('[data-surface-card] [data-oyn-canvas]').length === 5);
+      await page.waitForFunction(() => document.querySelectorAll('[data-surface-card] > [data-oyn-layer] > [data-oyn-canvas]').length === 5);
       await page.waitForTimeout(350);
       assert.deepEqual(await metrics(), original, `scroll geometry must match at ${width}px / ${theme}`);
       const next = page.getByRole('button', { name: 'Go to next page', exact: true });

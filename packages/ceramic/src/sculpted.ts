@@ -1,4 +1,5 @@
-import { ceramic, type CeramicOptions } from './index.js';
+import { ceramicResponseWGSL } from './effects/ceramic-response.js';
+import { createCeramicMaterial, type CeramicOptions } from './index.js';
 import { frameWGSL } from './effects/frame.js';
 import { geometryWGSL } from './effects/geometry.js';
 import { shadowWGSL } from './effects/shadow.js';
@@ -26,6 +27,7 @@ struct Parameters { shape: vec4f, colorMode: vec4f, optics: vec4f, shadow: vec4f
 @group(0) @binding(1) var<uniform> material: Parameters;
 ${geometryWGSL}
 ${shadowWGSL}
+${ceramicResponseWGSL}
 // Lower hemisphere of a sphere whose intersection with z=0 has radius a.
 // R=(a²+h²)/(2h) makes the cut exactly h deep. Outside the cutter,
 // return the uncut plane; min implements subtraction from the top face.
@@ -74,22 +76,21 @@ fn cutVisibility(p:vec2f,b:vec2f,r:f32,l:vec3f)->f32 {
  let n=normalize(vec3f(-dx,-dy,1.0));
  let toLight=frame.viewportLight.zw-(in.card.xy+in.local);
  let l=normalize(vec3f(toLight,150.0));
- let h=normalize(l+vec3f(0,0,1));
  let visibility=cutVisibility(p,b,r,l);
- let diffuse=(dot(n,l)-l.z)*0.32;
- let spec=pow(max(dot(n,h),0.0),70.0)*0.08;
  let cavity=-cutHeight(p,b)/max(material.shape.w,0.001);
- let color=material.colorMode.xyz*(1.0+diffuse-cavity*0.025-(1.0-visibility)*0.14)+vec3f(spec);
+ let color=ceramicResponse(material.colorMode.xyz,n,l,vec3f(0,0,1),visibility,cavity*0.025);
  return vec4f(clamp(color,vec3f(0),vec3f(1))*mask,mask);
 }
 `;
+/** @deprecated Historical prototype. Use bakedCeramic with an offline profile.
+ * Retained for compatibility; no Atelier route uses this lighting path. */
 export function sculptedCeramic(options: SculptedOptions = {}) {
   const validateHeight = (value: number) => {
     if (!Number.isFinite(value) || value < 0)
       throw Error('Sculpted Ceramic requires a finite raised elevation.');
   };
   validateHeight(options.elevation ?? 10);
-  const base = ceramic({
+  const base = createCeramicMaterial({
     ...options,
     mode: 'light',
     elevation: options.elevation ?? 10,

@@ -1,8 +1,10 @@
 "use client"
 
+import { ceramic } from '@oyn/ceramic'
+
 import * as React from "react"
 import { useSurface } from "@oyn/surface"
-import { popoverMaterial } from "./materials"
+import { popoverProps } from "./materials"
 import { useRecessInteraction } from "./recess-interaction"
 import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
@@ -64,7 +66,7 @@ function SelectContent({
   ref: forwardedRef,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const ref = useSurface<HTMLDivElement>({ material: popoverMaterial }, forwardedRef)
+  const ref = useSurface({ appearance: ceramic, props: popoverProps }, forwardedRef)
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

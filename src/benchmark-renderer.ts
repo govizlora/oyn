@@ -1,6 +1,6 @@
 /// <reference types="@webgpu/types" />
 import { ceramicWGSL } from './ceramic-benchmark.wgsl';
-import { ceramic } from '../packages/material-ceramic/src/index';
+import { createCeramicMaterial } from '../packages/ceramic/src/index';
 export type Mode = 'shared' | 'individual';
 export type Theme = 'light' | 'dark';
 export type Controls = { theme: Theme; running: boolean; autoScroll: boolean; lightSource: 'pointer' | 'auto' };
@@ -21,7 +21,7 @@ export function createBenchmark(stage:HTMLElement, mode:Mode, dpr:number, contro
   function error(reason:unknown){if(disposed)return;const message=String(reason);dispose();fail(message);}
   async function initialize(){
     if(!navigator.gpu)throw Error('WebGPU unavailable; use a supported browser on localhost/HTTPS.');
-    const materials={light:ceramic({mode:'light',elevation:6}),dark:ceramic({mode:'dark',elevation:6})};
+    const materials={light:createCeramicMaterial({mode:'light',elevation:6}),dark:createCeramicMaterial({mode:'dark',elevation:6})};
     const pad=80; // Preserve the historical benchmark workload; package bounds are adaptive.
     const cards=[...stage.querySelectorAll<HTMLElement>('article')];
     const rects=cards.map(c=>[c.offsetLeft,c.offsetTop,c.offsetWidth,c.offsetHeight]);

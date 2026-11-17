@@ -4,24 +4,24 @@ import { chromium, firefox } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createParameters } from '../packages/surface/dist/material.js';
 import { bindMotion } from '../packages/surface/dist/adapters/motion.js';
-import { ceramic, ceramicDefaults } from '../packages/material-ceramic/dist/index.js';
-import { shadowBounds } from '../packages/material-ceramic/dist/bounds.js';
+import { createCeramicMaterial, ceramicDefaults } from '../packages/ceramic/dist/index.js';
+import { shadowBounds } from '../packages/ceramic/dist/bounds.js';
 
 assert.equal(ceramicDefaults.elevation, 16);
-assert.equal(ceramic().parameters.get(1), 16);
+assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
-const tuned = ceramic({ shadowLightHeight: 300, shadowLightSize: 400, shadowStrength: 0.2,
+const tuned = createCeramicMaterial({ shadowLightHeight: 300, shadowLightSize: 400, shadowStrength: 0.2,
   contactShadowStrength: 0.04, lightZ: 40, reflectionStrength: 2, sharpness: 2,
   darkFrost: 0.3, lightReflectionStrength: 1, lightReflectionSpread: 0.5,
   lightEdgeShade: 0.1, lightSurfaceTop: 0.3, lightSurfaceShade: 0.02, lightRim: 5 });
 assert.deepEqual([...tuned.parameters.snapshot().slice(12)], [...new Float32Array([
   300,400,0.2,0.04,40,2,2,0.3,1,0.5,0.1,0,0.3,0.02,0,0])]);
 assert.equal(tuned.parameters.get(2), 5);
-assert.ok(tuned.bounds.measure(320,100,16).x > ceramic().bounds.measure(320,100,16).x);
-assert.throws(() => ceramic({ shadowLightHeight: 10 }));
-assert.throws(() => ceramic({ lightReflectionSpread: 2 }));
-assert.throws(() => ceramic({ lightSurface: 256 }));
-assert.deepEqual([...ceramic({ lightSurface: 220 }).parameters.snapshot().slice(4,7)], [...new Float32Array([220/255,220/255,220/255])]);
+assert.ok(tuned.bounds.measure(320,100,16).x > createCeramicMaterial().bounds.measure(320,100,16).x);
+assert.throws(() => createCeramicMaterial({ shadowLightHeight: 10 }));
+assert.throws(() => createCeramicMaterial({ lightReflectionSpread: 2 }));
+assert.throws(() => createCeramicMaterial({ lightSurface: 256 }));
+assert.deepEqual([...createCeramicMaterial({ lightSurface: 220 }).parameters.snapshot().slice(4,7)], [...new Float32Array([220/255,220/255,220/255])]);
 
 const block = createParameters([0, 0, 0, 0]);
 let notices = 0; const off = block.subscribe(() => notices++);
@@ -29,10 +29,10 @@ block.set(0, 1); block.set(0, 1); off(); block.set(0, 2); assert.equal(notices, 
 assert.throws(() => block.set(4, 1)); assert.throws(() => block.set(0, Infinity));
 const copy = block.snapshot(); copy[0] = 100; assert.equal(block.get(0), 2);
 let listener; let detached = false;
-const material = ceramic({ elevation: 12, maxElevation: 18 });
+const material = createCeramicMaterial({ elevation: 12, maxElevation: 18 });
 const unbind = bindMotion({ get: () => 10, on: (event, fn) => { assert.equal(event, 'change'); listener = fn; return () => { detached = true; }; } }, material.setElevation);
 assert.equal(material.parameters.get(1), 10); listener(3); assert.equal(material.parameters.get(1), 3); unbind(); assert.ok(detached);
-for (const elevation of [NaN, Infinity, -Infinity, 480]) assert.throws(() => ceramic({ elevation }));
+for (const elevation of [NaN, Infinity, -Infinity, 480]) assert.throws(() => createCeramicMaterial({ elevation }));
 assert.ok(shadowBounds(1200, 100, 12).x > shadowBounds(120, 100, 12).x);
 assert.deepEqual(shadowBounds(120, 40, 0), { x: 2, y: 2 });
 
@@ -52,7 +52,7 @@ try {
   await page.goto(base + '/tests/fixtures/surface.html');
   const result = await page.evaluate(async () => {
     const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { ceramic } = await import('/packages/material-ceramic/src/index.ts');
+    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
     const settle = async () => { for (let i = 0; i < 8; i++) await new Promise(requestAnimationFrame); };
     const wait = async condition => { for (let i = 0; !condition(); i++) { if (i > 300) throw Error('Timed out waiting for GPU canvas'); await new Promise(requestAnimationFrame); } };
     let devices = 0, submits = 0, pipelines = 0, copies = 0, measurements = 0, scheduled = 0;
@@ -65,7 +65,7 @@ try {
     count(GPUDevice.prototype, 'createRenderPipeline', () => pipelines++);
     count(CanvasRenderingContext2D.prototype, 'drawImage', () => copies++);
     const hosts = Array.from({ length: 3 }, () => { const el = document.createElement('div'); el.style.cssText = 'width:120px;height:40px;border-radius:8px'; document.body.append(el); return el; });
-    const materials = hosts.map(() => ceramic({ elevation: 12 }));
+    const materials = hosts.map(() => createCeramicMaterial({ elevation: 12 }));
     const meshes = new Map(hosts.map((element, i) => [element, { element, material: materials[i], initialBudget: materials[i].bounds.initial }]));
     const failures = []; const engine = createEngine(meshes, e => failures.push(String(e)));
     try {
@@ -82,9 +82,9 @@ try {
       await settle();
       const stable = canvases.every((c, i) => c.width === initial[i][0] && c.height === initial[i][1]);
       // Material replacement must not reset the binding's initial budget.
-      meshes.get(hosts[0]).material = ceramic({ elevation: 2, mode: 'dark' }); engine.invalidate(); await settle();
+      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, mode: 'dark' }); engine.invalidate(); await settle();
       const replacementStable = canvases[0].width === initial[0][0];
-      meshes.get(hosts[0]).material = ceramic({ elevation: 2, maxElevation: 24 }); engine.invalidate(); await settle();
+      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, maxElevation: 24 }); engine.invalidate(); await settle();
       const explicitGrowth = canvases[0].width > initial[0][0];
       hosts[1].style.width = '240px'; await settle();
       const resized = canvases[1].width > initial[1][0] && hosts[1].querySelector('canvas') === canvases[1];
@@ -107,12 +107,12 @@ try {
   for (const key of ['stableOnMaterialChange', 'oldRefCleaned', 'newRefCleaned', 'objectAttached', 'objectCleared', 'noCanvases']) assert.ok(refs[key], key);
   await page.evaluate(async () => {
     const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { ceramic } = await import('/packages/material-ceramic/src/index.ts');
+    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
     document.body.style.background = '#808080';
     const element = document.createElement('div');
     element.style.cssText = 'position:absolute;left:100px;top:100px;width:160px;height:100px;border-radius:12px';
     document.body.append(element);
-    const material = ceramic({ mode: 'dark', elevation: 12 });
+    const material = createCeramicMaterial({ mode: 'dark', elevation: 12 });
     const meshes = new Map([[element, { element, material, initialBudget: 12 }]]);
     window.visual = { material, element, meshes, engine: createEngine(meshes) };
   });
@@ -123,8 +123,8 @@ try {
   assert.deepEqual(pixel(180,150), [12,12,12,255], 'dark material paints its DOM-aligned center');
   assert.deepEqual(pixel(50,50), [128,128,128,255]);
   await page.evaluate(async () => {
-    const { ceramic } = await import('/packages/material-ceramic/src/index.ts');
-    window.visual.meshes.get(window.visual.element).material = ceramic({ elevation: 12 });
+    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    window.visual.meshes.get(window.visual.element).material = createCeramicMaterial({ elevation: 12 });
     window.visual.engine.invalidate();
   });
   await page.waitForTimeout(100);
@@ -134,7 +134,7 @@ try {
   const failureChecks = await page.evaluate(async () => {
     const { createRenderer } = await import('/packages/surface/src/renderer.ts');
     const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { ceramic } = await import('/packages/material-ceramic/src/index.ts');
+    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
     const own = Object.getOwnPropertyDescriptor(navigator, 'gpu');
     let unavailable = false;
     Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });
@@ -142,7 +142,7 @@ try {
     finally { if (own) Object.defineProperty(navigator, 'gpu', own); else delete navigator.gpu; }
     const wait = async predicate => { for (let i = 0; !predicate(); i++) { if (i > 300) throw Error('Failure cleanup timed out'); await new Promise(requestAnimationFrame); } };
     const host = document.createElement('div'); host.style.cssText = 'width:100000px;height:10px'; document.body.append(host);
-    const material = ceramic(); const mesh = { element: host, material, initialBudget: 12 };
+    const material = createCeramicMaterial(); const mesh = { element: host, material, initialBudget: 12 };
     const failures = []; const engine = createEngine(new Map([[host, mesh]]), e => failures.push(String(e)));
     await wait(() => failures.length);
     const oversized = failures[0].includes('exceeds GPU limit') && !host.querySelector('canvas'); engine.dispose(); host.remove();

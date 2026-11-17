@@ -5,6 +5,9 @@ import { QuietStudy } from './studies';
 import { AirStudy, PlaygroundStudy } from './kinetic-studies';
 import { ObjectLibrary, type LibraryLocation } from './library';
 import { objects, rooms } from './library/registry';
+import { ShadowLab } from './shadow-lab';
+import { CardComparison } from './card-comparison';
+import { SolidStudy } from './solid-study';
 import { SculptedStudy } from './sculpted-study';
 import './style.css';
 import './desktop.css';
@@ -26,6 +29,9 @@ function readLocation() {
   return {
     study: n >= 1 && n <= studies.length && Number.isInteger(n) ? n - 1 : 0,
     library: params.get('view') === 'library',
+    exploration: params.get('view') === 'solids',
+    comparison: params.get('view') === 'card-comparison',
+    shadowLab: params.get('view') === 'shadow-lab',
     landing: !params.has('study') && params.get('view') !== 'library',
     room:
       object?.room ??
@@ -47,12 +53,23 @@ function App() {
     return () => window.removeEventListener('popstate', pop);
   }, []);
   useEffect(() => {
-    document.title = route.library
+    document.title = route.shadowLab ? 'Oyn — Shadow lab' : route.library
       ? 'Oyn — Object library'
       : route.landing
-        ? 'Oyn — Sculpted ceramic'
+        ? route.comparison
+          ? 'Oyn — Ceramic card comparison'
+          : route.exploration
+            ? 'Oyn — Geometry lab'
+            : 'Oyn — Sculpted ceramic'
         : `Oyn — ${names[study]}`;
-  }, [study, route.library, route.landing]);
+  }, [
+    study,
+    route.library,
+    route.landing,
+    route.exploration,
+    route.comparison,
+    route.shadowLab,
+  ]);
   const visit = (params: Record<string, string>) => {
     const url = new URL(location.href);
     for (const key of ['study', 'view', 'room', 'object'])
@@ -97,10 +114,20 @@ function App() {
       >
         {!error &&
           (route.landing ? (
-            <SculptedStudy
-              explore={() => library({ room: 'hardware' })}
-              studies={() => select(0)}
-            />
+            route.shadowLab ? (<ShadowLab />) : route.comparison ? (
+              <CardComparison home={() => visit({ view: 'solids' })} />
+            ) : route.exploration ? (
+              <SolidStudy
+                home={() => visit({})}
+                compare={() => visit({ view: 'card-comparison' })}
+              />
+            ) : (
+              <SculptedStudy
+                exploration={() => visit({ view: 'solids' })}
+                explore={() => library({ room: 'hardware' })}
+                studies={() => select(0)}
+              />
+            )
           ) : route.library ? (
             <ObjectLibrary
               key={`library:${route.room}:${route.object ?? ''}`}

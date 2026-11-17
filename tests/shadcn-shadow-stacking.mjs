@@ -9,7 +9,7 @@ try {
   // no longer reaches this patch beyond the sidebar's 8px padding.
   await page.route('**/src/ceramic/materials.ts*', async route => {
     const response = await route.fetch();
-    const body = (await response.text()).replace(/panelMaterial = ceramic\(\{ elevation: 4 \}\)/, 'panelMaterial = ceramic({ elevation: 16 })');
+    const body = (await response.text()).replace(/panelProps = \{ elevation: 4 \}/, 'panelProps = { elevation: 16 }');
     await route.fulfill({ response, body });
   });
   await page.goto('http://127.0.0.1:5176');

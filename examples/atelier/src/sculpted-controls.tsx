@@ -1,82 +1,50 @@
 import {
-  useLayoutEffect,
-  useMemo,
+  useEffect,
   useState,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
 } from 'react';
 import { useSurface } from '@oyn/surface';
-import {
-  sculptedCeramic,
-  type SculptedOptions,
-} from '@oyn/material-ceramic/sculpted';
+import { baked, type BakedGeometry } from '@oyn/ceramic/baked';
+import { loadGeometry } from './geometry-assets';
 import { Surface } from './controls';
 
-function useSculpted<T extends HTMLElement>({
-  elevation = 10,
-  ...geometry
-}: SculptedOptions) {
-  const {
-    color,
-
-    hollow,
-    hollowRadius,
-    hollowX,
-    hollowY,
-    tilt,
-    doubleHollow,
-    bevel,
-  } = geometry;
-  const material = useMemo(
-    () =>
-      sculptedCeramic({
-        color: color ?? '#eeeee9',
-        elevation,
-        maxElevation: 24,
-      }),
-    [color],
-  );
-  useLayoutEffect(() => {
-    material.setGeometry({
-      hollow,
-      hollowRadius,
-      hollowX,
-      hollowY,
-      tilt,
-      doubleHollow,
-      bevel,
-    });
-    material.setElevation(elevation);
-  }, [
-    material,
-    elevation,
-
-    hollow,
-    hollowRadius,
-    hollowX,
-    hollowY,
-    tilt,
-    doubleHollow,
-    bevel,
-  ]);
-  return useSurface<T>({ material });
+type ControlShape = 'dish'|'thumbDial'|'dimple'|'bridge'|'rockerOn'|'rockerOff'|'latch'|'detent'|'saddle'|'pocketDial';
+type ControlOptions = { shape:ControlShape; color?:string; elevation?:number; rotation?:number };
+// Disabled during asset loading; never paints a competing fallback surface.
+function useBakedControl<T extends HTMLElement>({shape,color='#eeeee9',elevation=10,rotation=0}:ControlOptions) {
+  const [geometry,setAsset]=useState<BakedGeometry>();
+  const [error,setError]=useState<Error>();
+  useEffect(()=>{
+    let active=true;
+    loadGeometry(`controls/${shape}`).then(value=>{if(active)setAsset(value);},error=>{if(active)setError(error);});
+    return ()=>{active=false;};
+  },[shape]);
+  const ref=useSurface({appearance:baked,props:{geometry:geometry!,
+    mode:'light',color,elevation,rotation,maxElevation:24,
+    lightZ:150,lightReflectionStrength:.65,lightEdgeShade:.38,
+    lightSurfaceTop:.05,lightSurfaceShade:.025,
+    shadowStrength:.18,contactShadowStrength:.07,
+  },enabled:!!geometry});
+  if(error)throw error;
+  return ref;
 }
 function SculptedButton({
-  geometry = {},
+  geometry,
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { geometry?: SculptedOptions }) {
-  const ref = useSculpted<HTMLButtonElement>(geometry);
+}: ButtonHTMLAttributes<HTMLButtonElement> & { geometry: ControlOptions }) {
+  const ref = useBakedControl<HTMLButtonElement>(geometry);
   return (
     <button ref={ref} className={`sculpted-solid ${className}`} {...props} />
   );
 }
 function SculptedPart({
-  geometry = {},
+  geometry,
   className = '',
   ...props
-}: HTMLAttributes<HTMLDivElement> & { geometry?: SculptedOptions }) {
-  const ref = useSculpted<HTMLDivElement>(geometry);
+}: HTMLAttributes<HTMLDivElement> & { geometry: ControlOptions }) {
+  const ref = useBakedControl<HTMLDivElement>(geometry);
   return <div ref={ref} className={`sculpted-solid ${className}`} {...props} />;
 }
 const Dot = ({ active = true }: { active?: boolean }) => (
@@ -94,13 +62,7 @@ export function DishedKeys() {
           aria-pressed={selected === i}
           onClick={() => setSelected(i)}
           className="dished-key"
-          geometry={{
-            color: ['#e66c39', '#efefeb', '#424744'][i],
-
-            hollow: 2.5,
-            hollowRadius: 0.82,
-            elevation: selected === i ? 6 : 12,
-          }}
+          geometry={{shape:'dish',color:['#e66c39','#efefeb','#424744'][i],elevation:selected===i?6:12}}
         >
           <span className="key-index" data-active={selected === i} />
         </SculptedButton>
@@ -115,13 +77,7 @@ export function ThumbDial() {
       <Surface elevation={-2} className="thumb-dial-seat" />
       <SculptedPart
         className="thumb-dial-cap"
-        geometry={{
-          hollow: 3,
-          hollowRadius: 0.36,
-          hollowX: 0.52 * Math.cos((value / 100) * 5),
-          hollowY: 0.52 * Math.sin((value / 100) * 5),
-          elevation: 12,
-        }}
+        geometry={{shape:'thumbDial',rotation:(value/100)*5,elevation:12}}
       >
         <span
           className="thumb-dial-mark"
@@ -158,12 +114,7 @@ export function DimplePad() {
           aria-label={`Dimple pad ${i + 1}`}
           aria-pressed={on}
           onClick={() => setPads((p) => p.map((v, j) => (i === j ? !v : v)))}
-          geometry={{
-            hollow: 2.5,
-            hollowRadius: 0.85,
-
-            elevation: on ? 4 : 8,
-          }}
+          geometry={{shape:'dimple',elevation:on?4:8}}
         >
           <Dot active={on} />
         </SculptedButton>
@@ -182,14 +133,7 @@ export function BridgeSwitch() {
         onClick={() => setOn(!on)}
         className="bridge-thumb"
         style={{ left: on ? '75px' : '5px' }}
-        geometry={{
-          hollow: 3,
-          hollowRadius: 0.83,
-          hollowX: 0.52,
-          doubleHollow: true,
-
-          elevation: 10,
-        }}
+        geometry={{shape:'bridge',elevation:10}}
       />
       <span className="bridge-status" style={{ left: on ? '23px' : '128px' }}>
         <Dot active={on} />
@@ -209,12 +153,7 @@ export function RockerBank() {
           aria-checked={on}
           onClick={() => setValues((v) => v.map((x, j) => (i === j ? !x : x)))}
           className="sculpted-rocker"
-          geometry={{
-            tilt: on ? 7 : -7,
-            elevation: on ? 8 : 13,
-            hollow: 0,
-            hollowRadius: 1.2,
-          }}
+          geometry={{shape:on?'rockerOn':'rockerOff',elevation:on?8:13}}
         >
           <Dot active={on} />
           <span className="rocker-dash" />
@@ -234,13 +173,7 @@ export function ThumbSwitch() {
         onClick={() => setOn(!on)}
         className="long-thumb"
         style={{ left: on ? '72px' : '4px' }}
-        geometry={{
-          hollow: 3,
-          hollowRadius: 0.82,
-          hollowX: 0.57,
-
-          elevation: 9,
-        }}
+        geometry={{shape:'latch',elevation:9}}
       >
         <Dot active={on} />
       </SculptedButton>
@@ -258,13 +191,7 @@ export function DetentRail() {
           aria-pressed={value === i}
           onClick={() => setValue(i)}
           className="detent"
-          geometry={{
-            hollow: 2,
-            hollowRadius: 0.95,
-            elevation: 0,
-
-            bevel: 0.4,
-          }}
+          geometry={{shape:'detent',elevation:0}}
         >
           <Dot active={value === i} />
         </SculptedButton>
@@ -280,14 +207,7 @@ export function SaddleFader() {
       <SculptedPart
         className="saddle-cap"
         style={{ left: `${value * 0.95}px` }}
-        geometry={{
-          hollow: 2.5,
-          hollowRadius: 0.85,
-          hollowX: 0.5,
-          doubleHollow: true,
-
-          elevation: 8,
-        }}
+        geometry={{shape:'saddle',elevation:8}}
       />
       <input
         type="range"
@@ -308,13 +228,7 @@ export function PocketDial() {
       <Surface elevation={-3} className="crown-seat" />
       <SculptedPart
         className="crown-cap"
-        geometry={{
-          hollow: 2,
-          hollowRadius: 0.26,
-          hollowX: 0.5 * Math.cos(value * 0.05),
-          hollowY: 0.5 * Math.sin(value * 0.05),
-          elevation: 16,
-        }}
+        geometry={{shape:'pocketDial',rotation:value*.05,elevation:16}}
       >
         <span
           className="thumb-dial-mark"

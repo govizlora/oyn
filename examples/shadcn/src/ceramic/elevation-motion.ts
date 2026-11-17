@@ -1,5 +1,6 @@
+import { materialAppearance } from '@oyn/surface'
 import { useLayoutEffect, useRef, useState } from 'react'
-import { ceramic } from '@oyn/material-ceramic'
+import { createCeramicMaterial } from '@oyn/ceramic'
 
 // One animation clock for the demo. It only drives numeric material values;
 // Surface remains the sole owner of GPU rendering and invalidation.
@@ -26,7 +27,7 @@ function schedule(advance: (seconds: number) => boolean) {
 // The surface is detached once its exit settles, rather than switching through zero.
 const rest = -0.001
 export function useRecessMotion(target: number | null) {
-  const [material] = useState(() => ceramic({ elevation: rest }))
+  const [material] = useState(() => createCeramicMaterial({ elevation: rest }))
   const [visible, setVisible] = useState(false)
   const motion = useRef({ value: rest, velocity: 0 })
 
@@ -66,5 +67,5 @@ export function useRecessMotion(target: number | null) {
     return () => { cancel(); media.removeEventListener('change', start) }
   }, [material, target])
 
-  return { material, enabled: visible }
+  return { appearance: materialAppearance, props: { material }, enabled: visible }
 }

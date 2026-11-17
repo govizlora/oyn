@@ -1,90 +1,150 @@
 # @oyn/surface
 
-React 19 DOM-bound WebGPU rendering. One canvas per element, one GPUDevice and one draw scheduler per Provider. No WebGL, Canvas2D copying, ancestor discovery, shared page canvas, or fallback.
+React 19 DOM-bound WebGPU surfaces. One canvas per bound element; one GPU device,
+pipeline cache and draw scheduler per Provider. WebGPU only: no Canvas2D/WebGL/CSS
+fallback. Surface owns presentation and execution, not material optics.
+
+## Declarative API
 
 ```tsx
-const material = useMemo(() => ceramic({ elevation: 12 }), []);
-const ref = useSurface({ material });
-return <button ref={ref}>Press</button>;
-// Mount under <SurfaceProvider onError={handleError}>.
+import { SurfaceProvider, useSurface } from '@oyn/surface';
+import { ceramic } from '@oyn/ceramic';
+
+function Button({ pressed }: { pressed: boolean }) {
+  const ref = useSurface({
+    appearance: ceramic,
+    props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
+  });
+  return <button ref={ref}>Confirm</button>;
+}
+// <SurfaceProvider><Button pressed={false} /></SurfaceProvider>
 ```
 
-The application owns CSS layout, focus, events and removal of native background/border paint. A canvas is appended directly to the bound element (not suitable for void elements). The engine adds relative positioning when necessary and isolation, restoring its own styles on cleanup. Native overflow clips the canvas. DOM stacking applies to each entire surface, including its shadow; there is no cross-surface shadow coordination.
+`appearance` is a stable `Appearance<P>` definition. `props` is inferred from that
+definition; unknown fields, missing required fields and wrong types are rejected.
+`ceramic` is no longer a callable mutable-material factory. `useSurface({material})`
+is removed. Ordinary React users need neither manual memoization nor instance setters.
+An optional second argument composes a forwarded React ref, including React 19 cleanup.
+`enabled: false` suspends the binding and releases its active instance/GPU target;
+re-enabling creates an instance without remounting the native DOM/form subtree.
 
-## Support policy
+An appearance instance is created after commit for the bound node, not during render.
+Normal props/theme updates call its `update`, preserving the instance and canvas.
+Fresh props object identity alone does not imply a new instance. Appearance or target
+replacement ends the old instance. StrictMode setup/cleanup replay is supported;
+there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-WebGPU is required, on HTTPS/localhost with an available GPU adapter/device. Environments without usable WebGPU are unsupported. No WebGL, Canvas2D or CSS fallback, native-style restoration, or compatibility renderer is planned. Failures are reported through `SurfaceProvider.onError`; see lifecycle behavior below.
+`SurfaceProvider` owns `mode="system" | "light" | "dark"` and `onError` (default
+console.error). `useSurfaceMode()` reads the resolved mode. A provider mode change
+updates existing appearance instances. GPU initialization, validation or device-loss
+failures dispose provider rendering and report an error; there is no automatic recovery.
+Appearance creation/update errors are reported through the same callback.
 
-## Numeric updates
+## Appearance authoring
 
-Core accepts a Material, never a MotionValue or a number/source union. Material parameters are a fixed-layout f32 block created with `createParameters`. Its `set(index, number)` notifies the sole renderer scheduler; it does not update React, measure layout, recompile pipelines or resize canvases. A material may expose named numeric setters, such as Ceramic's `setElevation`.
-
-Keep animated materials stable with `useMemo`/`useState`. Replacing a material intentionally replaces its parameter source; the old subscription is removed. One writer owns each animated parameter.
-
-### Explicit Motion adapter
-
-```tsx
-import { bindMotion } from '@oyn/surface/adapters/motion';
-
-const material = useMemo(() => ceramic({ elevation: 12, maxElevation: 18 }), []);
-const elevation = useMotionValue(12); // from motion/react
-useEffect(() => bindMotion(elevation, material.setElevation), [elevation, material]);
-const ref = useSurface({ material });
-// animate(elevation, 3, { type: 'spring', ... }) is entirely owned by Motion.
+```ts
+import type { Appearance } from '@oyn/surface';
+const visual: Appearance<MyProps> = {
+  create(props, { mode }) {
+    return {
+      material: /* low-level GPU draw description */ program,
+      update(nextProps, { mode }) {
+        // Validate, compare, update owned parameters/resources.
+        // Return 'layout' for changed visual bounds, 'draw' for visual-only changes,
+        // or nothing if unchanged. Never mutate caller props.
+      },
+      dispose() { /* instance-owned non-GPU cleanup */ },
+    };
+  },
+};
 ```
 
-The adapter reads the current value, subscribes to changes and returns cleanup. It has no runtime dependency on Motion. Manual updates call the same numeric setter. Surface owns its single rAF scheduler; adapter notifications are coalesced. Depending on external rAF callback order, a notification may be presented on the next frame; no same-frame synchronization guarantee is claimed.
+`Material` is the low-level draw description (shader, parameters, passes, bounds,
+optional immutable data), not the React lifecycle API. `materialAppearance` is an
+explicit `Appearance<{material: Material}>` for existing GPU programs and externally
+controlled numeric sources. It uses exactly the same binding/engine path, not a
+legacy hook overload. Such externally controlled sources must remain stable.
 
-## Bounds and lifecycle
+A program may provide `bind(context)` for per-target DOM subscriptions. Context has
+`element`, `signal`, `inputs`, `requestDraw()` and `requestMeasure()`. It returns
+optional `measure()`, `frame(frameContext)` and `dispose()` callbacks. Use the abort
+signal for event cleanup. Bindings end on program binding replacement, disable,
+unmount or provider disposal. They must not create devices, submit GPU commands,
+control canvas placement or introduce another rendering scheduler/resource owner.
 
-At DOM binding, capture `material.bounds.initial` once, before asynchronous GPU initialization. Budget is `max(capturedInitial, bounds.max ?? capturedInitial)`. A new material object does not reset it. Real unmount/rebinding creates a new lifetime. StrictMode effect replay does not reset a still-existing binding's budget.
+## Optional input facts — not a light model
 
-Bounds are measured using element dimensions and that stable budget. Element resize, DPR changes, or explicit max-budget changes update the bitmap dimensions as needed. Numeric animation updates do not. Exceeding the budget does not clamp the animation or grow the canvas: effects can be clipped. An unavailable device, device loss, invalid shader or oversized canvas disposes the provider's rendering and calls `onError` (default: console.error). No implicit recovery or fallback.
+`context.inputs.pointer` provides `getSnapshot()` and `subscribe(listener)`:
 
-## Modules
+- `position`: last viewport CSS position, initially null;
+- `inside`: whether the pointer is known to be in the page;
+- `focused`: window focus state;
+- `visible`: document visibility.
 
-- `index.tsx`: React registration, forwarded-ref cleanup, binding lifetime.
-- `engine.ts`: subscriptions, observers, one frame scheduler and lifecycle.
-- `presentation.ts`: one element/canvas, local dimensions, bounds and pointer coordinates.
-- `renderer.ts`: device, cached pipelines, per-target buffers and one submission per dirty frame.
-- `material.ts`: fixed numeric parameter blocks and generic material contract.
-- `adapters/motion.ts`: explicitly opt-in third-party bridge.
+Listeners are lazy, shared per Provider and removed after the last subscription.
+Surface never supplies a synthetic default light position and never resets pointer
+coordinates on blur/leave. Appearance decides what those states mean and whether
+they warrant redraw. No consumer means no pointer listeners or pointer-triggered
+renders. The API is for imperative binding/frame callbacks, not hidden mutable
+state reads during React render; React consumers need an explicit snapshot subscription.
+`frameContext.toLocal(point)` performs axis-aligned viewport-to-canvas conversion.
 
-## WGSL material contract
+Ceramic subscribes to this service and interprets it as light. Other appearances can
+ignore it, use it for hit testing, or choose different visual responses. CSS radius
+interpretation also belongs to Ceramic's binding, not Surface presentation code.
 
-Premultiplied RGBA; six procedural vertices via `vertex`; ordered fragment entry names in `passes`. Group 0 binding 0 is a 48-byte uniform block with three vec4f fields:
+## GPU and frame contract
 
-1. canvas CSS width/height, pointer x/y in canvas CSS coordinates;
-2. element x/y/width/height in canvas CSS coordinates;
-3. corner radius, raster scale x/y, reserved zero.
+Premultiplied RGBA; six procedural vertices via `vertex`; ordered fragment entry
+names in `passes`. Group 0 binding 0 remains 48 bytes / three vec4f fields:
 
-Binding 1 is the material's f32 block, padded explicitly to groups of four floats. Its length is fixed. Shader and pass entry points determine the pipeline cache key; colors and parameter values do not. Materials own optics and visual-bound calculations, not Surface.
+1. canvas CSS width/height, appearance extension lanes 0/1;
+2. element x/y/width/height in canvas coordinates;
+3. appearance extension lane 2, raster scale x/y, reserved zero.
 
-## Current limits
+`binding.frame()` returns three finite f32 values for extension lanes; omitted means
+zeros. Surface does not interpret them. Ceramic uses them for local light XY and
+its CSS radius, preserving the existing shader ABI without core optical assumptions.
+Binding 1 is the fixed-layout numeric parameter block. Binding 2 optionally holds
+immutable read-only storage. The renderer shares storage by resource identity and
+reference counts it; no second GPU cache owns lifetime. Pipeline keys include shader,
+ordered passes and storage layout, not colors or individual asset identities.
 
-Axis-aligned DOM rectangles and uniform numeric corner radius (top-left radius used for all corners). No arbitrary rotation/skew/perspective, independent elliptical corners, textures, render graph or cross-element shadows. Native clipping is intentional. Continuous CSS transform animations are not tracked every frame: pointer/scroll/layout invalidation refreshes the light's coordinate mapping. Dynamic uniforms do not perform DOM measurement. Dirty frames currently redraw all registered visible-size surfaces; viewport culling is not implemented. Global structural/style observation remains intentionally broad.
+Parameters have change versions. Only changed parameter blocks and frame data are
+uploaded. Numeric changes notify the one scheduler, never React or layout. Changing
+bindings/data/layout may require specific GPU resources to be replaced; normal
+numeric props updates do not recreate the instance/canvas/pipeline. Dirty frames
+still draw all registered surfaces; per-target redraw and viewport culling are not
+implemented. Idle submissions stop.
 
+## DOM placement and visual bounds
 
-### Theme ownership
+Application owns layout, semantics, business events and removal of native background
+paint. The current canvas layer is a child of its target: use a container for void
+or replaced elements. Separate target/host support is a future extension, not an
+implemented guarantee. No implicit wrapping or DOM reparenting.
 
-`SurfaceProvider` defaults to `mode="system"` and follows live OS color-scheme changes.
-Pass `mode="light"` or `mode="dark"` once when an application already owns theme selection.
-`useSurfaceMode()` exposes the resolved mode for controls that intentionally invert it.
-Materials may implement `resolveMode(mode)`; `useSurface` resolves appearance without mutating
-a source shared across providers. The low-level engine does not read browser theme:
-non-React integrations resolve the material explicitly before registering it.
+The host-sized layer uses layout containment; padded ink does not enlarge ancestor
+scroll areas. Native overflow and stacking still apply. There are no cross-element
+shadows. Surface restores its own temporary positioning/isolation styles on cleanup.
 
+Initial visual budget is captured for a target/appearance binding, not reset by prop
+updates or disable/re-enable. Bounds use max(initial, current declared maximum).
+Numeric elevation changes alone do not grow canvases; reserve `maxElevation` when
+needed. An explicit bounds change returns 'layout'. Resize/DPR/style changes remeasure.
+Axis-aligned targets only; no general rotation/skew/perspective or animation tracking.
 
-### Explicit appearance comparison
+## React Compiler
 
-`useSurface({ material, enabled: false }, ref)` retains the same DOM ref but does
-not register a renderable surface. Re-enabling registers it with the existing
-provider; disabling removes its canvas on the next scheduled frame. This is an
-explicit presentation choice, not a GPU failure fallback. The DOM subtree and
-its form/interaction state are not remounted.
+Render-time writes to live instance/ref state and render-time mode resolution were
+removed from the hook. Correctness does not depend on memoization. Compiler-enabled
+consumer/library validation remains future work: no Compiler certification or
+`use no memo` workaround is claimed. See `docs/surface-api.md` and headless
+`test:surface-appearance` for current lifecycle/input/type coverage.
 
+## Optional external animation adapter
 
-The padded canvas is hosted inside an absolute, host-sized `data-oyn-layer`
-with `contain: layout` (not paint containment). Exterior material ink remains
-visible, but does not enlarge ancestor scrollable overflow. Native ancestor
-clipping still applies. The layer and canvas are both removed on disposal.
+`bindMotion(source, write)` remains an opt-in low-level adapter at
+`@oyn/surface/adapters/motion`, with no Motion runtime dependency in core. One writer
+owns each parameter. Use `materialAppearance` for such explicit externally driven
+programs; do not simultaneously write the same property from declarative props.

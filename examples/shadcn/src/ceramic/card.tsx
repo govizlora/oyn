@@ -1,10 +1,11 @@
+import { ceramic } from '@oyn/ceramic'
 import { useSurface } from '@oyn/surface'
-import { neutralMaterial } from '@/ceramic/materials'
+import { neutralProps } from '@/ceramic/materials'
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Card({ className, ref: forwardedRef, ...props }: React.ComponentProps<"div">) {
-  const ref = useSurface<HTMLDivElement>({ material: neutralMaterial }, forwardedRef)
+  const ref = useSurface({ appearance: ceramic, props: neutralProps }, forwardedRef)
   return (
     <div
       ref={ref}

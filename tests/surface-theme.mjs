@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
-import { ceramic } from '../packages/material-ceramic/dist/index.js';
+import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
 
-const source = ceramic();
+const source = createCeramicMaterial();
 const light = source.resolveMode('light'), dark = source.resolveMode('dark');
 assert.notEqual(light, dark);
 assert.equal(source.resolveMode('dark'), dark);
@@ -12,8 +12,8 @@ assert.equal(dark.parameters.get(8), 1);
 source.setElevation(30);
 assert.equal(light.parameters.get(1), 30);
 assert.equal(dark.parameters.get(1), 30);
-assert.equal(ceramic({ mode: 'dark' }).resolveMode, undefined);
-const colored = ceramic({ color: { light: '#ff0000', dark: '#0000ff' } });
+assert.equal(createCeramicMaterial({ mode: 'dark' }).resolveMode, undefined);
+const colored = createCeramicMaterial({ color: { light: '#ff0000', dark: '#0000ff' } });
 assert.equal(colored.resolveMode('light').parameters.get(4), 1);
 assert.equal(colored.resolveMode('dark').parameters.get(6), 1);
 

@@ -1,3 +1,4 @@
+import { ceramicDomBinding } from '../../../packages/ceramic/src/interaction';
 import {
   useEffect,
   useLayoutEffect,
@@ -5,7 +6,7 @@ import {
   useRef,
   type HTMLAttributes,
 } from 'react';
-import { createParameters, useSurface, type Material } from '@oyn/surface';
+import { materialAppearance, createParameters, useSurface, type Material } from '@oyn/surface';
 import { followMotion } from './motion-clock';
 
 // Two optical objects, one shader/pipeline: a swept rotor and a luminous lens.
@@ -84,6 +85,7 @@ const lampColors = {
 export type LampColor = keyof typeof lampColors;
 function instrumentMaterial(kind: number): Material {
   return {
+    bind: ceramicDomBinding,
     shader,
     passes: ['surface'],
     parameters: createParameters([
@@ -112,7 +114,7 @@ export function Glow({
     material.parameters.set(3, level);
     lampColors[color].forEach((v, i) => material.parameters.set(4 + i, v));
   }, [material, level, color]);
-  const ref = useSurface<HTMLSpanElement>({ material });
+  const ref = useSurface({ appearance: materialAppearance, props: { material: material } });
   return <span ref={ref} className={`glow-lens ${className}`} {...props} />;
 }
 // The dial/readout and shader share this single speed calibration.
@@ -148,7 +150,7 @@ export function RotorPaint({
       material.parameters.set(0, phase.current);
     });
   }, [material, powered, speed, reverse]);
-  const ref = useSurface<HTMLDivElement>({ material });
+  const ref = useSurface({ appearance: materialAppearance, props: { material: material } });
   return (
     <div
       ref={ref}

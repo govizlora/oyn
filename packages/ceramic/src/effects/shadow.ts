@@ -40,15 +40,19 @@ fn roundedCoverage(p:vec2f,b:vec2f,r:f32,blur:f32)->f32 {
 `;
 /** Optical integration is shared. Each geometry supplies slice coverage and
  * projected distance; the Gaussian/card solution remains analytic. */
-export const ceramicShadowWGSL = /* wgsl */ `
+export function ceramicShadowForLayers(layers: number) {
+  if (!Number.isInteger(layers) || layers < 3 || layers > 6) throw Error('Ceramic shadow requires 3–6 uniform layers.');
+  // Keep the historical six-layer arithmetic exact. All counts share mean 7H/12.
+  const sampleHeight = layers === 6 ? 'height*f32(i+1)/6' : `height*(1.0f/12.0f+(f32(i)+0.5f)/${layers}.0f)`;
+  return /* wgsl */ `
 fn ceramicShadow(p:vec2f,delta:vec2f,height:f32,settings:vec4f)->vec4f {
   if(height <= 0){return vec4f(0);}
   let shadowDelta=delta*settings.x/length(vec3f(delta,settings.x));
   var blocked=0.0;
-  for(var i=1;i<=6;i++){
-    let h=height*f32(i)/6;let ratio=h/(settings.x-h);let scale=1+ratio;
+  for(var i=0;i<${layers};i++){
+    let h=${sampleHeight};let ratio=h/(settings.x-h);let scale=1+ratio;
     let projected=p-shadowDelta*ratio;
-    blocked+=geometryShadowCoverage(projected,scale,settings.y*ratio*0.5,h)/6;
+    blocked+=geometryShadowCoverage(projected,scale,settings.y*ratio*0.5,h)/${layers}.0f;
   }
   let d=geometryShadowDistance(p);
   let ao=exp(-max(d,0)/max(${SHADOW.minAoFalloff},height*${SHADOW.aoFalloff}))*settings.w*min(height,1);
@@ -58,6 +62,9 @@ fn ceramicShadow(p:vec2f,delta:vec2f,height:f32,settings:vec4f)->vec4f {
   return vec4f(0,0,0,projectedOpacity+ao*(1-projectedOpacity));
 }
 `;
+}
+/** Approved production rule: uniform four layers, unchanged contact composition. */
+export const ceramicShadowWGSL = ceramicShadowForLayers(4);
 export const shadowWGSL = /* wgsl */ `
 ${gaussianCoverageWGSL}
 fn geometryShadowCoverage(p:vec2f,scale:f32,blur:f32,height:f32)->f32 {

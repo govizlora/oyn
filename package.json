@@ -10,7 +10,7 @@
     "dev:mui": "npm run dev -w @oyn/example-mui",
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
     "build:all": "npm run build:packages && npm run build:benchmark && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
-    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/material-ceramic",
+    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic",
     "test:ceramic": "npm run build:packages && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",
     "test:examples": "node tests/examples.mjs",
@@ -32,7 +32,13 @@
     "test:atelier": "npm run build && node tests/motion-clock.mjs && node tests/atelier.mjs && node tests/atelier-archive.mjs",
     "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir",
     "test:library": "npm run build && node tests/library.mjs",
-    "test:sculpted": "npm run build && node tests/sculpted.mjs"
+    "test:sculpted": "npm run build && node tests/sculpted.mjs",
+    "test:solids": "npm run build && node tests/solids.mjs",
+    "test:ceramic-compatibility": "npm run build:packages && node tests/ceramic-compatibility.mjs",
+    "bake:geometry": "node tools/geometry/bake.mjs",
+    "test:baked": "npm run build:packages && node tests/baked-geometry.mjs",
+    "test:shadow-lab": "npm run build && node tests/shadow-lab.mjs",
+    "test:surface-appearance": "npm run build:packages && tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler --jsx react-jsx tests/surface-appearance-types.tsx && node tests/surface-appearance.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

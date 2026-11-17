@@ -1,7 +1,9 @@
 "use client"
 
+import { ceramic } from '@oyn/ceramic'
+
 import { useSurface } from "@oyn/surface"
-import { dialogMaterial } from "@/ceramic/materials"
+import { dialogProps } from "@/ceramic/materials"
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
@@ -59,7 +61,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const ref = useSurface<HTMLDivElement>({ material: dialogMaterial }, forwardedRef)
+  const ref = useSurface({ appearance: ceramic, props: dialogProps }, forwardedRef)
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay className="bg-black/20" />

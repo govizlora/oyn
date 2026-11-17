@@ -1,5 +1,5 @@
 {
-  "name": "@oyn/material-ceramic",
+  "name": "@oyn/ceramic",
   "version": "0.0.0",
   "type": "module",
   "files": [
@@ -15,6 +15,16 @@
       "types": "./dist/sculpted.d.ts",
       "development": "./src/sculpted.ts",
       "import": "./dist/sculpted.js"
+    },
+    "./baked": {
+      "types": "./dist/baked.d.ts",
+      "development": "./src/baked.ts",
+      "import": "./dist/baked.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "development": "./src/card.ts",
+      "import": "./dist/card.js"
     }
   },
   "scripts": {

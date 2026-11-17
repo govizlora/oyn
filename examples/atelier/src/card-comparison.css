@@ -1,0 +1,109 @@
+.comparison-switch {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px 0 0;
+}
+.comparison-switch button {
+  border: 1px solid #a5ae9855;
+  border-radius: 6px;
+  background: transparent;
+  padding: 12px 20px;
+  font: 11px monospace;
+  color: #8b9481;
+}
+.comparison-switch button[aria-pressed='true'] {
+  color: #627057;
+  border-color: #859778;
+  background: #e1e5da;
+}
+.comparison-stage {
+  height: 370px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  outline-offset: -6px;
+}
+.comparison-stage:focus-visible {
+  outline: 1px dashed #bdc4b3;
+}
+.comparison-card {
+  width: 280px;
+  height: 160px;
+  position: relative;
+  pointer-events: none;
+}
+.comparison-renderer {
+  position: absolute;
+  bottom: 14px;
+  font: 8px monospace;
+  letter-spacing: 1.6px;
+  color: #8a957d;
+}
+.comparison-settings {
+  display: flex;
+  justify-content: center;
+  gap: 45px;
+  margin: 30px 0;
+}
+.comparison-settings label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 10px monospace;
+}
+.comparison-settings input {
+  width: 120px;
+  accent-color: #839575;
+}
+.comparison-settings output {
+  width: 32px;
+}
+.comparison-help {
+  text-align: center;
+  font: 10px/1.8 monospace;
+  color: #969d8d;
+}
+.comparison-help kbd {
+  border: 1px solid #b9c0b0;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.comparison-notes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 740px;
+  margin: 35px auto;
+  font: 11px/1.8 Arial;
+  color: #909987;
+}
+.comparison-notes b {
+  display: block;
+  font: 10px monospace;
+  margin-bottom: 8px;
+  color: #727f65;
+}
+@media (max-width: 700px) {
+  .comparison-settings {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  .comparison-stage {
+    height: 340px;
+  }
+  .comparison-switch button {
+    font-size: 9px;
+    padding: 12px;
+  }
+  .comparison-notes {
+    gap: 20px;
+  }
+  .comparison-help {
+    font-size: 8px;
+  }
+  .comparison-page .sculpture-heading button {
+    max-width: 100px;
+  }
+}

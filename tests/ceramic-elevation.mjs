@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { ceramic } from '../packages/material-ceramic/dist/index.js';
+import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
@@ -11,16 +11,16 @@ for (const options of [
   { mode: 'light', color: '#aabbcc' },
   { mode: 'dark', color: { light: '#eeeeee', dark: '#223344' } },
 ]) {
-  const raised = ceramic({ ...options, elevation: 4 });
+  const raised = createCeramicMaterial({ ...options, elevation: 4 });
   const color = raised.parameters.snapshot().slice(4, 7);
   for (const elevation of [-0.1, -1, -4, -6]) {
-    assert.deepEqual(ceramic({ ...options, elevation }).parameters.snapshot().slice(0, 3), color);
+    assert.deepEqual(createCeramicMaterial({ ...options, elevation }).parameters.snapshot().slice(0, 3), color);
     raised.setElevation(elevation);
     assert.deepEqual(raised.parameters.snapshot().slice(0, 3), color);
   }
 }
 
-const material = ceramic({ elevation: 4, maxElevation: 16 });
+const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
 const parameters = material.parameters;
 const light = material.resolveMode('light');
 const dark = material.resolveMode('dark');
@@ -28,12 +28,12 @@ let updates = 0;
 parameters.subscribe(() => updates++);
 for (const elevation of [-2, -6, 0, 4, -2]) {
   material.setElevation(elevation);
-  const fresh = ceramic({ elevation, maxElevation: 16 });
+  const fresh = createCeramicMaterial({ elevation, maxElevation: 16 });
   assert.equal(material.parameters, parameters, 'parameter subscription remains stable');
   assert.equal(material.shader, fresh.shader);
   assert.deepEqual(material.parameters.snapshot(), fresh.parameters.snapshot());
   for (const [mode, resolved] of [['light', light], ['dark', dark]]) {
-    assert.deepEqual(resolved.parameters.snapshot(), ceramic({ elevation, mode }).parameters.snapshot());
+    assert.deepEqual(resolved.parameters.snapshot(), createCeramicMaterial({ elevation, mode }).parameters.snapshot());
   }
   assert.deepEqual(material.passes, elevation < 0 ? ['surface'] : ['shadow', 'surface']);
 }
@@ -41,13 +41,13 @@ assert.ok(updates > 0);
 assert.equal(material.bounds.initial, 0);
 assert.deepEqual(material.bounds.measure(100, 40, 0), { x: 2, y: 2 });
 for (const elevation of [NaN, Infinity, -Infinity, -1e40, 480]) {
-  assert.throws(() => ceramic({ elevation }));
+  assert.throws(() => createCeramicMaterial({ elevation }));
   assert.throws(() => material.setElevation(elevation));
 }
-assert.throws(() => ceramic({ elevation: -2, maxElevation: -1 }));
-const late = ceramic({ elevation: 4 });
+assert.throws(() => createCeramicMaterial({ elevation: -2, maxElevation: -1 }));
+const late = createCeramicMaterial({ elevation: 4 });
 late.setElevation(-6);
-assert.deepEqual(late.resolveMode('dark').parameters.snapshot(), ceramic({ mode: 'dark', elevation: -6 }).parameters.snapshot());
+assert.deepEqual(late.resolveMode('dark').parameters.snapshot(), createCeramicMaterial({ mode: 'dark', elevation: -6 }).parameters.snapshot());
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
@@ -58,23 +58,23 @@ try {
   await page.goto('http://127.0.0.1:5176');
 
   await page.evaluate(async root => {
-    const { ceramic } = await import(root + 'packages/material-ceramic/dist/index.js');
+    const { createCeramicMaterial } = await import(root + 'packages/ceramic/dist/index.js');
     const { createEngine } = await import(root + 'packages/surface/dist/engine.js');
     const host = document.createElement('div');
     host.id = 'elevation-test';
     host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:80px;border-radius:12px;background:#888';
     document.body.append(host);
-    const mesh = { element: host, material: ceramic({ elevation: 4, mode: 'light', maxElevation: 16 }), initialBudget: 16 };
+    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, mode: 'light', maxElevation: 16 }), initialBudget: 16 };
     const engine = createEngine(new Map([[host, mesh]]));
-    window.elevationTest = { mesh, engine, ceramic };
+    window.elevationTest = { mesh, engine, createCeramicMaterial };
   }, '/@fs' + fileURLToPath(new URL('../', import.meta.url)));
   const canvas = page.locator('#elevation-test canvas');
   await canvas.waitFor();
   await canvas.evaluate(el => { window.elevationTestCanvas = el; });
   for (const mode of ['light', 'dark']) {
     await page.evaluate(mode => {
-      const { mesh, engine, ceramic } = window.elevationTest;
-      mesh.material = ceramic({ mode, elevation: 4, maxElevation: 16 });
+      const { mesh, engine, createCeramicMaterial } = window.elevationTest;
+      mesh.material = createCeramicMaterial({ mode, elevation: 4, maxElevation: 16 });
       engine.invalidate();
     }, mode);
     const images = [];

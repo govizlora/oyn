@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { chromium, firefox } from 'playwright';
-import { ceramic } from '../packages/material-ceramic/dist/index.js';
+import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
 
 // Compare the production WGSL integral with a dense independent CPU integration.
-const shader = ceramic().shader;
+const shader = createCeramicMaterial().shader;
 const functions = shader.slice(shader.indexOf('// Gaussian convolution'), shader.indexOf('@fragment fn shadow'));
 const cases = [];
 for (const [bx, by, radius, sigma] of [[256, 204, 12, 8], [60, 18, 6, 4], [160, 90, 12, 4], [30, 20, 0, 6], [20, 20, 20, 0.35]]) {

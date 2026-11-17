@@ -1,10 +1,7 @@
 export const darkReflectionWGSL = /* wgsl */ `
-fn darkReflection(grad:vec2f,edge:f32,rimMask:f32,halfVec:vec3f,toLight:vec2f)->vec4f {
+fn darkReflection(material:CeramicOptics,grad:vec2f,edge:f32,rimMask:f32,halfVec:vec3f,toLight:vec2f,normalFresnel:vec3f,normalSpec:vec3f)->vec4f {
   let viewDir=vec3f(0,0,1);
   let edgeCurve=pow(edge,1.15);let specCurve=pow(edge,2.25);
-  let tiltFresnel=0.94*edgeCurve;let tiltSpec=0.985*specCurve;
-  let normalFresnel=normalize(vec3f(grad*tiltFresnel,sqrt(max(0.0001,1-tiltFresnel*tiltFresnel))));
-  let normalSpec=normalize(vec3f(grad*tiltSpec,sqrt(max(0.0001,1-tiltSpec*tiltSpec))));
   let nh=max(dot(normalSpec,halfVec),0);let spec=pow(nh,mix(82.0,210.0,edgeCurve)*material.reflection.z);
   let fresnel=pow(1-max(dot(normalFresnel,viewDir),0),2.1);
   let lightLen=max(length(toLight),0.0001);let toLightDir=toLight/lightLen;

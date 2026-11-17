@@ -4,17 +4,20 @@ The default first screen is **Sculpted Ceramic**: nine functional control famili
 exploring dished keys, thumb wheels, dimple pads, bridge switches, pivot rockers,
 thumb latches, detent rails, saddle faders and pocket dials.
 
-`@oyn/material-ceramic/sculpted` is an opt-in sibling material. It shares Ceramic's
-frame, rounded-silhouette cast shadows and shadow bounds, but uses a separate
-primitive-based face shader: a flat rounded solid minus one or two spherical
-cutters, with hard boolean intersections and a small outer-edge bevel. Overlapping
-cutters use a minimum, never an additive or smooth blend. The sphere radius is
-derived from the circular opening and depth; cuts are limited to a hemisphere.
-Normals and lip occlusion come from that same cut geometry. The original material and
-its defaults are unchanged. This is a 2.5D surface model, not arbitrary meshes:
-depressions are not through-holes, and tilt affects the face normal, not the cast
-silhouette. Rocker faces are tilted planes rather than inflated cushions. Geometry updates retain the material instance. CSS owns layout and ink,
-not optical bevels or shadows. All controls support keyboard interaction.
+The homepage now uses **offline-baked profiles + the shared Ceramic shader**.
+The ten profiles cover all 22 shaped controls. Sphere cuts and bevel normals are
+computed by `tools/geometry/controls.mjs`, never by the browser. Dials rotate a
+fixed baked profile; elevation is a rigid instance parameter; rockers select one
+of two prebuilt profiles. Existing keyboard, switch, dial and fader semantics remain.
+
+Cards, housings and inset wells continue to use their exact analytic adapters.
+Raised cards and baked controls call the same `ceramic-surface.ts` entry point and
+`lightCeramic` implementation; they do not share a needlessly universal GPU shader
+or allocate sampled geometry for a simple rounded rectangle. Existing inset
+Ceramic remains unchanged. CSS owns layout/ink, not a second optical renderer.
+
+The old `sculptedCeramic` API remains deprecated for compatibility, but is not
+imported by the homepage or any other Atelier route.
 
 ## Open
 
@@ -27,6 +30,11 @@ npm run test:library        # full collection and selection workflow
 
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
+- `/?view=card-comparison`: in-place comparison of the original Ceramic card and
+  the analytic geometry adapter. Click the comparison area, park the cursor and press 1/2.
+  Shared 280×160 footprint, color, elevation, corner radius and original optical equations.
+- `/?view=solids`: **Geometry Lab**, six primitive/boolean specimens with prebaked presets.
+  Run `npm run test:solids` for production headless checks.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
 - `/?study=2`: **Air — Kinetic objects**. Swept ceramic rotor, speed dial, reverse,
@@ -42,6 +50,42 @@ npm run test:library        # full collection and selection workflow
 The bottom pictograms switch studies; the **last** opens the component library.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
+
+## Geometry Lab (experimental)
+
+The general runtime CSG experiment has been replaced with **offline-baked geometry**.
+Run `npm run bake:geometry` deliberately after editing the internal shape recipes.
+Normal builds consume checked-in assets; they never run the compiler in the browser.
+The controls select baked presets rather than recomputing boolean cuts.
+
+See [the current architecture and next-chat handoff](../../HANDOFF.md) for
+ownership, asset formats, measured performance, limitations and migration plans.
+That document supersedes the separate runtime-CSG audit and geometry notes.
+
+- `@oyn/ceramic/baked`: immutable geometry data, one shared baked adapter.
+- `@oyn/ceramic/card`: compact analytic card adapter; no CSG machinery.
+- `finish.ts`: sole optical configuration normalization.
+- `effects/ceramic-lighting.ts`: shared original Ceramic optical response.
+- `effects/shadow.ts`: shared light integration; each geometry supplies coverage.
+- Existing Surface renderer: static GPU data ownership and reference counting.
+- Surface engine: sole scheduler/canvas lifecycle; lazy shared input facts.
+- Ceramic appearance binding: interprets pointer state as light and reads CSS radius.
+
+`npm run test:ceramic-compatibility` compares original and explicit card adapters
+against the frozen pre-extraction shader for surface lighting only. Eight
+light/dark/radius/elevation/light scenarios produce zero changed surface RGBA bytes;
+full current-production and explicit-card outputs are compared separately because
+the four-layer/contact shadow changes are intentional. Never regenerate the reference
+to make a test pass. The A/B page uses the same footprint and light position.
+
+`npm run test:baked` verifies deterministic compilation, equivalent-tree identity,
+resource sharing/cleanup and 100 instances. It is not a promise that hundreds of
+unique assets have the same memory cost as repeated instances.
+
+The homepage uses the same baked adapter as the lab, with exact analytic rounded
+silhouette shadows for those rounded control bodies. Its profiles are not changed
+by live input; only rigid pose changes. See [the single 500-card benchmark](../../HANDOFF.md#6-validation-and-the-single-500-card-benchmark).
+The checkpoint before this exploration is `557ac86`.
 
 ## Object library
 
@@ -89,8 +133,9 @@ are involved. Dates/files/status meters in the archive are samples, not live dat
 One SurfaceProvider owns one GPU device, its pipeline cache and the existing draw
 scheduler. Every raised/recessed element is HTML bound to Ceramic; CSS lays out
 geometry and prints flat marks, never another bevel/shadow approximation. Numeric
-updates wake Surface's sole scheduler. Five pipelines maximum after visiting both
-optical materials (three Ceramic passes + optical + phosphor).
+updates wake Surface's sole scheduler. The current homepage uses five pipelines (raised Ceramic, inset Ceramic and the
+baked adapter). Visiting other studies can cache additional instrument/phosphor
+programs; five is not a provider-wide maximum across every route.
 
 This does not add partial redraw, viewport culling, arbitrary DOM rotation or a
 mobile GPU performance guarantee. WebGPU/HTTPS or localhost remains required;
@@ -98,8 +143,9 @@ unsupported environments show an explicit error, not a CSS/Canvas2D/WebGL fallba
 
 ## Validation
 
-`test:atelier` builds production and runs the shared-clock policy unit test, new
-homepage interactions, and the preserved archive regression suite. Both browser
+`test:sculpted` covers the current baked homepage. `test:atelier` builds production
+and runs the shared-clock policy unit test, preserved study interactions, and the
+archive regression suite. Both browser
 suites run headless, with their own preview on :5191; `BASE_URL` can use an existing
 server. Tests include actual changed pixels, mouse/keyboard input, single device,
 cached pipelines, zero Canvas2D copies, idle rendering, motion cleanup, hidden and
@@ -116,3 +162,32 @@ Chrome is the rendered review target. Stock installed headless Firefox blocklist
 WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison,
 core material defaults and historical benchmark are unchanged. Nothing is pushed
 or publicly deployed by these commands.
+
+### Shadow research
+
+`/?view=shadow-lab` compares uniform six-, five-, four-, and three-height shadows.
+Each uses equal weights 1/N and heights H * [1/12 + (i + 1/2)/N], i=0..N-1.
+The mean height stays 7H/12 across counts. Four layers are production; six layers retain the historical reference
+arithmetic, and three layers retain the previous paired-average positions. Other sampling
+experiments have been removed from this page and its shader assembly.
+
+Each group displays five sizes/elevations: large sheet, portrait, round token, small
+note and paper strip. All use Surface's global pointer light, unchanged surface optics
+and shared contact darkening. Controls adjust height, radius, light height/size,
+shadow strength, contact, surface light/highlight, color, and shadows-only rendering.
+Same-position A/B supports keys 1 and 2 after focus. Preview boundaries and a 240 px
+per-card drawing margin may crop extreme shadows. Work counts are not GPU timings.
+
+`npm run test:shadow-lab` checks all 20 specimens, global light, interaction and mobile
+layout headlessly. `node tests/shadow-height-comparison.mjs` verifies equal spacing,
+weights, counts and mean heights, then renders all four counts at identical positions
+with contact on/off and near/far/soft lights. Reports/screenshots: `test-results/`.
+
+### Declarative appearance migration
+
+Homepage housings/wells use `useSurface({ appearance: ceramic, props })`; sculpted
+controls use `appearance: baked` with geometry/elevation/rotation props. Instances
+and numeric parameter blocks persist through ordinary state changes. Specialized
+instrument/phosphor/research programs use the explicit `materialAppearance` adapter
+through the same lifecycle. No `useSurface({material})` overload remains. Optical
+math, including four uniform shadow layers and contact composition, is unchanged.
