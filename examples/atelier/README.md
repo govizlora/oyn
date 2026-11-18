@@ -191,3 +191,42 @@ and numeric parameter blocks persist through ordinary state changes. Specialized
 instrument/phosphor/research programs use the explicit `materialAppearance` adapter
 through the same lifecycle. No `useSurface({material})` overload remains. Optical
 math, including four uniform shadow layers and contact composition, is unchanged.
+
+## Minimal Surface / DOM Example
+
+Open [surface.html](http://127.0.0.1:5177/surface.html) after `npm run dev`.
+The production build also includes `surface.html`.
+
+- `src/surface-button.tsx`: the entire native button example, using only React, Surface, and Ceramic.
+- `src/surface-example.tsx`: ordinary HTML controls for exercising DOM changes.
+- `src/surface-example.css`: isolated layout, without the Atelier component styles.
+- `src/surface-dom-controls.ts`: native input delegation; mutates only test-owned host styles, classes, and visibility, never React state or Surface services.
+
+Use window and nested scrolling, viewport and native container resizing, width/height sliders, radius classes, native details expansion, hidden ancestors, enable/disable, mount/unmount, replacement, theme, and CSS motion. Browser zoom / display changes exercise DPR; pointer leave / focus / visibility changes exercise input policy. There are no extra observers, synchronization listeners, or rendering loops in the example.
+
+### Investigation Guide
+
+| Scenario | Surface path to inspect | Caveat |
+| --- | --- | --- |
+| Button click / ordinary rerender | `useSurface` commit and update effects | Numeric updates should retain the canvas |
+| Enable, mount, replacement | `useSurface` lifecycle effect and ref cleanup | Disable preserves native button state; replacement does not |
+| Window / container / slider resize | Engine `ResizeObserver`, window resize | These signals can overlap; this page does not prove both are required |
+| Native radius class, hidden ancestor, details | Engine attribute observer, binding measurement | No React state updates; details moves the button without resizing it |
+| CSS-only radius / space above | CSS `:has(:checked)` | No attribute mutation or React update; can expose missing computed-style or position invalidation |
+| Page / nested scroll | Engine capture-phase scroll listener | Native placement alone does not prove cached coordinates are fresh |
+| CSS transition / animation | Engine end-event listeners | Continuous transform tracking is not guaranteed |
+| Browser zoom / display change | Engine resolution media query | Inspect physical canvas dimensions, not only CSS bounds |
+| Pointer / focus / visibility | Shared input subscription, Ceramic policy | Default Ceramic holds the last light position |
+| Theme | Provider mode, instance update | Does not require a new native button |
+
+Use breakpoints or temporarily disable one existing path at a time when investigating necessity. Keep the example free of helper measurement loops: they could hide the very synchronization failures being studied. There is no promise that all DOM changes are supported (for example, arbitrary rotation, perspective, or unobserved stylesheet changes).
+
+### Isolating React from DOM / CSS Changes
+
+Native width, height, class, visibility, and motion controls are uncontrolled inputs with one native delegated handler. Changes are delayed by one second by default, allowing pointer activity to stop before the mutation. React never supplies dynamic values for the mutated host fields; lifecycle controls remain separate. The native handler does not observe layout or request Surface work.
+
+The CSS-only controls have no change handler. Their checked properties drive `:has(:checked)` rules for the button radius or the height of the preceding spacer. The spacer case moves the button without changing its own size. Scroll anchoring is disabled on the test container so the browser does not compensate for this shift.
+
+For strict observation, focus a control using the keyboard, park the pointer over the sample, then toggle with Space (or adjust a slider using arrow keys). Keep the pointer still before and after the change. Moving it afterward is a separate recovery check, not proof of automatic synchronization. No live DOM status panel is added, since its mutations could themselves wake the engine.
+
+These are diagnostic scenarios, not guaranteed supported behavior. A dotted native outline changing while the material does not is evidence to investigate, not something the demo should repair.

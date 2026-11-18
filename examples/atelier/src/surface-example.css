@@ -1,0 +1,149 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.6 system-ui,
+    sans-serif;
+}
+button,
+input {
+  font: inherit;
+}
+.example {
+  min-height: 180vh;
+  padding: 40px max(24px, calc((100vw - 1000px) / 2));
+  background: #e8e8e8;
+  color: #222;
+}
+.example.dark {
+  background: #181818;
+  color: #eee;
+  color-scheme: dark;
+}
+h1 {
+  margin: 16px 0 4px;
+  font-size: clamp(32px, 5vw, 52px);
+}
+a {
+  color: inherit;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 20px 0;
+}
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.controls input[type='range'] {
+  width: 110px;
+}
+.controls button {
+  padding: 4px 12px;
+}
+.layout-change {
+  margin: 20px 0;
+}
+.layout-change p {
+  padding: 40px 0;
+}
+.scroll-box {
+  width: 100%;
+  height: 440px;
+  min-width: 260px;
+  min-height: 240px;
+  max-width: 100%;
+  overflow: auto;
+  resize: both;
+  border: 1px dashed currentColor;
+}
+.scroll-content {
+  min-height: 1000px;
+  padding: 24px;
+}
+.scroll-hint {
+  margin: 0;
+  height: 120px;
+  opacity: 0.6;
+}
+.button-host {
+  --button-width: 70%;
+  --button-height: 180px;
+  text-align: center;
+  padding-bottom: 140px;
+  transform: translateX(0);
+  transition: transform 600ms ease;
+}
+.button-host.shifted {
+  transform: translateX(24px);
+}
+.button-host.animated {
+  animation: travel 900ms ease;
+}
+@keyframes travel {
+  50% {
+    translate: 0 70px;
+  }
+}
+.surface-button {
+  display: inline-block;
+  width: var(--button-width);
+  height: var(--button-height);
+  min-width: 180px;
+  border: 0;
+  border-radius: 24px;
+  padding: 20px;
+  background: transparent;
+  color: inherit;
+  outline: 1px dotted #b06048;
+  outline-offset: 0;
+  cursor: pointer;
+  font-size: clamp(18px, 3vw, 28px);
+}
+.surface-button small {
+  display: block;
+  font-size: 13px;
+  margin-top: 12px;
+}
+.rounded .surface-button {
+  border-radius: 70px;
+}
+.surface-button:focus-visible {
+  outline: 3px solid #2975cf;
+  outline-offset: 5px;
+}
+.notes {
+  margin-top: 48px;
+  max-width: 75ch;
+}
+.notes li {
+  margin-bottom: 12px;
+}
+footer {
+  padding-top: 180px;
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .button-host {
+    transition: none;
+  }
+  .button-host.animated {
+    animation: none;
+  }
+}
+
+/* Checked state is a DOM property, not an attribute mutation. */
+.example:has(#css-radius:checked) .surface-button {
+  border-radius: 90px;
+}
+.example:has(#css-space:checked) .scroll-hint:first-child {
+  height: 240px;
+}
+.scroll-box {
+  overflow-anchor: none;
+}
