@@ -1,0 +1,9 @@
+# Dependencies and generated output
+node_modules/
+dist/
+test-results/
+coverage/
+playwright-report/
+.vite/
+.cache/
+package-lock.json

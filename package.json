@@ -38,7 +38,9 @@
     "bake:geometry": "node tools/geometry/bake.mjs",
     "test:baked": "npm run build:packages && node tests/baked-geometry.mjs",
     "test:shadow-lab": "npm run build && node tests/shadow-lab.mjs",
-    "test:surface-appearance": "npm run build:packages && tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler --jsx react-jsx tests/surface-appearance-types.tsx && node tests/surface-appearance.mjs"
+    "test:surface-appearance": "npm run build:packages && tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler --jsx react-jsx tests/surface-appearance-types.tsx && node tests/surface-appearance.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -50,6 +52,7 @@
     "@webgpu/types": "^0.1.74",
     "playwright": "1.61.1",
     "pngjs": "^7.0.0",
+    "prettier": "3.10.1",
     "typescript": "^5.9.0",
     "vite": "^7.2.0"
   },
