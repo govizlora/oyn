@@ -1,10 +1,9 @@
-import { createRef } from 'react';
 import { useSurface, type Appearance } from '@oyn/surface';
 import { ceramic, type CeramicProps } from '@oyn/ceramic';
 const alternate:Appearance<{phase:number}>={create(){throw Error('type test only');}};
 function Generic<P>(appearance:Appearance<P>,props:P){return useSurface({appearance,props});}
 function Check(){
- const ref=useSurface({appearance:ceramic,props:{elevation:12,light:{onBlur:'return'}}},createRef<HTMLButtonElement>());
+ const ref=useSurface({appearance:ceramic,props:{elevation:12,light:{onBlur:'return'}}});
  useSurface({appearance:alternate,props:{phase:2}});
  Generic(ceramic,{elevation:3} satisfies CeramicProps);
  // @ts-expect-error Unknown Ceramic prop.
@@ -17,5 +16,7 @@ function Check(){
  useSurface({appearance:alternate,props:{}});
  // @ts-expect-error Legacy material-only hook has been removed.
  useSurface({material:{}});
+ // @ts-expect-error Ref composition belongs to the consumer, not useSurface.
+ useSurface({appearance:ceramic,props:{}}, () => {});
  return <button ref={ref}/>;
 }

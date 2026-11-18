@@ -4,7 +4,10 @@ export interface MotionNumber {
   on(event: 'change', listener: (value: number) => void): () => void;
 }
 /** Call in an effect and return the cleanup. The sink must have one owner. */
-export function bindMotion(source: MotionNumber, write: (value: number) => void): () => void {
+export function bindMotion(
+  source: MotionNumber,
+  write: (value: number) => void,
+): () => void {
   write(source.get());
   return source.on('change', write);
 }

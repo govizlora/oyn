@@ -13,7 +13,11 @@ export const ceramicDefaults = Object.freeze({ ...defaults, light: ceramicLightD
 export type CeramicMaterial = Material & { setElevation(value: number): void };
 /** Configuration is numeric. Animation libraries explicitly bind to setElevation. */
 export function createCeramicMaterial(options: CeramicOptions = {}): CeramicMaterial {
+  return createMaterial(options);
+}
+function createMaterial(options: CeramicOptions, reservedElevation?: number): CeramicMaterial {
   const { values, rgb, elevation: initialElevation, validateSignedElevation } = ceramicFinish(options);
+  const paddingElevation = Math.max(0, reservedElevation ?? initialElevation, options.maxElevation ?? 0);
   let elevation = initialElevation;
   const parameters = createParameters(values);
   // Bounds and GPU consume the same f32 optical parameters.
@@ -41,17 +45,14 @@ export function createCeramicMaterial(options: CeramicOptions = {}): CeramicMate
     resolveMode: options.mode === undefined ? mode => {
       let material = variants.get(mode);
       if (!material) {
-        material = createCeramicMaterial({ ...options, mode, elevation });
+        material = createMaterial({ ...options, mode, elevation, maxElevation: paddingElevation }, paddingElevation);
         variants.set(mode, material);
       }
       return material;
     } : undefined,
     get shader() { return elevation < 0 ? insetWGSL : ceramicWGSL; }, parameters,
     get passes() { return elevation < 0 ? insetPasses : raisedPasses; },
-    bounds: {
-      get initial() { return Math.max(0, elevation); }, max: options.maxElevation,
-      measure: (width, height, budget) => shadowBounds(width, height, budget, shadow),
-    },
+    measurePadding: (width, height) => shadowBounds(width, height, paddingElevation, shadow),
     setElevation(value: number) { updateElevation(value); variants.forEach(material => material.setElevation(value)); },
   };
 }
@@ -68,12 +69,15 @@ export const ceramic: Appearance<CeramicProps> = {
     });
     let configuration = read(props, context.mode);
     let key = JSON.stringify(configuration);
-    let optical = createCeramicMaterial(configuration);
+    // Reserve the initial exterior height for this appearance instance only.
+    const initialPaddingElevation = Math.max(0, configuration.elevation ?? ceramicDefaults.elevation);
+    const createOptical = (config: typeof configuration) => createMaterial(config, initialPaddingElevation);
+    let optical = createOptical(configuration);
     let binding = ceramicBinding(configuration.light);
     const parameters = optical.parameters;
     const material: Material = {
       get shader() { return optical.shader; }, get passes() { return optical.passes; },
-      get bounds() { return optical.bounds; }, get bind() { return binding; }, parameters,
+      measurePadding: (width, height) => optical.measurePadding(width, height), get bind() { return binding; }, parameters,
     };
     return {
       material,
@@ -81,7 +85,7 @@ export const ceramic: Appearance<CeramicProps> = {
         const config = read(next, context.mode), nextKey = JSON.stringify(config);
         if (key === nextKey) return;
         // Validate the complete next configuration before applying any change.
-        const nextOptical = createCeramicMaterial(config);
+        const nextOptical = createOptical(config);
         const lightKey = JSON.stringify(config.light);
         const lightChanged = lightKey !== JSON.stringify(configuration.light);
         const nextBinding = lightChanged ? ceramicBinding(config.light) : binding;

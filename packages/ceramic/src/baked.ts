@@ -123,11 +123,11 @@ export function bakedCeramic(geometry:BakedGeometry, options:BakedOptions={}):Ba
   return {
     bind:ceramicDomBinding,shader,parameters,data:geometry.data,passes:['shadow','surface'],
     resolveMode: options.mode===undefined?mode=>{let variant=variants.get(mode);if(!variant){variant=bakedCeramic(geometry,{...options,mode,elevation,rotation});variants.set(mode,variant);}return variant;}:undefined,
-    bounds:{initial:0,measure:(w,h)=>{
+    measurePadding:(w,h)=>{
       const height=maxElevation*Math.min(w/geometry.width,h/geometry.depth);
       if(height>=shadow[0])throw Error('Baked geometry exceeds Ceramic light height.');
       return shadowBounds(w,h,height,shadow);
-    }},
+    },
     setElevation(value:number){validateHeight(value);elevation=value;parameters.set(8,value);variants.forEach(v=>v.setElevation(value));},
     setRotation(value:number){validateRotation(value);rotation=value;parameters.set(9,value);variants.forEach(v=>v.setRotation(value));},
   };
@@ -147,7 +147,7 @@ export const baked: Appearance<BakedProps> = {
     const parameters=source.parameters;
     const material:Material={bind:ceramicDomBinding,parameters,
       get shader(){return source.shader;},get passes(){return source.passes;},
-      get bounds(){return source.bounds;},get data(){return source.data;}};
+      measurePadding:(w,h)=>source.measurePadding(w,h),get data(){return source.data;}};
     return {material,update(next,context){
       const nextKey=config(next,context.mode);
       if(next.geometry!==geometry||nextKey!==key){

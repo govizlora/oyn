@@ -1,0 +1,68 @@
+# Surface Source Map
+
+This refactor preserves the public API, lifecycle ordering, and rendering behavior. `index.ts` only exports public interfaces. Internal modules import implementations or types directly, never through the public entry point.
+
+## Start with useSurface
+
+1. `src/react/useSurface.ts`: the application entry point. Read binding state, committed inputs, instance lifetime, props updates and registration, then the DOM ref.
+2. `src/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
+3. `src/react/SurfaceContext.ts`: the service contract between the hook and Provider; it does not create an engine.
+4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle, theme resolution, and error handling.
+5. `src/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
+6. `src/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
+7. `src/renderer.ts`: GPU initialization, target lifetime, uploads, and submission.
+
+## Files and Responsibilities
+
+| File | Responsibility |
+| --- | --- |
+| `react/useSurface.ts` | React lifecycle of one DOM / Appearance binding |
+| `react/SurfaceProvider.tsx` | Provider-level engine, theme, and error callback |
+| `react/useSurfaceMode.ts` | Read the theme Context |
+| `react/ModeContext.ts` | Declare the theme Context |
+| `react/SurfaceContext.ts` | Declare the service Context and contract |
+| `types/appearance.ts` | Visual definition and instance contracts |
+| `materialAppearance.ts` | Adapt an externally controlled Material to the same Appearance lifecycle |
+| `types/material.ts` | Low-level drawing, bounds, and binding contracts |
+| `createParameters.ts` | Numeric parameter validation, versions, and subscriptions |
+| `types/input.ts` | Input snapshot and subscription contracts |
+| `createInputs.ts` | Lazy shared browser event subscriptions |
+| `types/scene.ts` | Mesh type connecting DOM and Material |
+| `engine.ts` | Sole scheduling owner and runtime coordination |
+| `presentation.ts` | DOM / canvas placement, measurement, and coordinate conversion |
+| `renderer.ts` | GPU target and draw submission lifecycle |
+| `gpu/Target.ts` | GPU target type |
+| `gpu/createLayouts.ts` | Create uniform / static-data binding layouts |
+| `gpu/createPipelineCache.ts` | Per-renderer pipeline cache |
+| `gpu/createStaticResources.ts` | Static GPU data copies and reference counting |
+| `adapters/motion.ts` | Optional external numeric subscription bridge; no Motion runtime dependency |
+
+## Dependency Direction
+
+```text
+Public entry point: index.ts (exports only)
+  ├─ react/useSurface → Context + Appearance / Mesh types
+  ├─ react/SurfaceProvider → Context + engine
+  ├─ materialAppearance → Appearance / Material types
+  └─ createParameters (standalone)
+
+engine
+  ├─ createInputs → input types
+  ├─ presentation → Mesh / binding types
+  └─ renderer
+       ├─ createLayouts
+       ├─ createPipelineCache → Material / layout types
+       └─ createStaticResources → static data types
+```
+
+The React adapter depends on the runtime; the runtime does not import React. GPU helpers do not depend on Engine, React, or Presentation. Type files do not instantiate runtime services; `ReturnType` inference uses type-only imports.
+
+## Extraction Boundaries
+
+Independent entry points and factories with distinct responsibilities have their own files. Internal callbacks sharing one lifecycle closure (such as `draw` / `dispose`, `retain` / `drop`, and React effect cleanup) stay with their owner. This avoids exposing private state as mutable objects passed between files.
+
+GPU cache extraction only reorganizes renderer internals: the renderer still creates and owns the caches, and Engine remains the sole scheduler. No additional resource lifecycle or drawing control path is introduced.
+
+## Type Organization
+
+Cross-module contracts live in `src/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `SurfaceOptions` in `react/useSurface.ts`, and the React service contract in `react/SurfaceContext.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.

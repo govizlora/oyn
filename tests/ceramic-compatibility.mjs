@@ -66,7 +66,6 @@ try {
           element: host,
           // Frozen legacy surface remains the reference; shadow changes are intentional.
           material: { ...material, shader: reference, passes: ['surface'] },
-          initialBudget: 40,
         };
         const meshes = new Map([[host, mesh]]);
         const failures = [];

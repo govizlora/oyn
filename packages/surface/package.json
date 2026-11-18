@@ -8,7 +8,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.tsx",
+      "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./adapters/motion": {

@@ -100,7 +100,7 @@ function instrumentMaterial(kind: number): Material {
       0,
       0,
     ]),
-    bounds: { initial: 14, measure: () => ({ x: 14, y: 14 }) },
+    measurePadding: () => ({ x: 14, y: 14 }),
   };
 }
 export function Glow({

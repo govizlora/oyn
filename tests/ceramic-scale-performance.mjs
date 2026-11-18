@@ -248,7 +248,7 @@ try {
                   ? { ...legacy, shader: frozen }
                   : legacy;
               materials.push(material);
-              meshes.set(element, { element, material, initialBudget: budget });
+              meshes.set(element, { element, material });
             }
             const createMaterialsMs = performance.now() - start,
               failures = [];

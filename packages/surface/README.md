@@ -4,6 +4,8 @@ React 19 DOM-bound WebGPU surfaces. One canvas per bound element; one GPU device
 pipeline cache and draw scheduler per Provider. WebGPU only: no Canvas2D/WebGL/CSS
 fallback. Surface owns presentation and execution, not material optics.
 
+See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useSurface.ts`.
+
 ## Declarative API
 
 ```tsx
@@ -59,7 +61,7 @@ const visual: Appearance<MyProps> = {
 };
 ```
 
-`Material` is the low-level draw description (shader, parameters, passes, bounds,
+`Material` is the low-level draw description (shader, parameters, passes, padding measurement,
 optional immutable data), not the React lifecycle API. `materialAppearance` is an
 explicit `Appearance<{material: Material}>` for existing GPU programs and externally
 controlled numeric sources. It uses exactly the same binding/engine path, not a
@@ -128,10 +130,11 @@ The host-sized layer uses layout containment; padded ink does not enlarge ancest
 scroll areas. Native overflow and stacking still apply. There are no cross-element
 shadows. Surface restores its own temporary positioning/isolation styles on cleanup.
 
-Initial visual budget is captured for a target/appearance binding, not reset by prop
-updates or disable/re-enable. Bounds use max(initial, current declared maximum).
-Numeric elevation changes alone do not grow canvases; reserve `maxElevation` when
-needed. An explicit bounds change returns 'layout'. Resize/DPR/style changes remeasure.
+Appearances own exterior-space policy. Material.measurePadding(width, height)
+returns horizontal/vertical CSS-pixel padding; contained effects return zero.
+Surface only sizes and positions the canvas from that result, without retaining
+a visual budget. Padding policy changes return 'layout'; resize/DPR/style changes
+remeasure. Disable/re-enable creates a new appearance instance.
 Axis-aligned targets only; no general rotation/skew/perspective or animation tracking.
 
 ## React Compiler
@@ -148,3 +151,7 @@ consumer/library validation remains future work: no Compiler certification or
 `@oyn/surface/adapters/motion`, with no Motion runtime dependency in core. One writer
 owns each parameter. Use `materialAppearance` for such explicit externally driven
 programs; do not simultaneously write the same property from declarative props.
+
+## Focused Resource Tests
+
+`npm run test:baked` checks geometry reproducibility, shared GPU storage and pipelines, idle scheduling, and resource release with three surfaces. It does not collect frame-rate samples. Run `BAKED_STRESS=1 npm run test:baked` explicitly for the 100-surface workload and frame-rate sampling; both modes use the same test implementation.

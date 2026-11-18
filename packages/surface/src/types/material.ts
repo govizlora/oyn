@@ -1,25 +1,6 @@
 import type { Point, SurfaceInputs } from './input.js';
-/** A fixed-layout block of f32 parameters. Updates never involve React or layout. */
-export function createParameters(initial: readonly number[]) {
-  if (!initial.length || initial.length % 4 || !initial.every(value => Number.isFinite(value) && Number.isFinite(Math.fround(value)))) throw Error('Parameters must be finite f32 values in groups of four.');
-  const values = new Float32Array(initial);
-  const listeners = new Set<() => void>();
-  let version = 0;
-  return {
-    get version() { return version; },
-    get length() { return values.length; },
-    get(index: number) { return values[index]; },
-    snapshot() { return values.slice(); },
-    set(index: number, value: number) {
-      if (!Number.isInteger(index) || index < 0 || index >= values.length || !Number.isFinite(value) || !Number.isFinite(Math.fround(value))) throw Error('Invalid parameter update.');
-      if (values[index] === Math.fround(value)) return;
-      values[index] = value;
-      version++;
-      listeners.forEach(listener => listener());
-    },
-    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
-  };
-}
+import type { createParameters } from '../createParameters.js';
+
 export type Parameters = ReturnType<typeof createParameters>;
 export type Insets = Readonly<{ x: number; y: number }>;
 export type SurfaceMode = 'light' | 'dark';
@@ -59,9 +40,7 @@ export type Material = Readonly<{
   parameters: Parameters;
   /** Fragment entry points, drawn in this order within this surface only. */
   passes: readonly string[];
-  bounds: Readonly<{
-    initial: number;
-    max?: number;
-    measure(width: number, height: number, budget: number): Insets;
-  }>;
+  /** Appearance-owned exterior padding in CSS pixels, measured per axis.
+   * Return zero for effects contained within the element. */
+  measurePadding(width: number, height: number): Insets;
 }>;

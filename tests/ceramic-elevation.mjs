@@ -21,6 +21,7 @@ for (const options of [
 }
 
 const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
+const initialPadding = material.measurePadding(100, 40);
 const parameters = material.parameters;
 const light = material.resolveMode('light');
 const dark = material.resolveMode('dark');
@@ -38,8 +39,8 @@ for (const elevation of [-2, -6, 0, 4, -2]) {
   assert.deepEqual(material.passes, elevation < 0 ? ['surface'] : ['shadow', 'surface']);
 }
 assert.ok(updates > 0);
-assert.equal(material.bounds.initial, 0);
-assert.deepEqual(material.bounds.measure(100, 40, 0), { x: 2, y: 2 });
+assert.deepEqual(material.measurePadding(100, 40), initialPadding, 'Animated elevation preserves material-owned padding');
+assert.deepEqual(createCeramicMaterial({ elevation: -2 }).measurePadding(100, 40), { x: 2, y: 2 });
 for (const elevation of [NaN, Infinity, -Infinity, -1e40, 480]) {
   assert.throws(() => createCeramicMaterial({ elevation }));
   assert.throws(() => material.setElevation(elevation));
@@ -64,7 +65,7 @@ try {
     host.id = 'elevation-test';
     host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:80px;border-radius:12px;background:#888';
     document.body.append(host);
-    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, mode: 'light', maxElevation: 16 }), initialBudget: 16 };
+    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, mode: 'light', maxElevation: 16 }) };
     const engine = createEngine(new Map([[host, mesh]]));
     window.elevationTest = { mesh, engine, createCeramicMaterial };
   }, '/@fs' + fileURLToPath(new URL('../', import.meta.url)));

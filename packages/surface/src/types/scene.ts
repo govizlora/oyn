@@ -3,5 +3,4 @@ import type { Material } from './material.js';
 export type Mesh = {
   element: HTMLElement;
   material: Material;
-  initialBudget: number;
 };

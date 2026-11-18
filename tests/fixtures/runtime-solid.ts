@@ -296,12 +296,9 @@ export function solidCeramic(
     shader,
     parameters,
     passes: ['shadow', 'surface'],
-    bounds: {
-      initial: 0,
-      measure: (w, h) => {
-        const scale = Math.min(w / extentX, h / extentY);
-        return shadowBounds(w, h, ceiling * scale, optical.slice(12, 16));
-      },
+    measurePadding: (w, h) => {
+      const scale = Math.min(w / extentX, h / extentY);
+      return shadowBounds(w, h, ceiling * scale, optical.slice(12, 16));
     },
   };
   return { ...material, setGeometry };

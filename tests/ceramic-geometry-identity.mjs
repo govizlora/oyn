@@ -59,7 +59,7 @@ try {
       const material = solidCeramic(shape, { extent: [280, 160], ceiling: 40 });
       const failures = [];
       const engine = createEngine(
-        new Map([[host, { element: host, material, initialBudget: 40 }]]),
+        new Map([[host, { element: host, material }]]),
         (e) => failures.push(String(e)),
       );
       try {

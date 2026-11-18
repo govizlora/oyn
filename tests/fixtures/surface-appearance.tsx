@@ -10,7 +10,7 @@ const probe: Appearance<CeramicProps> = {
   const instance=ceramic.create(props,context);
   const cache=new Map<NonNullable<typeof instance.material.bind>,NonNullable<typeof instance.material.bind>>();
   const material={...instance.material,
-   get shader(){return instance.material.shader;}, get passes(){return instance.material.passes;},get bounds(){return instance.material.bounds;},
+   get shader(){return instance.material.shader;}, get passes(){return instance.material.passes;},measurePadding:(w:number,h:number)=>instance.material.measurePadding(w,h),
    get bind(){
     const original=instance.material.bind!;
     if(!cache.has(original))cache.set(original,ctx=>{

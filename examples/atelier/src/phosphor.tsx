@@ -160,7 +160,7 @@ function makePhosphor(kind: number, amber: boolean): Material {
       0,
       ...Array(384).fill(0),
     ]),
-    bounds: { initial: 0, measure: () => ({ x: 0, y: 0 }) },
+    measurePadding: () => ({ x: 0, y: 0 }),
   };
 }
 export function Phosphor({

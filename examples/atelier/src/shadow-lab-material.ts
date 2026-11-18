@@ -35,9 +35,9 @@ fn ceramicGeometry(in:VertexOut)->CeramicGeometry{let b=in.card.zw*0.5;return ro
 ${ceramicSurfaceWGSL}`);
 export function labMaterial(index:number,s:Settings):Material {
  const finish=ceramicFinish({mode:'light',color:s.color,elevation:s.elevation,shadowLightHeight:s.lightHeight,shadowLightSize:s.lightSize,shadowStrength:s.strength,contactShadowStrength:s.contact,lightZ:s.surfaceLight,lightReflectionStrength:s.gloss});
- return {bind:ceramicDomBinding,shader:shaders[index],parameters:createParameters(finish.values),passes:s.shadowsOnly?['shadow']:['shadow','surface'],bounds:{initial:0,measure:()=>{
+ return {bind:ceramicDomBinding,shader:shaders[index],parameters:createParameters(finish.values),passes:s.shadowsOnly?['shadow']:['shadow','surface'],measurePadding:()=>{
  // A bounded research viewport, not a bound on the global light position.
  // Extreme settings may project beyond the preview window.
  return {x:240,y:240};
- }}};
+ }};
 }

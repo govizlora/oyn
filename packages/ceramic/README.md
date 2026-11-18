@@ -23,7 +23,7 @@ setter is required. Surface owns GPU resources, Ceramic owns visual configuratio
 `createCeramicMaterial(options)` retains the explicit low-level program API for engine
 integrations and numeric-source adapters; it is not the primary React API.
 
-Options: `color` (RGB/HEX or `{ light, dark }`), `mode` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial binding height. If omitted, the elevation at binding supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
+Options: `color` (RGB/HEX or `{ light, dark }`), `mode` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
 For upward springs, reserve space explicitly: `ceramic({ elevation: 12, maxElevation: 18 })`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
@@ -120,7 +120,7 @@ useSurface({ appearance: ceramic, props: { elevation: 16 } });
 ```
 
 Both `maxElevation` and `light` are optional. Without an explicit maximum, the
-exterior shadow budget uses the first bound elevation (clamped to zero for an
+exterior shadow budget uses the initial appearance-instance elevation (clamped to zero for an
 inset); it does not track subsequent elevation changes. If elevation is also
 omitted, its default is 16. Specify maxElevation only when later raised states
 need more space. Increasing elevation beyond the reserved budget can clip shadows.

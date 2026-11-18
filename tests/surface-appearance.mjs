@@ -55,7 +55,7 @@ try{
  assert.deepEqual(defaults.light,{source:'pointer',position:{x:100,y:100},onLeave:'hold',onBlur:'hold',onHidden:'hold'});
  assert.equal('maxElevation' in defaults,false,'Maximum budget is derived per binding, not a fixed default');
  const inputChecks=await page.evaluate(async()=>{
-  const {createInputs}=await import('/packages/surface/src/input.ts');
+  const {createInputs}=await import('/packages/surface/src/createInputs.ts');
   const service=createInputs(window),pointer=service.inputs.pointer;
   const initial=pointer.getSnapshot();let notifications=0;
   const a=pointer.subscribe(()=>notifications++),b=pointer.subscribe(()=>notifications++);

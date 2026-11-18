@@ -2,14 +2,25 @@ import assert from 'node:assert/strict';
 import { PNG } from 'pngjs';
 import { chromium, firefox } from 'playwright';
 import { spawn } from 'node:child_process';
-import { createParameters } from '../packages/surface/dist/material.js';
+import { createParameters } from '../packages/surface/dist/index.js';
 import { bindMotion } from '../packages/surface/dist/adapters/motion.js';
-import { createCeramicMaterial, ceramicDefaults } from '../packages/ceramic/dist/index.js';
+import { createCeramicMaterial, ceramicDefaults, ceramic } from '../packages/ceramic/dist/index.js';
 import { shadowBounds } from '../packages/ceramic/dist/bounds.js';
 
 assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
+// Padding policy belongs to the appearance, including remeasurement after updates.
+const appearance = ceramic.create({ elevation: 16 }, { mode: 'light' });
+const reservedPadding = appearance.material.measurePadding(120, 40);
+appearance.update({ elevation: 32 }, { mode: 'dark' });
+assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
+appearance.update({ elevation: 8, maxElevation: 40 }, { mode: 'dark' });
+assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
+appearance.update({ elevation: 8 }, { mode: 'light' });
+assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
+appearance.dispose?.();
+
 const tuned = createCeramicMaterial({ shadowLightHeight: 300, shadowLightSize: 400, shadowStrength: 0.2,
   contactShadowStrength: 0.04, lightZ: 40, reflectionStrength: 2, sharpness: 2,
   darkFrost: 0.3, lightReflectionStrength: 1, lightReflectionSpread: 0.5,
@@ -17,7 +28,7 @@ const tuned = createCeramicMaterial({ shadowLightHeight: 300, shadowLightSize: 4
 assert.deepEqual([...tuned.parameters.snapshot().slice(12)], [...new Float32Array([
   300,400,0.2,0.04,40,2,2,0.3,1,0.5,0.1,0,0.3,0.02,0,0])]);
 assert.equal(tuned.parameters.get(2), 5);
-assert.ok(tuned.bounds.measure(320,100,16).x > createCeramicMaterial().bounds.measure(320,100,16).x);
+assert.ok(tuned.measurePadding(320,100).x > createCeramicMaterial().measurePadding(320,100).x);
 assert.throws(() => createCeramicMaterial({ shadowLightHeight: 10 }));
 assert.throws(() => createCeramicMaterial({ lightReflectionSpread: 2 }));
 assert.throws(() => createCeramicMaterial({ lightSurface: 256 }));
@@ -66,7 +77,7 @@ try {
     count(CanvasRenderingContext2D.prototype, 'drawImage', () => copies++);
     const hosts = Array.from({ length: 3 }, () => { const el = document.createElement('div'); el.style.cssText = 'width:120px;height:40px;border-radius:8px'; document.body.append(el); return el; });
     const materials = hosts.map(() => createCeramicMaterial({ elevation: 12 }));
-    const meshes = new Map(hosts.map((element, i) => [element, { element, material: materials[i], initialBudget: materials[i].bounds.initial }]));
+    const meshes = new Map(hosts.map((element, i) => [element, { element, material: materials[i] }]));
     const failures = []; const engine = createEngine(meshes, e => failures.push(String(e)));
     try {
       await wait(() => failures.length || document.querySelectorAll('[data-oyn-canvas]').length === 3);
@@ -81,9 +92,9 @@ try {
       const noAnimationMeasurement = measuredBefore === measurements;
       await settle();
       const stable = canvases.every((c, i) => c.width === initial[i][0] && c.height === initial[i][1]);
-      // Material replacement must not reset the binding's initial budget.
+      // A replacement material owns its own padding policy.
       meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, mode: 'dark' }); engine.invalidate(); await settle();
-      const replacementStable = canvases[0].width === initial[0][0];
+      const replacementPaddingChanged = canvases[0].width < initial[0][0];
       meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, maxElevation: 24 }); engine.invalidate(); await settle();
       const explicitGrowth = canvases[0].width > initial[0][0];
       hosts[1].style.width = '240px'; await settle();
@@ -95,12 +106,12 @@ try {
       const baselineCopies = copies;
       engine.dispose(); await settle();
       const cleaned = hosts.every(h => !h.querySelector('canvas') && h.style.position === '' && h.style.isolation === '');
-      return { devices, firstPipelines, unchangedPipelines, animationSchedules, noAnimationMeasurement, stable, replacementStable, explicitGrowth, resized, oldUnsubscribed, copies: baselineCopies, cleaned, failures };
+      return { devices, firstPipelines, unchangedPipelines, animationSchedules, noAnimationMeasurement, stable, replacementPaddingChanged, explicitGrowth, resized, oldUnsubscribed, copies: baselineCopies, cleaned, failures };
     } finally { engine.dispose(); hosts.forEach(h => h.remove()); originals.forEach(fn => fn()); }
   });
   assert.equal(result.devices, 1); assert.equal(result.firstPipelines, 2); assert.ok(result.unchangedPipelines);
   assert.equal(result.animationSchedules, 1); assert.equal(result.copies, 0);
-  for (const key of ['noAnimationMeasurement', 'stable', 'replacementStable', 'explicitGrowth', 'resized', 'oldUnsubscribed', 'cleaned']) assert.ok(result[key], key);
+  for (const key of ['noAnimationMeasurement', 'stable', 'replacementPaddingChanged', 'explicitGrowth', 'resized', 'oldUnsubscribed', 'cleaned']) assert.ok(result[key], key);
   assert.deepEqual(result.failures, []);
   const refs = await page.evaluate(async () => (await import('/tests/fixtures/surface-refs.tsx')).checkRefLifecycle());
   assert.equal(refs.firstCanvases, 1);
@@ -113,7 +124,7 @@ try {
     element.style.cssText = 'position:absolute;left:100px;top:100px;width:160px;height:100px;border-radius:12px';
     document.body.append(element);
     const material = createCeramicMaterial({ mode: 'dark', elevation: 12 });
-    const meshes = new Map([[element, { element, material, initialBudget: 12 }]]);
+    const meshes = new Map([[element, { element, material }]]);
     window.visual = { material, element, meshes, engine: createEngine(meshes) };
   });
   await page.waitForSelector('[data-oyn-canvas]');
@@ -142,7 +153,7 @@ try {
     finally { if (own) Object.defineProperty(navigator, 'gpu', own); else delete navigator.gpu; }
     const wait = async predicate => { for (let i = 0; !predicate(); i++) { if (i > 300) throw Error('Failure cleanup timed out'); await new Promise(requestAnimationFrame); } };
     const host = document.createElement('div'); host.style.cssText = 'width:100000px;height:10px'; document.body.append(host);
-    const material = createCeramicMaterial(); const mesh = { element: host, material, initialBudget: 12 };
+    const material = createCeramicMaterial(); const mesh = { element: host, material };
     const failures = []; const engine = createEngine(new Map([[host, mesh]]), e => failures.push(String(e)));
     await wait(() => failures.length);
     const oversized = failures[0].includes('exceeds GPU limit') && !host.querySelector('canvas'); engine.dispose(); host.remove();
@@ -151,7 +162,7 @@ try {
     GPUAdapter.prototype.requestDevice = async function(...args) { device = await request.apply(this, args); return device; };
     const el = document.createElement('div'); el.style.cssText = 'width:100px;height:40px'; document.body.append(el);
     const lost = [];
-    const lossEngine = createEngine(new Map([[el, { element: el, material, initialBudget: 12 }]]), e => lost.push(String(e)));
+    const lossEngine = createEngine(new Map([[el, { element: el, material }]]), e => lost.push(String(e)));
     try {
       await wait(() => el.querySelector('canvas'));
       device.destroy(); await wait(() => lost.length);
