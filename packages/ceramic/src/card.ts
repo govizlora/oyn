@@ -1,13 +1,18 @@
-import { ceramicBinding } from './interaction.js';
-import { ceramicSurfaceWGSL } from './effects/ceramic-surface.js';
-import { createParameters, type Material } from '@oyn/surface';
-import { frameWGSL } from './effects/frame.js';
-import { ceramicFinish, type CeramicOptions } from './finish.js';
-import { shadowBounds } from './bounds.js';
-import { geometryWGSL } from './effects/geometry.js';
-import { ceramicLightingWGSL } from './effects/ceramic-lighting.js';
-import { ceramicGeometryWGSL } from './effects/ceramic-geometry.js';
-import { gaussianCoverageWGSL, ceramicShadowWGSL } from './effects/shadow.js';
+import { environmentBinding, preferredColorScheme } from "./environment.js";
+import { ceramicBinding } from "./interaction.js";
+import { ceramicSurfaceWGSL } from "./effects/ceramic-surface.js";
+import { createParameters, type Material } from "@oyn/surface";
+import { frameWGSL } from "./effects/frame.js";
+import {
+  ceramicFinish,
+  snapshotCeramicOptions,
+  type CeramicOptions,
+} from "./finish.js";
+import { shadowBounds } from "./bounds.js";
+import { geometryWGSL } from "./effects/geometry.js";
+import { ceramicLightingWGSL } from "./effects/ceramic-lighting.js";
+import { ceramicGeometryWGSL } from "./effects/ceramic-geometry.js";
+import { gaussianCoverageWGSL, ceramicShadowWGSL } from "./effects/shadow.js";
 
 const shader = /* wgsl */ `
 ${frameWGSL}
@@ -38,17 +43,99 @@ fn ceramicOptics()->CeramicOptics {return m.ceramic;}
 ${ceramicSurfaceWGSL}
 `;
 /** An analytic, already-authored geometry adapter. No compiler or CSG tree. */
-export function cardCeramic(options: {width:number;height:number;radius:number;elevation:number;maxElevation?:number;finish?:Omit<CeramicOptions,'elevation'|'maxElevation'>}) {
- const {width,height,radius,elevation}=options;
- const maxElevation=options.maxElevation??elevation;
- const finish=ceramicFinish({...options.finish,elevation,maxElevation});
- function validate(r:number,e:number) {
-  if(![width,height].every(v=>Number.isFinite(v)&&v>0)||!Number.isFinite(r)||r<0||r>Math.min(width,height)/2||e<0||e>maxElevation)throw Error('Invalid card geometry.');
-  finish.validateSignedElevation(e);
- }
- validate(radius,elevation);
- const parameters=createParameters([width/2,height/2,radius,elevation,width,height,0,0,...finish.values]);
- const shadow=new Float32Array(finish.values.slice(12,16));
- const material:Material={bind:ceramicBinding(options.finish?.light),shader,parameters,passes:['shadow','surface'],measurePadding:(w,h)=>shadowBounds(w,h,maxElevation*Math.min(w/width,h/height),shadow)};
- return {...material,setDimensions(radius:number,elevation:number){validate(radius,elevation);parameters.set(2,radius);parameters.set(3,elevation);}};
+function resolvedCardCeramic(options: {
+  width: number;
+  height: number;
+  radius: number;
+  elevation: number;
+  maxElevation?: number;
+  finish?: Omit<CeramicOptions, "elevation" | "maxElevation">;
+}) {
+  const { width, height, radius, elevation } = options;
+  const maxElevation = options.maxElevation ?? elevation;
+  const finish = ceramicFinish({ ...options.finish, elevation, maxElevation });
+  function validate(r: number, e: number) {
+    if (
+      ![width, height].every((v) => Number.isFinite(v) && v > 0) ||
+      !Number.isFinite(r) ||
+      r < 0 ||
+      r > Math.min(width, height) / 2 ||
+      e < 0 ||
+      e > maxElevation
+    )
+      throw Error("Invalid card geometry.");
+    finish.validateSignedElevation(e);
+  }
+  validate(radius, elevation);
+  const parameters = createParameters([
+    width / 2,
+    height / 2,
+    radius,
+    elevation,
+    width,
+    height,
+    0,
+    0,
+    ...finish.values,
+  ]);
+  const shadow = new Float32Array(finish.values.slice(12, 16));
+  const material: Material = {
+    bind: ceramicBinding(options.finish?.light),
+    shader,
+    parameters,
+    passes: finish.shadows ? ["shadow", "surface"] : ["surface"],
+    measurePadding: (w, h) =>
+      finish.shadows
+        ? shadowBounds(
+            w,
+            h,
+            maxElevation * Math.min(w / width, h / height),
+            shadow,
+          )
+        : { x: 0, y: 0 },
+  };
+  return {
+    ...material,
+    setDimensions(radius: number, elevation: number) {
+      validate(radius, elevation);
+      parameters.set(2, radius);
+      parameters.set(3, elevation);
+    },
+  };
+}
+
+export function cardCeramic(
+  options: Parameters<typeof resolvedCardCeramic>[0],
+) {
+  const config = {
+    ...options,
+    finish: snapshotCeramicOptions(options.finish ?? {}),
+  };
+  let radius = config.radius,
+    elevation = config.elevation;
+  const maxElevation = config.maxElevation ?? elevation;
+  const listeners = new Set<() => void>();
+  const create = (colorScheme: import("./environment.js").ColorScheme) =>
+    resolvedCardCeramic({
+      ...config,
+      radius,
+      elevation,
+      maxElevation,
+      finish: { ...config.finish, colorScheme },
+    });
+  const material = create(config.finish.colorScheme ?? preferredColorScheme());
+  const setDimensions = material.setDimensions;
+  material.setDimensions = (r, e) => {
+    setDimensions(r, e);
+    radius = r;
+    elevation = e;
+    listeners.forEach((update) => update());
+  };
+  Object.defineProperty(material, "bind", {
+    value: environmentBinding(config.finish.colorScheme, create, (update) => {
+      listeners.add(update);
+      return () => listeners.delete(update);
+    }),
+  });
+  return material;
 }

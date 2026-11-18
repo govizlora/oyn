@@ -1,4 +1,4 @@
-import type { Appearance, Material } from "@oyn/surface";
+import type { Appearance } from "@oyn/surface";
 import type { BakedGeometry } from "./geometry.js";
 import { bakedCeramic, type BakedOptions } from "./material.js";
 
@@ -13,32 +13,14 @@ export const baked: Appearance<BakedProps> = {
     };
     let key = config(props);
     let source = bakedCeramic(geometry, props);
-    const parameters = source.parameters;
-    const material: Material = {
-      get bind() {
-        return source.bind;
-      },
-      parameters,
-      get shader() {
-        return source.shader;
-      },
-      get passes() {
-        return source.passes;
-      },
-      measurePadding: (w, h) => source.measurePadding(w, h),
-      get data() {
-        return source.data;
-      },
-    };
     return {
-      material,
+      get material() {
+        return source;
+      },
       update(next) {
         const nextKey = config(next);
         if (next.geometry !== geometry || nextKey !== key) {
           const replacement = bakedCeramic(next.geometry, next);
-          replacement.parameters
-            .snapshot()
-            .forEach((v, i) => parameters.set(i, v));
           source = replacement;
           geometry = next.geometry;
           key = nextKey;
@@ -53,8 +35,6 @@ export const baked: Appearance<BakedProps> = {
           return;
         source.setElevation(elevation);
         source.setRotation(rotation);
-        parameters.set(8, source.parameters.get(8));
-        parameters.set(9, source.parameters.get(9));
         return "draw";
       },
     };

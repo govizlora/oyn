@@ -1,9 +1,10 @@
-import { ceramicResponseWGSL } from './effects/ceramic-response.js';
-import { createCeramicMaterial } from './material.js';
-import type { CeramicOptions } from './finish.js';
-import { frameWGSL } from './effects/frame.js';
-import { geometryWGSL } from './effects/geometry.js';
-import { shadowWGSL } from './effects/shadow.js';
+import { ceramicBinding } from "./interaction.js";
+import { ceramicResponseWGSL } from "./effects/ceramic-response.js";
+import { createCeramicMaterial } from "./material.js";
+import type { CeramicOptions } from "./finish.js";
+import { frameWGSL } from "./effects/frame.js";
+import { geometryWGSL } from "./effects/geometry.js";
+import { shadowWGSL } from "./effects/shadow.js";
 
 /** Experimental sibling material. The original Ceramic shader is untouched.
  * A planar solid minus spherical cutters describes the visible face. Boolean
@@ -12,7 +13,7 @@ import { shadowWGSL } from './effects/shadow.js';
  */
 export type SculptedOptions = Pick<
   CeramicOptions,
-  'color' | 'elevation' | 'maxElevation'
+  "color" | "elevation" | "maxElevation"
 > & {
   bevel?: number;
   hollow?: number;
@@ -88,12 +89,12 @@ fn cutVisibility(p:vec2f,b:vec2f,r:f32,l:vec3f)->f32 {
 export function sculptedCeramic(options: SculptedOptions = {}) {
   const validateHeight = (value: number) => {
     if (!Number.isFinite(value) || value < 0)
-      throw Error('Sculpted Ceramic requires a finite raised elevation.');
+      throw Error("Sculpted Ceramic requires a finite raised elevation.");
   };
   validateHeight(options.elevation ?? 10);
   const base = createCeramicMaterial({
     ...options,
-    colorScheme: 'light',
+    colorScheme: "light",
     elevation: options.elevation ?? 10,
     lightRim: 4,
     shadowStrength: 0.18,
@@ -102,7 +103,7 @@ export function sculptedCeramic(options: SculptedOptions = {}) {
   // Unused lanes in the original uniform layout hold face geometry. Shadow
   // parameters and the bounds calculation remain owned by Ceramic.
   function setGeometry(
-    shape: Omit<SculptedOptions, 'color' | 'elevation' | 'maxElevation'>,
+    shape: Omit<SculptedOptions, "color" | "elevation" | "maxElevation">,
   ) {
     const values = [
       0,
@@ -122,7 +123,7 @@ export function sculptedCeramic(options: SculptedOptions = {}) {
       values[2] <= 0 ||
       values[6] <= 0
     )
-      throw Error('Invalid sculpted Ceramic geometry.');
+      throw Error("Invalid sculpted Ceramic geometry.");
     const p = base.parameters;
     p.set(0, values[0]);
     p.set(3, values[1]);
@@ -136,6 +137,7 @@ export function sculptedCeramic(options: SculptedOptions = {}) {
   setGeometry(options);
   return {
     ...base,
+    bind: ceramicBinding(),
     shader,
     setGeometry,
     setElevation(value: number) {

@@ -3,10 +3,10 @@ import type { CeramicProps } from '@oyn/ceramic';
 export const neutralProps = {};
 export const panelProps = { elevation: 4 };
 export const dialogProps = { elevation: 64 };
-export const destructiveProps = { color: { light: '#dc2626', dark: '#ef4444' } };
+export const destructiveProps = { light: { color: '#dc2626' }, dark: { color: '#ef4444' } };
 export const primaryProps: Record<'light'|'dark', CeramicProps> = {
-  light: { colorScheme: 'dark', color: '#171717' },
-  dark: { colorScheme: 'light', color: '#e5e5e5' },
+  light: { color: '#171717' },
+  dark: { color: '#e5e5e5' },
 };
 
 export const insetProps = { elevation: -2.3 };

@@ -1,13 +1,15 @@
-import {
-  createParameters,
-  type Material,
-  type ColorScheme,
-} from "@oyn/surface";
+import { ceramicDefaults } from "./defaults.js";
+import { environmentBinding, preferredColorScheme } from "./environment.js";
+import { createParameters, type Material } from "@oyn/surface";
 import { ceramicBinding } from "./interaction.js";
 import { insetWGSL, insetParameters } from "./inset.js";
 import { ceramicWGSL } from "./shaders.js";
 import { shadowBounds } from "./bounds.js";
-import { ceramicFinish, type CeramicOptions } from "./finish.js";
+import {
+  ceramicFinish,
+  snapshotCeramicOptions,
+  type CeramicOptions,
+} from "./finish.js";
 
 export type CeramicMaterial = Material & { setElevation(value: number): void };
 /** Animation libraries explicitly bind to setElevation. */
@@ -16,8 +18,39 @@ export function createCeramicMaterial(
 ): CeramicMaterial {
   return createMaterial(options);
 }
-/** Internal factory shared by imperative and declarative entry points. */
+/**
+ * Shared factory. Every attached target owns a parameter block and environment;
+ * changing the imperative elevation updates all attached targets.
+ */
 export function createMaterial(
+  options: CeramicOptions,
+  reservedElevation?: number,
+): CeramicMaterial {
+  const config = snapshotCeramicOptions(options);
+  let elevation = config.elevation;
+  const reservation =
+    reservedElevation ?? config.elevation ?? ceramicDefaults.elevation;
+  const listeners = new Set<() => void>();
+  const create = (colorScheme: import("./environment.js").ColorScheme) =>
+    createResolvedMaterial({ ...config, colorScheme, elevation }, reservation);
+  const material = create(config.colorScheme ?? preferredColorScheme());
+  const setElevation = material.setElevation;
+  material.setElevation = (value) => {
+    setElevation(value);
+    elevation = value;
+    listeners.forEach((update) => update());
+  };
+  Object.defineProperty(material, "bind", {
+    value: environmentBinding(config.colorScheme, create, (update) => {
+      listeners.add(update);
+      return () => listeners.delete(update);
+    }),
+  });
+  return material;
+}
+
+/** Internal factory shared by imperative and declarative entry points. */
+function createResolvedMaterial(
   options: CeramicOptions,
   reservedElevation?: number,
 ): CeramicMaterial {
@@ -26,6 +59,7 @@ export function createMaterial(
     rgb,
     elevation: initialElevation,
     validateSignedElevation,
+    shadows,
   } = ceramicFinish(options);
   const paddingElevation = Math.max(
     0,
@@ -58,36 +92,21 @@ export function createMaterial(
     values.forEach((v, i) => parameters.set(i, v));
   }
   updateElevation(elevation);
-  // Cache per-colorScheme instances: sharing the source across differently themed surfaces is safe.
-  const variants = new Map<ColorScheme, CeramicMaterial>();
   return {
     bind: ceramicBinding(options.light),
-    resolveColorScheme:
-      options.colorScheme === undefined
-        ? (colorScheme) => {
-            let material = variants.get(colorScheme);
-            if (!material) {
-              material = createMaterial(
-                { ...options, colorScheme, elevation, maxElevation: paddingElevation },
-                paddingElevation,
-              );
-              variants.set(colorScheme, material);
-            }
-            return material;
-          }
-        : undefined,
     get shader() {
       return elevation < 0 ? insetWGSL : ceramicWGSL;
     },
     parameters,
     get passes() {
-      return elevation < 0 ? insetPasses : raisedPasses;
+      return elevation < 0 || !shadows ? insetPasses : raisedPasses;
     },
     measurePadding: (width, height) =>
-      shadowBounds(width, height, paddingElevation, shadow),
+      shadows
+        ? shadowBounds(width, height, paddingElevation, shadow)
+        : { x: 0, y: 0 },
     setElevation(value: number) {
       updateElevation(value);
-      variants.forEach((material) => material.setElevation(value));
     },
   };
 }

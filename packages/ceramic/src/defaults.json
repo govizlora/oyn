@@ -13,10 +13,6 @@
   "lightReflectionSpread": 0.8,
   "lightEdgeShade": 0.025,
   "darkFrost": 0.1,
-  "lightSurface": 240,
   "lightSurfaceTop": 0.2,
-  "lightSurfaceShade": 0.012,
-  "darkSurface": 12,
-  "lightWorkspace": 232,
-  "darkWorkspace": 0
+  "lightSurfaceShade": 0.012
 }

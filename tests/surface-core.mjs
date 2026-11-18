@@ -14,8 +14,8 @@ assert.equal('surfaceHeight' in ceramicDefaults, false);
 const appearance = ceramic.create({ elevation: 16, colorScheme: 'light' });
 const reservedPadding = appearance.material.measurePadding(120, 40);
 appearance.update({ elevation: 32, colorScheme: 'dark' });
-assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
-appearance.update({ elevation: 8, maxElevation: 40, colorScheme: 'dark' });
+assert.deepEqual(appearance.material.measurePadding(120, 40), { x: 0, y: 0 });
+appearance.update({ elevation: 8, maxElevation: 40, colorScheme: 'light' });
 assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
 appearance.update({ elevation: 8, colorScheme: 'light' });
 assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
@@ -31,8 +31,8 @@ assert.equal(tuned.parameters.get(2), 5);
 assert.ok(tuned.measurePadding(320,100).x > createCeramicMaterial().measurePadding(320,100).x);
 assert.throws(() => createCeramicMaterial({ shadowLightHeight: 10 }));
 assert.throws(() => createCeramicMaterial({ lightReflectionSpread: 2 }));
-assert.throws(() => createCeramicMaterial({ lightSurface: 256 }));
-assert.deepEqual([...createCeramicMaterial({ lightSurface: 220 }).parameters.snapshot().slice(4,7)], [...new Float32Array([220/255,220/255,220/255])]);
+assert.throws(() => createCeramicMaterial({ color: 'rgb(256 256 256)' }));
+assert.deepEqual([...createCeramicMaterial({ color: 'rgb(220 220 220)' }).parameters.snapshot().slice(4,7)], [...new Float32Array([220/255,220/255,220/255])]);
 
 const block = createParameters([0, 0, 0, 0]);
 let notices = 0; const off = block.subscribe(() => notices++);
@@ -102,7 +102,7 @@ try {
       const beforeOld = scheduled; materials[0].setElevation(7);
       const oldUnsubscribed = scheduled === beforeOld;
       await settle();
-      const unchangedPipelines = pipelines === firstPipelines;
+      const unchangedPipelines = pipelines === firstPipelines + 1; // Dark environment adds the surface-only pipeline.
       const baselineCopies = copies;
       engine.dispose(); await settle();
       const cleaned = hosts.every(h => !h.querySelector('canvas') && h.style.position === '' && h.style.isolation === '');

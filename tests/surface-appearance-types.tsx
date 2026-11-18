@@ -5,6 +5,13 @@ function Generic<P>(appearance:Appearance<P>,props:P){return useSurface({appeara
 function Check(){
  const ref=useSurface({appearance:ceramic,props:{elevation:12,light:{onBlur:'return'}}});
  useSurface({appearance:alternate,props:{phase:2}});
+ useSurface({appearance:ceramic,props:{color:'#c0c0c0',colorScheme:'dark',lighting:'soft'}});
+ // @ts-expect-error Theme palettes belong upstream.
+ useSurface({appearance:ceramic,props:{color:{light:'#fff',dark:'#000'}}});
+ // @ts-expect-error Optical branches are not color schemes.
+ useSurface({appearance:ceramic,props:{lighting:'dark'}});
+ // @ts-expect-error Removed parallel base-color control.
+ useSurface({appearance:ceramic,props:{lightSurface:192}});
  Generic(ceramic,{elevation:3} satisfies CeramicProps);
  // @ts-expect-error Unknown Ceramic prop.
  useSurface({appearance:ceramic,props:{phase:1}});

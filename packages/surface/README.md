@@ -36,7 +36,7 @@ Fresh props object identity alone does not imply a new instance. Appearance or t
 replacement ends the old instance. StrictMode setup/cleanup replay is supported;
 there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-`SurfaceProvider` owns the engine and `onError` (default console.error). Theme is application-owned: pass the resolved `colorScheme` through appearance props.
+`SurfaceProvider` owns the engine and `onError` (default console.error). Theme policy belongs to appearances, not Surface.
 
 ## Appearance authoring
 
@@ -59,7 +59,7 @@ const visual: Appearance<MyProps> = {
 
 `Material` is the low-level draw description (shader, parameters, passes, padding measurement,
 optional immutable data), not the React lifecycle API. `materialAppearance` is an
-explicit `Appearance<{material: Material; colorScheme?: ColorScheme}>` for existing GPU programs and externally
+explicit `Appearance<{material: Material}>` for existing GPU programs and externally
 controlled numeric sources. It uses exactly the same binding/engine path, not a
 legacy hook overload. Such externally controlled sources must remain stable.
 
@@ -151,3 +151,7 @@ programs; do not simultaneously write the same property from declarative props.
 ## Focused Resource Tests
 
 `npm run test:baked` checks geometry reproducibility, shared GPU storage and pipelines, idle scheduling, and resource release with three surfaces. It does not collect frame-rate samples. Run `BAKED_STRESS=1 npm run test:baked` explicitly for the 100-surface workload and frame-rate sampling; both modes use the same test implementation.
+
+A binding may expose a target-local `material`. Surface uses its parameters, passes,
+shader, data and padding without invoking its bind hook recursively. This lets
+appearances isolate per-element state when a source material is shared.

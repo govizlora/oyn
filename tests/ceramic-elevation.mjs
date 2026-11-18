@@ -7,9 +7,9 @@ import { PNG } from 'pngjs';
 // Both programs share the one resolved Ceramic base color.
 for (const options of [
   { colorScheme: 'light' }, { colorScheme: 'dark' },
-  { colorScheme: 'light', lightSurface: 245 }, { colorScheme: 'dark', darkSurface: 24 },
+  { colorScheme: 'light', color: '#f5f5f5' }, { colorScheme: 'dark', color: '#181818' },
   { colorScheme: 'light', color: '#aabbcc' },
-  { colorScheme: 'dark', color: { light: '#eeeeee', dark: '#223344' } },
+  { colorScheme: 'dark', color: '#223344' },
 ]) {
   const raised = createCeramicMaterial({ ...options, elevation: 4 });
   const color = raised.parameters.snapshot().slice(4, 7);
@@ -23,8 +23,6 @@ for (const options of [
 const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
 const initialPadding = material.measurePadding(100, 40);
 const parameters = material.parameters;
-const light = material.resolveColorScheme('light');
-const dark = material.resolveColorScheme('dark');
 let updates = 0;
 parameters.subscribe(() => updates++);
 for (const elevation of [-2, -6, 0, 4, -2]) {
@@ -33,9 +31,6 @@ for (const elevation of [-2, -6, 0, 4, -2]) {
   assert.equal(material.parameters, parameters, 'parameter subscription remains stable');
   assert.equal(material.shader, fresh.shader);
   assert.deepEqual(material.parameters.snapshot(), fresh.parameters.snapshot());
-  for (const [colorScheme, resolved] of [['light', light], ['dark', dark]]) {
-    assert.deepEqual(resolved.parameters.snapshot(), createCeramicMaterial({ elevation, colorScheme }).parameters.snapshot());
-  }
   assert.deepEqual(material.passes, elevation < 0 ? ['surface'] : ['shadow', 'surface']);
 }
 assert.ok(updates > 0);
@@ -48,7 +43,7 @@ for (const elevation of [NaN, Infinity, -Infinity, -1e40, 480]) {
 assert.throws(() => createCeramicMaterial({ elevation: -2, maxElevation: -1 }));
 const late = createCeramicMaterial({ elevation: 4 });
 late.setElevation(-6);
-assert.deepEqual(late.resolveColorScheme('dark').parameters.snapshot(), createCeramicMaterial({ colorScheme: 'dark', elevation: -6 }).parameters.snapshot());
+assert.deepEqual(late.parameters.snapshot(), createCeramicMaterial({ colorScheme: 'light', elevation: -6 }).parameters.snapshot());
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
@@ -97,7 +92,8 @@ try {
     }
     assert.ok(!images[0].equals(images[1]), 'deeper recess changes GPU output');
     assert.ok(!images[1].equals(images[2]), 'recess to flat changes GPU output');
-    assert.ok(!images[2].equals(images[3]), 'flat to raised changes GPU output');
+    if (colorScheme === 'light') assert.ok(!images[2].equals(images[3]), 'flat to raised changes the cast shadow');
+    else assert.ok(images[2].equals(images[3]), 'Dark raised surfaces have no elevation-dependent external shadow');
     assert.ok(images[0].equals(images[4]), 'returning to same depth restores exact pixels');
   }
   await page.evaluate(() => window.elevationTest.engine.dispose());

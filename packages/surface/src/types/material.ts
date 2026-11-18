@@ -1,9 +1,8 @@
-import type { Point, SurfaceInputs } from './input.js';
-import type { createParameters } from '../createParameters.js';
+import type { Point, SurfaceInputs } from "./input.js";
+import type { createParameters } from "../createParameters.js";
 
 export type Parameters = ReturnType<typeof createParameters>;
 export type Insets = Readonly<{ x: number; y: number }>;
-export type ColorScheme = 'light' | 'dark';
 /** Immutable payload. The renderer owns its GPU copy and shares it by identity. */
 export type StaticData = Readonly<{ bytes: Uint8Array<ArrayBuffer> }>;
 /** Material-owned extension lanes in the 48-byte frame ABI: offsets 2, 3, 8.
@@ -16,6 +15,8 @@ export type SurfaceFrame = Readonly<{
   toLocal(point: Point): Point;
 }>;
 export type SurfaceBinding = Readonly<{
+  /** Optional target-local material. Its bind hook is not recursively invoked. */
+  material?: Material;
   measure?(): void;
   frame?(frame: SurfaceFrame): FrameExtras;
   dispose?(): void;
@@ -30,8 +31,6 @@ export type SurfaceBindingContext = Readonly<{
 export type Material = Readonly<{
   /** Optional per-target subscription/DOM lifecycle. Never runs during React render. */
   bind?(context: SurfaceBindingContext): SurfaceBinding;
-  /** Resolve inherited appearance without mutating a material shared by providers. */
-  resolveColorScheme?(colorScheme: ColorScheme): Material;
   /** May switch with parameter notifications; keep the parameter block layout stable.
    * WGSL: vertex entry `vertex`, binding 0 frame, binding 1 parameters. */
   shader: string;

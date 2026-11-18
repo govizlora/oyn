@@ -54,7 +54,7 @@ function Button({
     asChild?: boolean
   }) {
   const mode = useTheme().dark ? 'dark' : 'light'
-  const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps : neutralProps
+  const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps[mode] : neutralProps
   const filled = variant !== 'ghost' && variant !== 'link'
   const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...material } })
   const ref = useComposedRefs(filled ? surfaceRef : undefined, forwardedRef)

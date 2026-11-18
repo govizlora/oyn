@@ -11,6 +11,8 @@
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
     "build:all": "npm run build:packages && npm run build:benchmark && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
     "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic",
+    "test:color-lab": "npm run build:packages && node tests/color-lab.mjs",
+    "test:ceramic-policy": "npm run build:packages && node tests/ceramic-policy.mjs",
     "test:ceramic": "npm run build:packages && node tests/ceramic-light.mjs && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",
     "test:examples": "node tests/examples.mjs",

@@ -3,19 +3,12 @@ import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
 
-const source = createCeramicMaterial();
-const light = source.resolveColorScheme('light'), dark = source.resolveColorScheme('dark');
-assert.notEqual(light, dark);
-assert.equal(source.resolveColorScheme('dark'), dark);
+const light = createCeramicMaterial({ colorScheme: 'light' });
+const dark = createCeramicMaterial({ colorScheme: 'dark' });
 assert.equal(light.parameters.get(8), 0);
 assert.equal(dark.parameters.get(8), 1);
-source.setElevation(30);
-assert.equal(light.parameters.get(1), 30);
-assert.equal(dark.parameters.get(1), 30);
-assert.equal(createCeramicMaterial({ colorScheme: 'dark' }).resolveColorScheme, undefined);
-const colored = createCeramicMaterial({ color: { light: '#ff0000', dark: '#0000ff' } });
-assert.equal(colored.resolveColorScheme('light').parameters.get(4), 1);
-assert.equal(colored.resolveColorScheme('dark').parameters.get(6), 1);
+assert.deepEqual(dark.passes, ['surface']);
+assert.deepEqual(dark.measurePadding(100, 60), { x: 0, y: 0 });
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
@@ -43,6 +36,18 @@ try {
     assert.ok(await brightness('dark') < 100);
     assert.ok(await brightness('fixed') < 100);
   }
+  // Manual page selection overrides browser preference without a React prop.
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.evaluate(() => { document.documentElement.style.colorScheme = 'dark'; });
+  await page.waitForTimeout(150);
+  assert.ok(await brightness('system') < 100);
+  assert.ok(await brightness('light') > 150, 'Local explicit CSS beats inherited CSS');
+  await page.evaluate(() => { document.documentElement.style.colorScheme = 'light dark'; });
+  await page.waitForTimeout(150);
+  assert.ok(await brightness('system') > 150);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.waitForTimeout(150);
+  assert.ok(await brightness('system') < 100);
   assert.deepEqual(errors, []);
   console.log('Surface theme: live system mode, explicit mode props, fixed material, shared-material isolation and elevation passed.');
 } finally { await browser.close(); }

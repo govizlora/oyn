@@ -1,6 +1,11 @@
+import { environmentBinding, preferredColorScheme } from "../environment.js";
 import { createParameters, type Material } from "@oyn/surface";
 import { ceramicBinding } from "../interaction.js";
-import { ceramicFinish, type CeramicOptions } from "../finish.js";
+import {
+  ceramicFinish,
+  snapshotCeramicOptions,
+  type CeramicOptions,
+} from "../finish.js";
 import { shadowBounds } from "../bounds.js";
 import type { BakedGeometry } from "./geometry.js";
 import { bakedWGSL } from "./shader.js";
@@ -18,15 +23,54 @@ export type BakedMaterial = Material & {
   setElevation(value: number): void;
   setRotation(value: number): void;
 };
-/** No recipe, compiler, ray marcher or per-shape shader in the runtime API. */
 export function bakedCeramic(
+  geometry: BakedGeometry,
+  options: BakedOptions = {},
+): BakedMaterial {
+  const config = snapshotCeramicOptions(options);
+  let elevation = config.elevation ?? geometry.height,
+    rotation = config.rotation ?? 0;
+  const maxElevation = config.maxElevation ?? elevation;
+  const listeners = new Set<() => void>();
+  const create = (colorScheme: import("../environment.js").ColorScheme) =>
+    resolvedBakedCeramic(geometry, {
+      ...config,
+      colorScheme,
+      elevation,
+      rotation,
+      maxElevation,
+    });
+  const material = create(config.colorScheme ?? preferredColorScheme());
+  const setElevation = material.setElevation,
+    setRotation = material.setRotation;
+  material.setElevation = (value) => {
+    setElevation(value);
+    elevation = value;
+    listeners.forEach((update) => update());
+  };
+  material.setRotation = (value) => {
+    setRotation(value);
+    rotation = value;
+    listeners.forEach((update) => update());
+  };
+  Object.defineProperty(material, "bind", {
+    value: environmentBinding(config.colorScheme, create, (update) => {
+      listeners.add(update);
+      return () => listeners.delete(update);
+    }),
+  });
+  return material;
+}
+
+/** No recipe, compiler, ray marcher or per-shape shader in the runtime API. */
+function resolvedBakedCeramic(
   geometry: BakedGeometry,
   options: BakedOptions = {},
 ): BakedMaterial {
   let elevation = options.elevation ?? geometry.height,
     rotation = options.rotation ?? 0;
   const maxElevation = options.maxElevation ?? elevation;
-  const { values, validateSignedElevation } = ceramicFinish({
+  const { values, validateSignedElevation, shadows } = ceramicFinish({
     ...options,
     elevation,
     maxElevation,
@@ -83,47 +127,28 @@ export function bakedCeramic(
     throw Error(
       "Ceramic light exceeds the baked shadow blur budget. Re-bake with a larger shadow field.",
     );
-  const variants = new Map<string, BakedMaterial>();
   return {
     bind: ceramicBinding(options.light),
     shader: bakedWGSL,
     parameters,
     data: geometry.data,
-    passes: ["shadow", "surface"],
-    resolveColorScheme:
-      options.colorScheme === undefined
-        ? (colorScheme) => {
-            let variant = variants.get(colorScheme);
-            if (!variant) {
-              variant = bakedCeramic(geometry, {
-                ...options,
-                colorScheme,
-                elevation,
-                rotation,
-              });
-              variants.set(colorScheme, variant);
-            }
-            return variant;
-          }
-        : undefined,
+    passes: shadows ? ["shadow", "surface"] : ["surface"],
     measurePadding: (w, h) => {
       const height =
         maxElevation * Math.min(w / geometry.width, h / geometry.depth);
       if (height >= shadow[0])
         throw Error("Baked geometry exceeds Ceramic light height.");
-      return shadowBounds(w, h, height, shadow);
+      return shadows ? shadowBounds(w, h, height, shadow) : { x: 0, y: 0 };
     },
     setElevation(value: number) {
       validateHeight(value);
       elevation = value;
       parameters.set(8, value);
-      variants.forEach((v) => v.setElevation(value));
     },
     setRotation(value: number) {
       validateRotation(value);
       rotation = value;
       parameters.set(9, value);
-      variants.forEach((v) => v.setRotation(value));
     },
   };
 }

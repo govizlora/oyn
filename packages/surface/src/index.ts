@@ -6,7 +6,6 @@ export type {
   Material,
   Parameters,
   Insets,
-  ColorScheme,
   StaticData,
   SurfaceBinding,
   SurfaceBindingContext,

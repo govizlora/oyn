@@ -1,6 +1,7 @@
 import { StrictMode, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SurfaceProvider, useSurface, type Appearance, type ColorScheme, type SurfaceBinding } from '@oyn/surface';
+import { SurfaceProvider, useSurface, type Appearance, type SurfaceBinding } from '@oyn/surface';
+import type { ColorScheme } from '@oyn/ceramic';
 import { ceramic, type CeramicProps } from '@oyn/ceramic';
 
 const records = { creates:0, disposes:0, frames:[] as number[][], errors:[] as string[] };

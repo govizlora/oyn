@@ -1,4 +1,4 @@
-import { StrictMode, createElement, createRef, type Ref } from 'react';
+import { StrictMode, createElement, createRef, useMemo, type Ref } from 'react';
 import { createRoot } from 'react-dom/client';
 import {  SurfaceProvider, useSurface } from '@oyn/surface';
 import { ceramic } from '@oyn/ceramic';
@@ -18,8 +18,19 @@ export async function checkRefLifecycle() {
   };
   const objectRef = createRef<HTMLButtonElement>();
   function Probe({ forwardedRef, color }: { forwardedRef: Ref<HTMLButtonElement>; color: string }) {
-    const ref = useSurface({ appearance: ceramic, props: { color, elevation: 4 } }, forwardedRef);
-    return <button ref={ref}>Ref test</button>;
+    const ref = useSurface({ appearance: ceramic, props: { color, elevation: 4 } });
+    const composed = useMemo(() => (node: HTMLButtonElement | null) => {
+      ref(node);
+      const cleanup = typeof forwardedRef === "function" ? forwardedRef(node) : undefined;
+      if (forwardedRef && typeof forwardedRef !== "function") forwardedRef.current = node;
+      return () => {
+        ref(null);
+        if (typeof cleanup === "function") cleanup();
+        else if (typeof forwardedRef === "function") forwardedRef(null);
+        else if (forwardedRef) forwardedRef.current = null;
+      };
+    }, [ref, forwardedRef]);
+    return <button ref={composed}>Ref test</button>;
   }
   const settle = async () => { for (let i = 0; i < 4; i++) await new Promise(requestAnimationFrame); };
   const render = async (forwardedRef: Ref<HTMLButtonElement>, color = '#123') => {

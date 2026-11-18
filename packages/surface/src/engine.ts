@@ -1,8 +1,8 @@
-import { createInputs } from './createInputs.js';
-import type { Mesh } from './types/scene.js';
-import type { Material, Parameters, SurfaceBinding } from './types/material.js';
-import { createRenderer, type Renderer, type Target } from './renderer.js';
-import { createPresentation } from './presentation.js';
+import { createInputs } from "./createInputs.js";
+import type { Mesh } from "./types/scene.js";
+import type { Material, Parameters, SurfaceBinding } from "./types/material.js";
+import { createRenderer, type Renderer, type Target } from "./renderer.js";
+import { createPresentation } from "./presentation.js";
 
 type Entry = {
   mesh: Mesh;
@@ -13,7 +13,7 @@ type Entry = {
   parameters: Parameters;
   binding?: SurfaceBinding;
   controller: AbortController;
-  binder: Material['bind'];
+  binder: Material["bind"];
 };
 /** Sole scheduling owner. Parameter notifications never invalidate layout. */
 export function createEngine(
@@ -81,80 +81,88 @@ export function createEngine(
         if (!element.isConnected) continue;
         let entry = entries.get(element);
         if (!entry) {
-          const presentation = createPresentation(mesh);
+          const controller = new AbortController();
+          let binding: SurfaceBinding | undefined;
+          let presentation: ReturnType<typeof createPresentation> | undefined;
+          let target: Target | undefined;
           try {
+            binding = mesh.material.bind?.({
+              element,
+              signal: controller.signal,
+              inputs: input.inputs,
+              requestDraw: invalidatePosition,
+              requestMeasure: invalidateLayout,
+            });
+            binding?.measure?.();
+            const material = binding?.material ?? mesh.material;
+            presentation = createPresentation({
+              element,
+              get material() {
+                const current = entries.get(element);
+                return current
+                  ? (current.binding?.material ?? mesh.material)
+                  : (binding?.material ?? mesh.material);
+              },
+            });
             presentation.measure(renderer.limit);
-            const target = renderer.createTarget(
-              presentation.canvas,
-              mesh.material,
-            );
-            const controller = new AbortController();
-            let binding: SurfaceBinding | undefined;
-            try {
-              binding = mesh.material.bind?.({
-                element,
-                signal: controller.signal,
-                inputs: input.inputs,
-                requestDraw: invalidatePosition,
-                requestMeasure: invalidateLayout,
-              });
-            } catch (error) {
-              controller.abort();
-              renderer.release(target);
-              throw error;
-            }
+            target = renderer.createTarget(presentation.canvas, material);
             entry = {
               controller,
               binding,
               binder: mesh.material.bind,
               mesh,
-              material: mesh.material,
+              material,
               presentation,
               target,
-              parameters: mesh.material.parameters,
-              unsubscribe: mesh.material.parameters.subscribe(invalidate),
+              parameters: material.parameters,
+              unsubscribe: material.parameters.subscribe(invalidate),
             };
             entries.set(element, entry);
             resize.observe(element);
-            binding?.measure?.();
           } catch (error) {
-            presentation.dispose();
+            controller.abort();
+            binding?.dispose?.();
+            if (target) renderer.release(target);
+            presentation?.dispose();
             throw error;
           }
-        } else if (
-          entry.material !== mesh.material ||
-          entry.parameters !== mesh.material.parameters
-        ) {
-          entry.unsubscribe();
-          if (entry.target.size !== mesh.material.parameters.length * 4) {
-            renderer.release(entry.target);
-            entry.target = renderer.createTarget(
-              entry.presentation.canvas,
-              mesh.material,
-            );
+        } else {
+          let rebound = false;
+          if (entry.binder !== mesh.material.bind) {
+            entry.controller.abort();
+            entry.binding?.dispose?.();
+            entry.binding = undefined;
+            entry.controller = new AbortController();
+            entry.binder = mesh.material.bind;
+            entry.binding = mesh.material.bind?.({
+              element,
+              signal: entry.controller.signal,
+              inputs: input.inputs,
+              requestDraw: invalidatePosition,
+              requestMeasure: invalidateLayout,
+            });
+            rebound = true;
           }
-          entry.material = mesh.material;
-          entry.parameters = mesh.material.parameters;
-          entry.unsubscribe = mesh.material.parameters.subscribe(invalidate);
-        }
-        if (entry.binder !== mesh.material.bind) {
-          entry.controller.abort();
-          entry.binding?.dispose?.();
-          entry.binding = undefined;
-          entry.controller = new AbortController();
-          entry.binder = mesh.material.bind;
-          entry.binding = mesh.material.bind?.({
-            element,
-            signal: entry.controller.signal,
-            inputs: input.inputs,
-            requestDraw: invalidatePosition,
-            requestMeasure: invalidateLayout,
-          });
-          entry.binding?.measure?.();
-        }
-        if (layoutDirty) {
-          entry.presentation.measure(renderer.limit);
-          entry.binding?.measure?.();
+          if (layoutDirty || rebound) entry.binding?.measure?.();
+          const material = entry.binding?.material ?? mesh.material;
+          const replaced =
+            entry.material !== material ||
+            entry.parameters !== material.parameters;
+          if (replaced) {
+            entry.unsubscribe();
+            if (entry.target.size !== material.parameters.length * 4) {
+              renderer.release(entry.target);
+              entry.target = renderer.createTarget(
+                entry.presentation.canvas,
+                material,
+              );
+            }
+            entry.material = material;
+            entry.parameters = material.parameters;
+            entry.unsubscribe = material.parameters.subscribe(invalidate);
+          }
+          if (layoutDirty || rebound || replaced)
+            entry.presentation.measure(renderer.limit);
         }
       }
       layoutDirty = false;
@@ -177,18 +185,18 @@ export function createEngine(
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ['style', 'class', 'open', 'hidden'],
+    attributeFilter: ["style", "class", "open", "hidden"],
   });
-  window.addEventListener('scroll', invalidatePosition, true);
-  window.addEventListener('resize', invalidateLayout);
-  window.addEventListener('transitionend', invalidateLayout, true);
-  window.addEventListener('animationend', invalidateLayout, true);
+  window.addEventListener("scroll", invalidatePosition, true);
+  window.addEventListener("resize", invalidateLayout);
+  window.addEventListener("transitionend", invalidateLayout, true);
+  window.addEventListener("animationend", invalidateLayout, true);
   // A DPR-only change need not emit an element resize.
   let resolution: MediaQueryList;
   function watchResolution() {
-    resolution?.removeEventListener('change', resolutionChanged);
+    resolution?.removeEventListener("change", resolutionChanged);
     resolution = matchMedia(`(resolution: ${devicePixelRatio}dppx)`);
-    resolution.addEventListener('change', resolutionChanged);
+    resolution.addEventListener("change", resolutionChanged);
   }
   function resolutionChanged() {
     watchResolution();
@@ -201,11 +209,11 @@ export function createEngine(
     cancelAnimationFrame(raf);
     mutations.disconnect();
     resize.disconnect();
-    window.removeEventListener('scroll', invalidatePosition, true);
-    window.removeEventListener('resize', invalidateLayout);
-    window.removeEventListener('transitionend', invalidateLayout, true);
-    window.removeEventListener('animationend', invalidateLayout, true);
-    resolution.removeEventListener('change', resolutionChanged);
+    window.removeEventListener("scroll", invalidatePosition, true);
+    window.removeEventListener("resize", invalidateLayout);
+    window.removeEventListener("transitionend", invalidateLayout, true);
+    window.removeEventListener("animationend", invalidateLayout, true);
+    resolution.removeEventListener("change", resolutionChanged);
     const errors: unknown[] = [];
     entries.forEach((entry) => {
       try {
