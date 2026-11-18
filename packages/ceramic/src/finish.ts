@@ -1,10 +1,12 @@
-import type { SurfaceMode } from '@oyn/surface';
+import type { CeramicLight } from './interaction.js';
+import type { ColorScheme } from '@oyn/surface';
 import { validateElevation } from './bounds.js';
 import { parseColor } from './color.js';
 import defaults from './defaults.json' with { type: 'json' };
 export type CeramicOptions = Partial<Omit<typeof defaults, 'lightWorkspace' | 'darkWorkspace'>> & {
-  color?: string | Record<SurfaceMode, string>;
-  mode?: 'light' | 'dark';
+  light?: CeramicLight;
+  color?: string | Record<ColorScheme, string>;
+  colorScheme?: ColorScheme;
   maxElevation?: number;
 };
 export function ceramicFinish(options: CeramicOptions = {}) {
@@ -30,7 +32,7 @@ export function ceramicFinish(options: CeramicOptions = {}) {
   validateSignedElevation(settings.elevation);
   const elevation = settings.elevation;
   if (options.maxElevation !== undefined) validateElevation(options.maxElevation, lightHeight);
-  const dark = options.mode === 'dark';
+  const dark = options.colorScheme === 'dark';
   const brightness = dark ? settings.darkSurface : settings.lightSurface;
   const rgb = parseColor((typeof options.color === 'string' ? options.color : options.color?.[dark ? 'dark' : 'light']) ?? `rgb(${brightness} ${brightness} ${brightness})`);
   const values = [

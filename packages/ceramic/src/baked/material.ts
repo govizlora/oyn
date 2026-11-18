@@ -1,5 +1,5 @@
 import { createParameters, type Material } from "@oyn/surface";
-import { ceramicDomBinding } from "../interaction.js";
+import { ceramicBinding } from "../interaction.js";
 import { ceramicFinish, type CeramicOptions } from "../finish.js";
 import { shadowBounds } from "../bounds.js";
 import type { BakedGeometry } from "./geometry.js";
@@ -85,23 +85,23 @@ export function bakedCeramic(
     );
   const variants = new Map<string, BakedMaterial>();
   return {
-    bind: ceramicDomBinding,
+    bind: ceramicBinding(options.light),
     shader: bakedWGSL,
     parameters,
     data: geometry.data,
     passes: ["shadow", "surface"],
-    resolveMode:
-      options.mode === undefined
-        ? (mode) => {
-            let variant = variants.get(mode);
+    resolveColorScheme:
+      options.colorScheme === undefined
+        ? (colorScheme) => {
+            let variant = variants.get(colorScheme);
             if (!variant) {
               variant = bakedCeramic(geometry, {
                 ...options,
-                mode,
+                colorScheme,
                 elevation,
                 rotation,
               });
-              variants.set(mode, variant);
+              variants.set(colorScheme, variant);
             }
             return variant;
           }

@@ -1,5 +1,4 @@
 import type { Appearance, Material } from "@oyn/surface";
-import { ceramicDomBinding } from "../interaction.js";
 import type { BakedGeometry } from "./geometry.js";
 import { bakedCeramic, type BakedOptions } from "./material.js";
 
@@ -16,7 +15,9 @@ export const baked: Appearance<BakedProps> = {
     let source = bakedCeramic(geometry, props);
     const parameters = source.parameters;
     const material: Material = {
-      bind: ceramicDomBinding,
+      get bind() {
+        return source.bind;
+      },
       parameters,
       get shader() {
         return source.shader;

@@ -93,7 +93,7 @@ export function sculptedCeramic(options: SculptedOptions = {}) {
   validateHeight(options.elevation ?? 10);
   const base = createCeramicMaterial({
     ...options,
-    mode: 'light',
+    colorScheme: 'light',
     elevation: options.elevation ?? 10,
     lightRim: 4,
     shadowStrength: 0.18,

@@ -12,7 +12,7 @@ export function CardComparison({ home }: { home: () => void }) {
   const original = useMemo(
     () =>
       createCeramicMaterial({
-        mode: 'light',
+        colorScheme: 'light',
         color: '#f0f0f0',
         elevation: 16,
         maxElevation: 40,
@@ -21,7 +21,7 @@ export function CardComparison({ home }: { home: () => void }) {
   );
   const geometric = useMemo(
     () =>
-      cardCeramic({width:WIDTH,height:HEIGHT,radius:24,elevation:16,maxElevation:40,finish:{mode:'light',color:'#f0f0f0'}}),
+      cardCeramic({width:WIDTH,height:HEIGHT,radius:24,elevation:16,maxElevation:40,finish:{colorScheme:'light',color:'#f0f0f0'}}),
     [],
   );
   useLayoutEffect(() => {

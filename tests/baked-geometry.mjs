@@ -22,7 +22,7 @@ const buffer = bytes.buffer.slice(
   bytes.byteOffset + bytes.byteLength,
 );
 const geometry = decodeGeometry(buffer),
-  material = bakedCeramic(geometry, { mode: 'light' });
+  material = bakedCeramic(geometry, { colorScheme: 'light' });
 assert.equal(material.parameters.length, 44);
 assert.equal(
   bakedCeramic(geometry).data,
@@ -121,7 +121,7 @@ try {
         root.append(element);
         meshes.set(element, {
           element,
-          material: bakedCeramic(geometry, { mode: 'light' }),
+          material: bakedCeramic(geometry, { colorScheme: 'light' }),
         });
       }
       const errors = [],

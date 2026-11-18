@@ -1,4 +1,4 @@
-import { ceramicDomBinding } from '../../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../../packages/ceramic/src/interaction';
 import { useLayoutEffect, useMemo, type CSSProperties } from 'react';
 import { materialAppearance, createParameters, useSurface, type Material } from '@oyn/surface';
 
@@ -148,7 +148,7 @@ LIGHT.FOLLOW(POINTER)
 > _`;
 function makePhosphor(kind: number, amber: boolean): Material {
   return {
-    bind: ceramicDomBinding,
+    bind: ceramicBinding(),
     shader,
     passes: ['surface'],
     parameters: createParameters([

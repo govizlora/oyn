@@ -1,6 +1,6 @@
 import { StrictMode, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SurfaceProvider, useSurface, type Appearance, type SurfaceMode, type SurfaceBinding } from '@oyn/surface';
+import { SurfaceProvider, useSurface, type Appearance, type ColorScheme, type SurfaceBinding } from '@oyn/surface';
 import { ceramic, type CeramicProps } from '@oyn/ceramic';
 
 const records = { creates:0, disposes:0, frames:[] as number[][], errors:[] as string[] };
@@ -26,19 +26,19 @@ const probe: Appearance<CeramicProps> = {
 const other:Appearance<CeramicProps>={create:probe.create};
 // No bind hook: a surface with no pointer consumer must not subscribe or redraw on it.
 const inert:Appearance<{}>={create(){
- const source=ceramic.create({light:{source:'fixed'},mode:'light'});
+ const source=ceramic.create({light:{source:'fixed'},colorScheme:'light'});
  return {material:{...source.material,bind:undefined},update(){}};
 }};
 function App(){
  const [attached,setAttached]=useState(true);
  const [props,setProps]=useState<CeramicProps>({elevation:16});
- const [mode,setMode]=useState<SurfaceMode>('light');
+ const [colorScheme,setMode]=useState<ColorScheme>('light');
  const [mounted,setMounted]=useState(true),[alternate,setAlternate]=useState(false),[tag,setTag]=useState(false);
  const [quiet,setQuiet]=useState(false),[tick,setTick]=useState(0);
  useLayoutEffect(()=>{Object.assign(window,{api:{records,setAttached,setProps,setMode,setMounted,setAlternate,setTag,setQuiet,rerender:()=>setTick(t=>t+1)}});});
  return <SurfaceProvider onError={error=>records.errors.push(String(error))}>
   <span data-tick={tick}/>
-  {mounted&&<Sample appearance={quiet?inert:alternate?other:probe} props={{...props, mode}} attached={attached} tag={tag}/>}
+  {mounted&&<Sample appearance={quiet?inert:alternate?other:probe} props={{...props, colorScheme}} attached={attached} tag={tag}/>}
  </SurfaceProvider>;
 }
 function Sample({appearance,props,attached,tag}:{appearance:Appearance<CeramicProps>;props:CeramicProps;attached:boolean;tag:boolean}){

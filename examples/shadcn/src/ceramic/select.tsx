@@ -69,7 +69,7 @@ function SelectContent({
   ref: forwardedRef,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
+  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <SelectPrimitive.Portal>

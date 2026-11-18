@@ -1,16 +1,16 @@
 import {
   createParameters,
   type Material,
-  type SurfaceMode,
+  type ColorScheme,
 } from "@oyn/surface";
-import { ceramicDomBinding } from "./interaction.js";
+import { ceramicBinding } from "./interaction.js";
 import { insetWGSL, insetParameters } from "./inset.js";
 import { ceramicWGSL } from "./shaders.js";
 import { shadowBounds } from "./bounds.js";
 import { ceramicFinish, type CeramicOptions } from "./finish.js";
 
 export type CeramicMaterial = Material & { setElevation(value: number): void };
-/** Configuration is numeric. Animation libraries explicitly bind to setElevation. */
+/** Animation libraries explicitly bind to setElevation. */
 export function createCeramicMaterial(
   options: CeramicOptions = {},
 ): CeramicMaterial {
@@ -58,20 +58,20 @@ export function createMaterial(
     values.forEach((v, i) => parameters.set(i, v));
   }
   updateElevation(elevation);
-  // Cache per-mode instances: sharing the source across differently themed surfaces is safe.
-  const variants = new Map<SurfaceMode, CeramicMaterial>();
+  // Cache per-colorScheme instances: sharing the source across differently themed surfaces is safe.
+  const variants = new Map<ColorScheme, CeramicMaterial>();
   return {
-    bind: ceramicDomBinding,
-    resolveMode:
-      options.mode === undefined
-        ? (mode) => {
-            let material = variants.get(mode);
+    bind: ceramicBinding(options.light),
+    resolveColorScheme:
+      options.colorScheme === undefined
+        ? (colorScheme) => {
+            let material = variants.get(colorScheme);
             if (!material) {
               material = createMaterial(
-                { ...options, mode, elevation, maxElevation: paddingElevation },
+                { ...options, colorScheme, elevation, maxElevation: paddingElevation },
                 paddingElevation,
               );
-              variants.set(mode, material);
+              variants.set(colorScheme, material);
             }
             return material;
           }

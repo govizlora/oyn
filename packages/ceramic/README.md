@@ -23,7 +23,7 @@ setter is required. Surface owns GPU resources, Ceramic owns visual configuratio
 `createCeramicMaterial(options)` retains the explicit low-level program API for engine
 integrations and numeric-source adapters; it is not the primary React API.
 
-Options: `color` (RGB/HEX or `{ light, dark }`), `mode` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
+Options: `color` (RGB/HEX or `{ light, dark }`), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `rim` (dark edges), `lightRim` (light edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
 For upward springs, reserve space explicitly: `ceramic({ elevation: 12, maxElevation: 18 })`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
@@ -40,20 +40,21 @@ Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` s
 All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `lightSurface`, `lightSurfaceTop`, `lightSurfaceShade`, `darkSurface`, plus `elevation` and optional `maxElevation`. `color` explicitly overrides the selected mode's grayscale surface value. Update appearance props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
 
 ```ts
-useSurface({ appearance: ceramic, props: {} }); // elevation 16, inherited mode
+useSurface({ appearance: ceramic, props: {} }); // elevation 16, light by default
 useSurface({ appearance: ceramic, props: { lightReflectionStrength: 2, shadowStrength: 0.1 } });
 ```
 
 Workspace brightness values (`lightWorkspace: 232`, `darkWorkspace: 0`) are exported guidance, not material options. The application owns its background. The shadcn demo uses #f0f0f0 / #000000 backgrounds and default neutral materials; primary/destructive actions retain semantic colors. Avoid pure white neutral surfaces if white highlights should remain visible.
 
 
-Omit `mode` to inherit Surface's theme (system by default). An explicit `mode` fixes
-the material appearance, taking precedence over the provider. Ceramic does not read `matchMedia`; its per-target binding explicitly subscribes to
-Surface’s shared pointer input service. A standalone material outside Surface
-starts with light parameters; use `material.resolveMode?.(mode) ?? material` for
-low-level integrations. Resolved instances are cached separately per mode, so one
-source can safely be shared by light and dark providers. Call `setElevation` on
-the source to update all its resolved instances.
+The application owns theme selection: pass its resolved `colorScheme` through appearance
+props. Omission defaults to light. Ceramic does not read `matchMedia`; its per-target
+binding subscribes to Surface's shared pointer input service. Standalone materials
+can use `material.resolveColorScheme?.(colorScheme) ?? material` for low-level
+integrations. Resolved instances are cached separately per color scheme, so one
+source can safely be shared across light and dark surfaces. An explicit
+`colorScheme` fixes the material appearance and disables resolution. Call
+`setElevation` on the source to update all its resolved instances.
 
 
 ### Soft shadow silhouette

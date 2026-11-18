@@ -1,4 +1,4 @@
-import { ceramicDomBinding } from '../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../packages/ceramic/src/interaction';
 // Historical runtime-CSG baseline, test-only. Never import from application code.
 import { createParameters, type Material } from '@oyn/surface';
 import { frameWGSL } from '../../packages/ceramic/src/effects/frame.js';
@@ -256,7 +256,7 @@ export function solidCeramic(
     throw Error('Invalid solid color.');
   const finish = createCeramicMaterial({
     ...options.finish,
-    mode: options.finish?.mode ?? 'light',
+    colorScheme: options.finish?.colorScheme ?? 'light',
     ...(color ? { color: `rgb(${color.map((v) => v * 255).join(' ')})` } : {}),
     elevation: 0,
     maxElevation: ceiling,
@@ -292,7 +292,7 @@ export function solidCeramic(
   }
   setGeometry(solid);
   const material: Material = {
-    bind: ceramicDomBinding,
+    bind: ceramicBinding(),
     shader,
     parameters,
     passes: ['shadow', 'surface'],

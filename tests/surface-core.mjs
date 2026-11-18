@@ -11,13 +11,13 @@ assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
 // Padding policy belongs to the appearance, including remeasurement after updates.
-const appearance = ceramic.create({ elevation: 16, mode: 'light' });
+const appearance = ceramic.create({ elevation: 16, colorScheme: 'light' });
 const reservedPadding = appearance.material.measurePadding(120, 40);
-appearance.update({ elevation: 32, mode: 'dark' });
+appearance.update({ elevation: 32, colorScheme: 'dark' });
 assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
-appearance.update({ elevation: 8, maxElevation: 40, mode: 'dark' });
+appearance.update({ elevation: 8, maxElevation: 40, colorScheme: 'dark' });
 assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
-appearance.update({ elevation: 8, mode: 'light' });
+appearance.update({ elevation: 8, colorScheme: 'light' });
 assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
 appearance.dispose?.();
 
@@ -93,7 +93,7 @@ try {
       await settle();
       const stable = canvases.every((c, i) => c.width === initial[i][0] && c.height === initial[i][1]);
       // A replacement material owns its own padding policy.
-      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, mode: 'dark' }); engine.invalidate(); await settle();
+      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, colorScheme: 'dark' }); engine.invalidate(); await settle();
       const replacementPaddingChanged = canvases[0].width < initial[0][0];
       meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, maxElevation: 24 }); engine.invalidate(); await settle();
       const explicitGrowth = canvases[0].width > initial[0][0];
@@ -123,7 +123,7 @@ try {
     const element = document.createElement('div');
     element.style.cssText = 'position:absolute;left:100px;top:100px;width:160px;height:100px;border-radius:12px';
     document.body.append(element);
-    const material = createCeramicMaterial({ mode: 'dark', elevation: 12 });
+    const material = createCeramicMaterial({ colorScheme: 'dark', elevation: 12 });
     const meshes = new Map([[element, { element, material }]]);
     window.visual = { material, element, meshes, engine: createEngine(meshes) };
   });

@@ -5,8 +5,8 @@ export const panelProps = { elevation: 4 };
 export const dialogProps = { elevation: 64 };
 export const destructiveProps = { color: { light: '#dc2626', dark: '#ef4444' } };
 export const primaryProps: Record<'light'|'dark', CeramicProps> = {
-  light: { mode: 'dark', color: '#171717' },
-  dark: { mode: 'light', color: '#e5e5e5' },
+  light: { colorScheme: 'dark', color: '#171717' },
+  dark: { colorScheme: 'light', color: '#e5e5e5' },
 };
 
 export const insetProps = { elevation: -2.3 };

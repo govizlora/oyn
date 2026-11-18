@@ -4,18 +4,18 @@ import { PNG } from 'pngjs';
 import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
 
 const source = createCeramicMaterial();
-const light = source.resolveMode('light'), dark = source.resolveMode('dark');
+const light = source.resolveColorScheme('light'), dark = source.resolveColorScheme('dark');
 assert.notEqual(light, dark);
-assert.equal(source.resolveMode('dark'), dark);
+assert.equal(source.resolveColorScheme('dark'), dark);
 assert.equal(light.parameters.get(8), 0);
 assert.equal(dark.parameters.get(8), 1);
 source.setElevation(30);
 assert.equal(light.parameters.get(1), 30);
 assert.equal(dark.parameters.get(1), 30);
-assert.equal(createCeramicMaterial({ mode: 'dark' }).resolveMode, undefined);
+assert.equal(createCeramicMaterial({ colorScheme: 'dark' }).resolveColorScheme, undefined);
 const colored = createCeramicMaterial({ color: { light: '#ff0000', dark: '#0000ff' } });
-assert.equal(colored.resolveMode('light').parameters.get(4), 1);
-assert.equal(colored.resolveMode('dark').parameters.get(6), 1);
+assert.equal(colored.resolveColorScheme('light').parameters.get(4), 1);
+assert.equal(colored.resolveColorScheme('dark').parameters.get(6), 1);
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {

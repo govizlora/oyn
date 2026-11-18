@@ -3,7 +3,7 @@ import type { createParameters } from '../createParameters.js';
 
 export type Parameters = ReturnType<typeof createParameters>;
 export type Insets = Readonly<{ x: number; y: number }>;
-export type SurfaceMode = 'light' | 'dark';
+export type ColorScheme = 'light' | 'dark';
 /** Immutable payload. The renderer owns its GPU copy and shares it by identity. */
 export type StaticData = Readonly<{ bytes: Uint8Array<ArrayBuffer> }>;
 /** Material-owned extension lanes in the 48-byte frame ABI: offsets 2, 3, 8.
@@ -31,7 +31,7 @@ export type Material = Readonly<{
   /** Optional per-target subscription/DOM lifecycle. Never runs during React render. */
   bind?(context: SurfaceBindingContext): SurfaceBinding;
   /** Resolve inherited appearance without mutating a material shared by providers. */
-  resolveMode?(mode: SurfaceMode): Material;
+  resolveColorScheme?(colorScheme: ColorScheme): Material;
   /** May switch with parameter notifications; keep the parameter block layout stable.
    * WGSL: vertex entry `vertex`, binding 0 frame, binding 1 parameters. */
   shader: string;

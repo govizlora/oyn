@@ -52,7 +52,7 @@ try {
       'position:absolute;left:250px;top:220px;width:280px;height:160px';
     document.body.append(host);
     const results = [];
-    for (const mode of ['light', 'dark'])
+    for (const colorScheme of ['light', 'dark'])
       for (const [radius, elevation, pointer] of [
         [0, 8, [100, 100]],
         [24, 16, [180, 120]],
@@ -60,7 +60,7 @@ try {
         [24, 16, [390, 300]],
       ]) {
         host.style.borderRadius = `${radius}px`;
-        const options = { mode, elevation, maxElevation: 40 };
+        const options = { colorScheme, elevation, maxElevation: 40 };
         const material = createCeramicMaterial(options);
         const mesh = {
           element: host,
@@ -93,7 +93,7 @@ try {
           await settle();
           if (failures.length) throw Error(failures.join('\n'));
           const after = host.querySelector('canvas').toDataURL();
-          const card=cardCeramic({width:280,height:160,radius,elevation,maxElevation:40,finish:{mode}});
+          const card=cardCeramic({width:280,height:160,radius,elevation,maxElevation:40,finish:{colorScheme}});
           mesh.material = {...card,passes:['surface']};
           engine.invalidate();
           await settle();
@@ -105,7 +105,7 @@ try {
           if(failures.length)throw Error(failures.join('\n'));
           const adaptedFull=host.querySelector('canvas').toDataURL();
           results.push({
-            mode,
+            colorScheme,
             radius,
             elevation,
             before,
@@ -142,7 +142,7 @@ try {
       console.log(
         JSON.stringify({
           path,
-          mode: r.mode,
+          colorScheme: r.colorScheme,
           radius: r.radius,
           elevation: r.elevation,
           max,
@@ -152,7 +152,7 @@ try {
       );
       report.push({
         path,
-        mode: r.mode,
+        colorScheme: r.colorScheme,
         radius: r.radius,
         elevation: r.elevation,
         max,

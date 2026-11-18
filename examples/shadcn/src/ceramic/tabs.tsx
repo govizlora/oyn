@@ -55,9 +55,9 @@ function TabsList({ className, variant = "default", ref: forwardedRef, children,
   React.ComponentProps<typeof TabsPrimitive.List> & VariantProps<typeof tabsListVariants>) {
   const host = React.useRef<HTMLDivElement>(null);
   const inset = variant === 'default';
-  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...insetProps } });
+  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...insetProps } });
   const ref = useComposedRefs(inset ? surfaceRef : undefined, host, forwardedRef);
-  const indicatorRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...neutralProps } });
+  const indicatorRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...neutralProps } });
   const rect = useSelectionGeometry(host, inset);
   return (
     <TabsPrimitive.List ref={ref} data-slot="tabs-list" data-variant={variant} data-surface-tabs={inset ? '' : undefined}

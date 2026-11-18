@@ -21,7 +21,7 @@ export function createBenchmark(stage:HTMLElement, mode:Mode, dpr:number, contro
   function error(reason:unknown){if(disposed)return;const message=String(reason);dispose();fail(message);}
   async function initialize(){
     if(!navigator.gpu)throw Error('WebGPU unavailable; use a supported browser on localhost/HTTPS.');
-    const materials={light:createCeramicMaterial({mode:'light',elevation:6}),dark:createCeramicMaterial({mode:'dark',elevation:6})};
+    const materials={light:createCeramicMaterial({colorScheme:'light',elevation:6}),dark:createCeramicMaterial({colorScheme:'dark',elevation:6})};
     const pad=80; // Preserve the historical benchmark workload; package bounds are adaptive.
     const cards=[...stage.querySelectorAll<HTMLElement>('article')];
     const rects=cards.map(c=>[c.offsetLeft,c.offsetTop,c.offsetWidth,c.offsetHeight]);

@@ -48,5 +48,3 @@ export function ceramicBinding(light: CeramicLight = {}): NonNullable<Material['
     };
   };
 }
-/** Shared adapter for existing Ceramic program assemblies; same input service. */
-export const ceramicDomBinding = ceramicBinding();

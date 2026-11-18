@@ -7,7 +7,7 @@ import { panelProps } from './materials';
 
 /** Low-elevation card surface. Layout and scrolling belong to its consumer. */
 export function PanelSurface({ ref: forwardedRef, ...props }: ComponentProps<'div'>) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...panelProps } })
+  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...panelProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef);
   return <div ref={ref} data-surface-panel="" {...props} />;
 }

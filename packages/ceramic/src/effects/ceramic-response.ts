@@ -1,4 +1,4 @@
-/** Geometry-independent, experimental light-mode ceramic response.
+/** Geometry-independent, experimental light-scheme ceramic response.
  * Retained only for the earlier sculpted-control experiment. The solid renderer
  * now uses the original Ceramic equations in ceramic-lighting.ts.
  */

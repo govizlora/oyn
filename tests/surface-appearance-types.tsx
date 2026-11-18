@@ -23,6 +23,6 @@ function Check(){
  // @ts-expect-error Theme is an appearance prop, not a provider responsibility.
  const provider = <SurfaceProvider mode="dark"><div /></SurfaceProvider>;
  // @ts-expect-error Appearance no longer receives an ambient context.
- ceramic.create({}, {mode:'dark'});
+ ceramic.create({}, {colorScheme:'dark'});
  return <button ref={ref}/>;
 }

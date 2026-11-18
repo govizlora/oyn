@@ -6,10 +6,10 @@ import { PNG } from 'pngjs';
 
 // Both programs share the one resolved Ceramic base color.
 for (const options of [
-  { mode: 'light' }, { mode: 'dark' },
-  { mode: 'light', lightSurface: 245 }, { mode: 'dark', darkSurface: 24 },
-  { mode: 'light', color: '#aabbcc' },
-  { mode: 'dark', color: { light: '#eeeeee', dark: '#223344' } },
+  { colorScheme: 'light' }, { colorScheme: 'dark' },
+  { colorScheme: 'light', lightSurface: 245 }, { colorScheme: 'dark', darkSurface: 24 },
+  { colorScheme: 'light', color: '#aabbcc' },
+  { colorScheme: 'dark', color: { light: '#eeeeee', dark: '#223344' } },
 ]) {
   const raised = createCeramicMaterial({ ...options, elevation: 4 });
   const color = raised.parameters.snapshot().slice(4, 7);
@@ -23,8 +23,8 @@ for (const options of [
 const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
 const initialPadding = material.measurePadding(100, 40);
 const parameters = material.parameters;
-const light = material.resolveMode('light');
-const dark = material.resolveMode('dark');
+const light = material.resolveColorScheme('light');
+const dark = material.resolveColorScheme('dark');
 let updates = 0;
 parameters.subscribe(() => updates++);
 for (const elevation of [-2, -6, 0, 4, -2]) {
@@ -33,8 +33,8 @@ for (const elevation of [-2, -6, 0, 4, -2]) {
   assert.equal(material.parameters, parameters, 'parameter subscription remains stable');
   assert.equal(material.shader, fresh.shader);
   assert.deepEqual(material.parameters.snapshot(), fresh.parameters.snapshot());
-  for (const [mode, resolved] of [['light', light], ['dark', dark]]) {
-    assert.deepEqual(resolved.parameters.snapshot(), createCeramicMaterial({ elevation, mode }).parameters.snapshot());
+  for (const [colorScheme, resolved] of [['light', light], ['dark', dark]]) {
+    assert.deepEqual(resolved.parameters.snapshot(), createCeramicMaterial({ elevation, colorScheme }).parameters.snapshot());
   }
   assert.deepEqual(material.passes, elevation < 0 ? ['surface'] : ['shadow', 'surface']);
 }
@@ -48,7 +48,7 @@ for (const elevation of [NaN, Infinity, -Infinity, -1e40, 480]) {
 assert.throws(() => createCeramicMaterial({ elevation: -2, maxElevation: -1 }));
 const late = createCeramicMaterial({ elevation: 4 });
 late.setElevation(-6);
-assert.deepEqual(late.resolveMode('dark').parameters.snapshot(), createCeramicMaterial({ mode: 'dark', elevation: -6 }).parameters.snapshot());
+assert.deepEqual(late.resolveColorScheme('dark').parameters.snapshot(), createCeramicMaterial({ colorScheme: 'dark', elevation: -6 }).parameters.snapshot());
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
@@ -65,19 +65,19 @@ try {
     host.id = 'elevation-test';
     host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:80px;border-radius:12px;background:#888';
     document.body.append(host);
-    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, mode: 'light', maxElevation: 16 }) };
+    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, colorScheme: 'light', maxElevation: 16 }) };
     const engine = createEngine(new Map([[host, mesh]]));
     window.elevationTest = { mesh, engine, createCeramicMaterial };
   }, '/@fs' + fileURLToPath(new URL('../', import.meta.url)));
   const canvas = page.locator('#elevation-test canvas');
   await canvas.waitFor();
   await canvas.evaluate(el => { window.elevationTestCanvas = el; });
-  for (const mode of ['light', 'dark']) {
-    await page.evaluate(mode => {
+  for (const colorScheme of ['light', 'dark']) {
+    await page.evaluate(colorScheme => {
       const { mesh, engine, createCeramicMaterial } = window.elevationTest;
-      mesh.material = createCeramicMaterial({ mode, elevation: 4, maxElevation: 16 });
+      mesh.material = createCeramicMaterial({ colorScheme, elevation: 4, maxElevation: 16 });
       engine.invalidate();
-    }, mode);
+    }, colorScheme);
     const images = [];
     for (const elevation of [-2, -6, 0, 4, -2]) {
       await page.evaluate(value => window.elevationTest.mesh.material.setElevation(value), elevation);
@@ -90,7 +90,7 @@ try {
         const pixel = (Math.floor(png.height / 2) * png.width + Math.floor(png.width / 2)) * 4;
         const depth = -elevation;
         const coverage = 1 - Math.exp(-depth);
-        const base = mode === 'light' ? 240 : 12;
+        const base = colorScheme === 'light' ? 240 : 12;
         const expected = base * (1 - Math.min(depth * 0.006, 0.06)) * coverage + 136 * (1 - coverage);
         assert.ok(Math.abs(png.data[pixel] - expected) <= 2, `floor depth ${depth}: GPU ${png.data[pixel]}, expected ${expected}`);
       }

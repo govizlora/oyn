@@ -1,4 +1,4 @@
-import { ceramicDomBinding } from './interaction.js';
+import { ceramicBinding } from './interaction.js';
 import { ceramicSurfaceWGSL } from './effects/ceramic-surface.js';
 import { createParameters, type Material } from '@oyn/surface';
 import { frameWGSL } from './effects/frame.js';
@@ -49,6 +49,6 @@ export function cardCeramic(options: {width:number;height:number;radius:number;e
  validate(radius,elevation);
  const parameters=createParameters([width/2,height/2,radius,elevation,width,height,0,0,...finish.values]);
  const shadow=new Float32Array(finish.values.slice(12,16));
- const material:Material={bind:ceramicDomBinding,shader,parameters,passes:['shadow','surface'],measurePadding:(w,h)=>shadowBounds(w,h,maxElevation*Math.min(w/width,h/height),shadow)};
+ const material:Material={bind:ceramicBinding(options.finish?.light),shader,parameters,passes:['shadow','surface'],measurePadding:(w,h)=>shadowBounds(w,h,maxElevation*Math.min(w/width,h/height),shadow)};
  return {...material,setDimensions(radius:number,elevation:number){validate(radius,elevation);parameters.set(2,radius);parameters.set(3,elevation);}};
 }

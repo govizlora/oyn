@@ -1,10 +1,9 @@
 import type { Appearance, Material } from "@oyn/surface";
-import { ceramicBinding, type CeramicLight } from "./interaction.js";
 import type { CeramicOptions } from "./finish.js";
 import { ceramicDefaults } from "./defaults.js";
 import { createMaterial } from "./material.js";
 
-export type CeramicProps = CeramicOptions & { light?: CeramicLight };
+export type CeramicProps = CeramicOptions;
 /** Stable visual definition. Each committed node owns its own parameter block. */
 export const ceramic: Appearance<CeramicProps> = {
   create(props) {
@@ -30,7 +29,6 @@ export const ceramic: Appearance<CeramicProps> = {
     const createOptical = (config: typeof configuration) =>
       createMaterial(config, initialPaddingElevation);
     let optical = createOptical(configuration);
-    let binding = ceramicBinding(configuration.light);
     const parameters = optical.parameters;
     const material: Material = {
       get shader() {
@@ -41,7 +39,7 @@ export const ceramic: Appearance<CeramicProps> = {
       },
       measurePadding: (width, height) => optical.measurePadding(width, height),
       get bind() {
-        return binding;
+        return optical.bind;
       },
       parameters,
     };
@@ -53,11 +51,6 @@ export const ceramic: Appearance<CeramicProps> = {
         if (key === nextKey) return;
         // Validate the complete next configuration before applying any change.
         const nextOptical = createOptical(config);
-        const lightKey = JSON.stringify(config.light);
-        const lightChanged = lightKey !== JSON.stringify(configuration.light);
-        const nextBinding = lightChanged
-          ? ceramicBinding(config.light)
-          : binding;
         const layout =
           config.maxElevation !== configuration.maxElevation ||
           config.shadowLightHeight !== configuration.shadowLightHeight ||
@@ -68,7 +61,6 @@ export const ceramic: Appearance<CeramicProps> = {
           .snapshot()
           .forEach((value, index) => parameters.set(index, value));
         optical = nextOptical;
-        binding = nextBinding;
         configuration = config;
         key = nextKey;
         return layout ? "layout" : "draw";

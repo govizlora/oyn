@@ -132,7 +132,7 @@ function Example() {
           <div className="scroll-content">
             <p className="scroll-hint">Scroll down to the button ↓</p>
             <div className="button-host">
-              {mounted && <SurfaceButton key={generation} mode={dark ? 'dark' : 'light'} />}
+              {mounted && <SurfaceButton key={generation} colorScheme={dark ? 'dark' : 'light'} />}
             </div>
             <p className="scroll-hint">More native scroll space ↓</p>
           </div>

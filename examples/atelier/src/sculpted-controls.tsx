@@ -21,7 +21,7 @@ function useBakedControl<T extends HTMLElement>({shape,color='#eeeee9',elevation
     return ()=>{active=false;};
   },[shape]);
   const ref=useSurface({appearance:baked,props:{geometry:geometry!,
-    mode:'light',color,elevation,rotation,maxElevation:24,
+    colorScheme:'light',color,elevation,rotation,maxElevation:24,
     lightZ:150,lightReflectionStrength:.65,lightEdgeShade:.38,
     lightSurfaceTop:.05,lightSurfaceShade:.025,
     shadowStrength:.18,contactShadowStrength:.07,

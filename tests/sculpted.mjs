@@ -7,7 +7,7 @@ import { bakeControl, controls } from '../tools/geometry/controls.mjs';
 const bytes=await readFile('examples/atelier/public/geometries/controls/thumbDial.bin');
 assert.deepEqual(bytes,bakeControl(controls.thumbDial),'Homepage profile is reproducible');
 const geometry=decodeGeometry(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));
-const material=bakedCeramic(geometry,{elevation:12,maxElevation:24,mode:'light'});
+const material=bakedCeramic(geometry,{elevation:12,maxElevation:24,colorScheme:'light'});
 const parameters=material.parameters,data=material.data;
 material.setRotation(1.75);material.setElevation(3);
 assert.equal(material.parameters,parameters);

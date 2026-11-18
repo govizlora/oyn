@@ -36,7 +36,7 @@ Fresh props object identity alone does not imply a new instance. Appearance or t
 replacement ends the old instance. StrictMode setup/cleanup replay is supported;
 there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-`SurfaceProvider` owns the engine and `onError` (default console.error). Theme is application-owned: pass the resolved `mode` through appearance props.
+`SurfaceProvider` owns the engine and `onError` (default console.error). Theme is application-owned: pass the resolved `colorScheme` through appearance props.
 
 ## Appearance authoring
 
@@ -59,7 +59,7 @@ const visual: Appearance<MyProps> = {
 
 `Material` is the low-level draw description (shader, parameters, passes, padding measurement,
 optional immutable data), not the React lifecycle API. `materialAppearance` is an
-explicit `Appearance<{material: Material; mode?: SurfaceMode}>` for existing GPU programs and externally
+explicit `Appearance<{material: Material; colorScheme?: ColorScheme}>` for existing GPU programs and externally
 controlled numeric sources. It uses exactly the same binding/engine path, not a
 legacy hook overload. Such externally controlled sources must remain stable.
 

@@ -1,4 +1,4 @@
-import { ceramicDomBinding } from '../../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../../packages/ceramic/src/interaction';
 import {
   useEffect,
   useLayoutEffect,
@@ -85,7 +85,7 @@ const lampColors = {
 export type LampColor = keyof typeof lampColors;
 function instrumentMaterial(kind: number): Material {
   return {
-    bind: ceramicDomBinding,
+    bind: ceramicBinding(),
     shader,
     passes: ['surface'],
     parameters: createParameters([

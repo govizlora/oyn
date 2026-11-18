@@ -233,7 +233,7 @@ try {
               const legacy = mode.startsWith('solid')
                 ? null
                 : createCeramicMaterial({
-                    mode: 'light',
+                    colorScheme: 'light',
                     color: `rgb(${rgb.map((v) => v * 255).join(' ')})`,
                     elevation: e,
                     maxElevation: budget,
