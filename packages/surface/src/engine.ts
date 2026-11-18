@@ -15,10 +15,54 @@ type Entry = {
   controller: AbortController;
   binder: Material["bind"];
 };
+export type Engine = ReturnType<typeof createEngine>;
+
+/** Stable instance; browser resources belong to each start/stop cycle. */
+export function createEngine() {
+  const entries = new Map<HTMLElement, Mesh>();
+  let running: ReturnType<typeof startEngine> | undefined;
+  let failed = false;
+  const engine = {
+    entries,
+    get failed() {
+      return failed;
+    },
+    fail(error: unknown) {
+      if (failed) return;
+      failed = true;
+      engine.stop();
+      console.error(error);
+    },
+    start() {
+      if (running || failed) return;
+      try {
+        running = startEngine(entries, engine.fail);
+      } catch (error) {
+        engine.fail(error);
+      }
+    },
+    stop() {
+      const current = running;
+      running = undefined;
+      current?.dispose();
+    },
+    requestMeasure() {
+      running?.requestMeasure();
+    },
+    requestDraw() {
+      running?.requestDraw();
+    },
+    release(mesh: Mesh) {
+      running?.release(mesh);
+    },
+  };
+  return engine;
+}
+
 /** Sole scheduling owner. Parameter notifications never invalidate layout. */
-export function createEngine(
+function startEngine(
   meshes: Map<HTMLElement, Mesh>,
-  report: (error: unknown) => void = console.error,
+  fail: (error: unknown) => void,
 ) {
   let renderer: Renderer | undefined,
     disposed = false,
@@ -40,6 +84,7 @@ export function createEngine(
     invalidate();
   }
   function drop(entry: Entry) {
+    entry.presentation.dispose();
     const binding = entry.binding;
     entry.binding = undefined;
     try {
@@ -49,7 +94,6 @@ export function createEngine(
       entry.unsubscribe();
       resize.unobserve(entry.mesh.element);
       renderer?.release(entry.target);
-      entry.presentation.dispose();
     }
   }
   function release(mesh: Mesh) {
@@ -59,13 +103,8 @@ export function createEngine(
     try {
       drop(entry);
     } catch (error) {
-      report(error);
+      fail(error);
     }
-  }
-  function fail(error: unknown) {
-    if (disposed) return;
-    dispose();
-    report(error);
   }
   function draw() {
     raf = 0;
@@ -120,10 +159,10 @@ export function createEngine(
             entries.set(element, entry);
             resize.observe(element);
           } catch (error) {
+            presentation?.dispose();
             controller.abort();
             binding?.dispose?.();
             if (target) renderer.release(target);
-            presentation?.dispose();
             throw error;
           }
         } else {
@@ -225,9 +264,12 @@ export function createEngine(
     entries.clear();
     input.dispose();
     renderer?.dispose();
-    errors.forEach(report);
+    errors.forEach((error) => console.error(error));
   }
-  void createRenderer(fail)
+  const failed = (error: unknown) => {
+    if (!disposed) fail(error);
+  };
+  void createRenderer(failed)
     .then((value) => {
       if (disposed) {
         value.dispose();
@@ -236,9 +278,9 @@ export function createEngine(
       renderer = value;
       invalidate();
     })
-    .catch(fail);
+    .catch(failed);
   return {
-    invalidate: invalidateLayout,
+    requestMeasure: invalidateLayout,
     requestDraw: invalidate,
     release,
     dispose,

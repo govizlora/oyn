@@ -23,6 +23,7 @@ export function createPresentation(mesh: Mesh) {
   canvas.style.cssText = 'position:absolute;pointer-events:none;display:block;';
   layer.append(canvas);
   host.append(layer);
+  host.setAttribute('data-oyn-active', '');
   let cachedBounds: DOMRect | undefined;
   let width = 0,
     height = 0,
@@ -93,6 +94,7 @@ export function createPresentation(mesh: Mesh) {
     ]);
   }
   function dispose() {
+    host.removeAttribute('data-oyn-active');
     layer.remove();
     canvas.width = canvas.height = 0;
     if (positioned && host.style.position === 'relative')

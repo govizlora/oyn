@@ -45,7 +45,6 @@ function readLocation() {
 function App() {
   const [route, setRoute] = useState(readLocation);
   const study = route.study;
-  const [error, setError] = useState(false);
   const Study = studies[study];
   useEffect(() => {
     const pop = () => setRoute(readLocation());
@@ -105,14 +104,8 @@ function App() {
           </div>
         </>
       )}
-      <SurfaceProvider
-        onError={(reason) => {
-          console.error(reason);
-          setError(true);
-        }}
-      >
-        {!error &&
-          (route.landing ? (
+      <SurfaceProvider>
+        {(route.landing ? (
             route.shadowLab ? (<ShadowLab />) : route.comparison ? (
               <CardComparison home={() => visit({ view: 'solids' })} />
             ) : route.exploration ? (
@@ -200,11 +193,6 @@ function App() {
             </svg>
           </button>
         </nav>
-      )}
-      {error && (
-        <p className="unsupported" role="alert">
-          This study needs WebGPU. Open it in a browser with WebGPU enabled.
-        </p>
       )}
     </main>
   );

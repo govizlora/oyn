@@ -36,7 +36,7 @@ Fresh props object identity alone does not imply a new instance. Appearance or t
 replacement ends the old instance. StrictMode setup/cleanup replay is supported;
 there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-`SurfaceProvider` owns the engine and `onError` (default console.error). Theme policy belongs to appearances, not Surface.
+`SurfaceProvider` owns the engine. Theme policy belongs to appearances, not Surface.
 
 ## Appearance authoring
 
@@ -155,3 +155,21 @@ programs; do not simultaneously write the same property from declarative props.
 A binding may expose a target-local `material`. Surface uses its parameters, passes,
 shader, data and padding without invoking its bind hook recursively. This lets
 appearances isolate per-element state when a source material is shared.
+
+
+### CSS fallback
+
+Keep the native appearance as the default. Surface owns the presence-only
+`data-oyn-active` attribute on each element while its GPU presentation is active.
+Do not set this attribute yourself.
+
+```css
+.button { background: #eee; box-shadow: 0 2px 6px #0002; }
+.button[data-oyn-active] { background: transparent; box-shadow: none; }
+```
+
+Override hover/disabled decorations as needed, but preserve focus indicators and
+layout dimensions. Initialization or runtime failure removes the attribute from
+every surface in that Provider and permanently stops its engine. New mounts and
+prop updates do not retry. Ref detachment also removes the attribute. Errors are
+logged for diagnostics; there is no application error callback to wire up.

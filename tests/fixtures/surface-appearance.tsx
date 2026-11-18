@@ -4,7 +4,7 @@ import { SurfaceProvider, useSurface, type Appearance, type SurfaceBinding } fro
 import type { ColorScheme } from '@oyn/ceramic';
 import { ceramic, type CeramicProps } from '@oyn/ceramic';
 
-const records = { creates:0, disposes:0, createdElevations:[] as (number | undefined)[], updatedElevations:[] as (number | undefined)[], frames:[] as number[][], errors:[] as string[] };
+const records = { failUpdate:false, creates:0, disposes:0, createdElevations:[] as (number | undefined)[], updatedElevations:[] as (number | undefined)[], frames:[] as number[][], errors:[] as string[] };
 const probe: Appearance<CeramicProps> = {
  create(props) {
   records.creates++;
@@ -22,7 +22,7 @@ const probe: Appearance<CeramicProps> = {
     return cache.get(original)!;
    },
   };
-  return {material,update(next){records.updatedElevations.push(next.elevation);return instance.update(next);},dispose(){records.disposes++;instance.dispose?.();}};
+  return {material,update(next){if(records.failUpdate) throw Error('test appearance failure');records.updatedElevations.push(next.elevation);return instance.update(next);},dispose(){records.disposes++;instance.dispose?.();}};
  },
 };
 const other:Appearance<CeramicProps>={create:probe.create};
@@ -40,7 +40,7 @@ function App(){
  const [mounted,setMounted]=useState(true),[alternate,setAlternate]=useState(false),[tag,setTag]=useState(false);
  const [quiet,setQuiet]=useState(false),[tick,setTick]=useState(0);
  useLayoutEffect(()=>{Object.assign(window,{api:{records,prepare:()=>startTransition(()=>{setProps({elevation:77});setSuspended(true);}),cancel:()=>{setProps({elevation:16});setSuspended(false);},setAttached,setProps,setMode,setMounted,setAlternate,setTag,setQuiet,rerender:()=>setTick(t=>t+1)}});});
- return <SurfaceProvider onError={error=>records.errors.push(String(error))}>
+ return <SurfaceProvider>
   <span data-tick={tick}/>
   <Suspense fallback={null}>{mounted&&<Sample suspended={suspended} appearance={quiet?inert:alternate?other:probe} props={{...props, colorScheme}} attached={attached} tag={tag}/>}</Suspense>
  </SurfaceProvider>;

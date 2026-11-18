@@ -6,8 +6,8 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 
 1. `src/react/useSurface.ts`: the application entry point. Read the ref callback for creation, registration, and cleanup, then the single layout effect for configuration updates. There is no DOM-to-state rerender.
 2. `src/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
-3. `src/react/SurfaceContext.ts`: the service contract between the hook and Provider; it does not create an engine.
-4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle and error handling.
+3. `src/react/SurfaceEngineContext.ts`: provides the Engine instance shared by the hook and Provider.
+4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle.
 5. `src/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
 6. `src/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
 7. `src/renderer.ts`: GPU initialization, target lifetime, uploads, and submission.
@@ -17,8 +17,8 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 | File | Responsibility |
 | --- | --- |
 | `react/useSurface.ts` | React lifecycle of one DOM / Appearance binding |
-| `react/SurfaceProvider.tsx` | Provider-level engine and error callback |
-| `react/SurfaceContext.ts` | Declare the service Context and contract |
+| `react/SurfaceProvider.tsx` | Provider-level engine lifecycle |
+| `react/SurfaceEngineContext.ts` | Provide the Engine instance through React Context |
 | `types/appearance.ts` | Visual definition and instance contracts |
 | `materialAppearance.ts` | Adapt an externally controlled Material to the same Appearance lifecycle |
 | `types/material.ts` | Low-level drawing, bounds, and binding contracts |
@@ -63,6 +63,10 @@ GPU cache extraction only reorganizes renderer internals: the renderer still cre
 
 ## Type Organization
 
-Cross-module contracts live in `src/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `SurfaceOptions` in `react/useSurface.ts`, and the React service contract in `react/SurfaceContext.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.
+Cross-module contracts live in `src/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `SurfaceOptions` in `react/useSurface.ts`, and `Engine` in `engine.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.
 
-The hook keeps one memoized binding handle per appearance/service pair. Creating this handle has no side effects. Its ref creates and registers the instance, and its cleanup releases it. One layout effect saves committed configuration and updates the active instance; configuration changes do not replace the ref. Reattachment starts with the last committed configuration, then the layout effect applies the current commit before the scheduled draw.
+The hook keeps one memoized binding handle per appearance/engine pair. Creating this handle has no side effects. Its ref creates and registers the instance, and its cleanup releases it. One layout effect saves committed configuration and updates the active instance; configuration changes do not replace the ref. Reattachment starts with the last committed configuration, then the layout effect applies the current commit before the scheduled draw.
+
+Each Provider owns one stable Engine instance. Creating it has no browser side effects. The Provider starts/stops browser resources in layout effects; Strict Mode can restart resources without replacing the instance. Context exposes this instance directly, not a separate forwarding contract. `requestMeasure` schedules measurement and drawing; `requestDraw` schedules drawing only.
+
+Presentation owns `data-oyn-active` during GPU attachment. Engine failure latches the Engine as failed and disposes every presentation, restoring CSS before releasing its other resources, then logs the cause. Hooks do not create or update appearances after failure. There is no Provider error callback or React fallback state.

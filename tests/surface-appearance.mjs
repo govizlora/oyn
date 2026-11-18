@@ -21,6 +21,7 @@ try{
  const settle=()=>page.waitForTimeout(150);
  const state=()=>page.evaluate(()=>({stats:{...window.stats},creates:api.records.creates,disposes:api.records.disposes,last:api.records.frames.at(-1),errors:api.records.errors}));
  await settle();assert.equal((await state()).stats.pointerListeners,1);
+ assert.equal(await page.locator('#sample').getAttribute('data-oyn-active'),'');
  const size=()=>page.locator('canvas').evaluate(c=>[c.width,c.height]);
  const initialSize=await size();
  const initial=await state();await page.evaluate(()=>{window.firstCanvas=document.querySelector('canvas');api.rerender();});await settle();
@@ -52,6 +53,7 @@ try{
  const beforeTag=(await state()).creates;await page.evaluate(()=>api.setTag(true));await settle();assert.ok((await state()).creates>beforeTag,'New DOM target owns a new instance');
  await page.evaluate(()=>{window.boundNode=document.getElementById('sample');api.setAttached(false);});await settle();
  assert.equal(await page.locator('canvas').count(),0,'Ref detachment releases the surface');
+ assert.equal(await page.locator('#sample').getAttribute('data-oyn-active'),null);
  assert.equal(await page.evaluate(()=>document.getElementById('sample')===window.boundNode),true,'Ref detachment preserves the DOM');
  await page.evaluate(()=>api.setProps({elevation:23}));await settle();
  await page.evaluate(()=>api.setAttached(true));await page.locator('canvas').waitFor();await settle();
@@ -80,6 +82,58 @@ try{
  assert.equal(inputChecks.initial.position,null);assert.equal(inputChecks.listenerCount,1);assert.equal(inputChecks.afterOne,1);assert.equal(inputChecks.afterBoth,0);
  assert.deepEqual(inputChecks.left.position,{x:321,y:123});assert.equal(inputChecks.left.inside,false);assert.equal(inputChecks.left.focused,false);assert.equal(inputChecks.hidden.visible,false);assert.equal(inputChecks.notifications,8);
 
+ // Hook failures latch the engine: no future appearance updates or creations.
+ await page.evaluate(()=>{api.setQuiet(false);api.setMounted(true);});
+ await page.locator('#sample[data-oyn-active]').waitFor();
+ await page.evaluate(()=>{api.records.failUpdate=true;api.setProps({elevation:12});});
+ await settle();
+ assert.equal(await page.locator('[data-oyn-active]').count(),0);
+ assert.equal(await page.locator('canvas').count(),0);
+ const failedCreates=(await state()).creates;
+ await page.evaluate(()=>{api.setProps({elevation:13});api.setAttached(false);});await settle();
+ await page.evaluate(()=>api.setAttached(true));await settle();
+ assert.equal((await state()).creates,failedCreates);
+ assert.equal(await page.locator('canvas').count(),0);
  await page.evaluate(()=>window.unmountSurface());
+ // Exercise actual renderer failure channels with two surfaces and native CSS.
+ for (const reason of ['initialization','validation','device-lost']) {
+  const result=await page.evaluate(async(reason)=>{
+   const {createEngine}=await import('/packages/surface/src/engine.ts');
+   const {ceramic}=await import('/packages/ceramic/src/index.ts');
+   const style=document.createElement('style');
+   style.textContent='.fallback-probe {background:rgb(12, 34, 56);width:100px;height:60px}.fallback-probe[data-oyn-active]{background:transparent}';
+   document.head.append(style);
+   const hosts=[document.createElement('div'),document.createElement('div')];
+   const instances=hosts.map(()=>ceramic.create({light:{source:'fixed'}}));
+   const engine=createEngine();
+   hosts.forEach((element,i)=>{element.className='fallback-probe';document.body.append(element);engine.entries.set(element,{element,material:instances[i].material});});
+   const requestAdapter=navigator.gpu.requestAdapter;
+   const requestDevice=GPUAdapter.prototype.requestDevice;
+   let device;
+   if(reason==='initialization') navigator.gpu.requestAdapter=async()=>null;
+   else GPUAdapter.prototype.requestDevice=async function(...args){device=await requestDevice.apply(this,args);return device;};
+   const waitFor=async(test)=>{for(let i=0;i<200;i++){if(test())return;await new Promise(r=>setTimeout(r,10));}throw Error('Timed out: '+reason);};
+   try {
+    engine.start();
+    if(reason!=='initialization') {
+     await waitFor(()=>hosts.every(h=>h.hasAttribute('data-oyn-active')));
+     if(reason==='validation') device.dispatchEvent(new GPUUncapturedErrorEvent('uncapturederror',{error:new GPUValidationError('test validation failure')}));
+     else device.destroy();
+    }
+    await waitFor(()=>engine.failed);
+    const fallback=hosts.map(h=>({active:h.hasAttribute('data-oyn-active'),canvases:h.querySelectorAll('canvas').length,background:getComputedStyle(h).backgroundColor}));
+    engine.start();engine.requestMeasure();engine.requestDraw();
+    await new Promise(r=>setTimeout(r,100));
+    return {fallback,restarted:hosts.some(h=>h.hasAttribute('data-oyn-active'))};
+   } finally {
+    navigator.gpu.requestAdapter=requestAdapter;GPUAdapter.prototype.requestDevice=requestDevice;
+    engine.stop();instances.forEach(i=>i.dispose?.());hosts.forEach(h=>h.remove());style.remove();
+   }
+  },reason);
+  assert.deepEqual(result,{fallback:Array.from({length:2},()=>({active:false,canvases:0,background:'rgb(12, 34, 56)'})),restarted:false},reason);
+ }
+ assert.ok(errors.some(e=>e.includes('test appearance failure')));
+ assert.equal(errors.length,4,'Exactly one diagnostic per failed engine');
+
  console.log('PASS appearance API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/appearance replacement and cleanup.');
 }finally{await browser?.close();server.kill();}

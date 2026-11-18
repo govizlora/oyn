@@ -147,3 +147,13 @@ footer {
 .scroll-box {
   overflow-anchor: none;
 }
+
+
+/* Native appearance remains the default until Surface takes over. */
+.surface-button:not([data-oyn-active]) {
+  background: #eee;
+  box-shadow: 0 4px 12px #0003;
+}
+.dark .surface-button:not([data-oyn-active]) {
+  background: #333;
+}

@@ -11,7 +11,6 @@ function Example() {
   const [mounted, setMounted] = useState(true);
   const [dark, setDark] = useState(false);
   const [generation, setGeneration] = useState(0);
-  const [error, setError] = useState('');
 
   return (
     <main ref={root} className={dark ? 'example dark' : 'example'}>
@@ -120,14 +119,11 @@ function Example() {
           size. No React handler is involved.
         </p>
       </details>
-      {error && <p role="alert">{error}</p>}
       <p>
         Scroll this page, resize the window, or scroll / drag the bottom-right
         corner of the dashed container.
       </p>
-      <SurfaceProvider
-        onError={(error) => setError(String(error))}
-      >
+      <SurfaceProvider>
         <div className="scroll-box" aria-label="Resizable scroll container">
           <div className="scroll-content">
             <p className="scroll-hint">Scroll down to the button ↓</p>
