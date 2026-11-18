@@ -1,11 +1,11 @@
-import { useLayoutEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createEngine } from '../engine.js';
 import { SurfaceEngineContext } from './SurfaceEngineContext.js';
 
 export function SurfaceProvider({ children }: { children: ReactNode }) {
   const [engine] = useState(createEngine);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     engine.start();
     return () => engine.stop();
   }, [engine]);
