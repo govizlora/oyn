@@ -56,7 +56,7 @@ keyboard interaction and responsive layouts. See [the collection notes](examples
 
 ## Support policy
 
-Oyn supports **WebGPU only**, in a secure context (HTTPS or localhost) with an available GPU adapter/device. Environments without usable WebGPU are unsupported. There is no WebGL, Canvas2D or CSS rendering fallback, automatic native-style restoration, or planned compatibility renderer.
+Surface prefers WebGPU. If it cannot acquire a device it lazily loads WebGL2 for analytic rounded Ceramic cards (raised, inset and card geometry). Every rendered element still owns its DOM canvas; only the temporary batch buffer is shared. Baked, sculpted and WGSL-only materials retain native CSS on fallback devices.
 
 `SurfaceProvider` reports initialization failures, device loss, invalid shaders and oversized canvases through `onError` (default: `console.error`) and disposes its rendering. Unsupported environments do not receive a substitute material effect.
 
@@ -91,7 +91,7 @@ Fixed scene: three columns; **120 cards**; 300×180 CSS px; 32px gaps; radius 16
 
 **Limit on this machine:** A needs a 2248×17216 texture, exceeding the adapter’s 16384 maximum dimension. A explicitly reports unsupported, and tests record that result rather than claiming a rendered pass. B is supported. No automatic DPR reduction, card reduction or architectural fallback is applied; visual tests skip only the unavailable A comparison.
 
-The WGSL port covers **light and dark Ceramic** optics (including dark specular/Fresnel, distance falloff and frosted edges), not every production material feature. Select Light/Dark in the page or add `&theme=dark`; both modes share the same pipelines, and switching only updates uniforms. Defaults come from `createCeramicMaterial()` in the material package. A paused scene redraws once on a theme change. The two benchmark modes share one WGSL implementation. The current `@oyn/surface` and Ceramic packages are also WebGPU-only; their former GLSL implementation has been removed. The original MUI/shadcn demos are native UI baselines, while the Surface demo uses the current packages. Full example UI revalidation was not part of the package migration.
+The WGSL port covers **light and dark Ceramic** optics (including dark specular/Fresnel, distance falloff and frosted edges), not every production material feature. Select Light/Dark in the page or add `&theme=dark`; both modes share the same pipelines, and switching only updates uniforms. Defaults come from `createCeramicMaterial()` in the material package. A paused scene redraws once on a theme change. The two benchmark modes share one WGSL implementation. This standalone benchmark remains WebGPU-only. The original MUI/shadcn demos are native UI baselines, while the Surface demo uses the current packages. Full example UI revalidation was not part of the package migration.
 
 Historical light-mode measurements and limitations: [performance report](test-results/webgpu/REPORT.md). Dark mode has functional and visual validation, but the complete performance matrix has not been rerun.
 

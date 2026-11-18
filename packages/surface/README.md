@@ -1,8 +1,6 @@
 # @oyn/surface
 
-React 19 DOM-bound WebGPU surfaces. One canvas per bound element; one GPU device,
-pipeline cache and draw scheduler per Provider. WebGPU only: no Canvas2D/WebGL/CSS
-fallback. Surface owns presentation and execution, not material optics.
+React 19 DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second scheduler, or runtime backend switching.
 
 See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useSurface.ts`.
 

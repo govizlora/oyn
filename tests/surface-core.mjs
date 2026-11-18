@@ -149,7 +149,7 @@ try {
     const own = Object.getOwnPropertyDescriptor(navigator, 'gpu');
     let unavailable = false;
     Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });
-    try { await createRenderer(() => {}); } catch (error) { unavailable = error.message.includes('WebGPU'); }
+    try { const fallback = await createRenderer(() => {}); unavailable = !!fallback.ready; fallback.dispose(); }
     finally { if (own) Object.defineProperty(navigator, 'gpu', own); else delete navigator.gpu; }
     const wait = async predicate => { for (let i = 0; !predicate(); i++) { if (i > 300) throw Error('Failure cleanup timed out'); await new Promise(requestAnimationFrame); } };
     const host = document.createElement('div'); host.style.cssText = 'width:100000px;height:10px'; document.body.append(host);

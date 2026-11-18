@@ -10,7 +10,7 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle.
 5. `src/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
 6. `src/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
-7. `src/renderer.ts`: GPU initialization, target lifetime, uploads, and submission.
+7. `src/renderer.ts`: one-time backend selection. webgpu.ts owns direct submission; the lazy webgl2.ts owns batch rendering and element-local copies.
 
 ## Files and Responsibilities
 

@@ -45,6 +45,9 @@ export function environmentBinding(
     const parameters = source.parameters;
     const material: Material = {
       parameters,
+      get loadWebGL2() {
+        return source.loadWebGL2;
+      },
       get shader() {
         return source.shader;
       },

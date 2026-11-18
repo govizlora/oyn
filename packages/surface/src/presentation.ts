@@ -23,7 +23,9 @@ export function createPresentation(mesh: Mesh) {
   canvas.style.cssText = 'position:absolute;pointer-events:none;display:block;';
   layer.append(canvas);
   host.append(layer);
-  host.setAttribute('data-oyn-active', '');
+  function activate() {
+    host.toggleAttribute('data-oyn-active', true);
+  }
   let cachedBounds: DOMRect | undefined;
   let width = 0,
     height = 0,
@@ -101,5 +103,5 @@ export function createPresentation(mesh: Mesh) {
       host.style.position = position;
     if (host.style.isolation === 'isolate') host.style.isolation = isolation;
   }
-  return { canvas, measure, frame, dispose };
+  return { canvas, measure, frame, activate, dispose };
 }

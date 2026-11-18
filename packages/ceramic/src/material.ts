@@ -94,6 +94,7 @@ function createResolvedMaterial(
   updateElevation(elevation);
   return {
     bind: ceramicBinding(options.light),
+    loadWebGL2: loadCeramic,
     get shader() {
       return elevation < 0 ? insetWGSL : ceramicWGSL;
     },
@@ -109,4 +110,8 @@ function createResolvedMaterial(
       updateElevation(value);
     },
   };
+}
+
+function loadCeramic() {
+  return import("./generated/ceramic.js").then((m) => m.default);
 }

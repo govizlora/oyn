@@ -14,7 +14,7 @@ import { ceramicLightingWGSL } from "./effects/ceramic-lighting.js";
 import { ceramicGeometryWGSL } from "./effects/ceramic-geometry.js";
 import { gaussianCoverageWGSL, ceramicShadowWGSL } from "./effects/shadow.js";
 
-const shader = /* wgsl */ `
+export const cardWGSL = /* wgsl */ `
 ${frameWGSL}
 ${geometryWGSL}
 ${ceramicLightingWGSL}
@@ -81,7 +81,8 @@ function resolvedCardCeramic(options: {
   const shadow = new Float32Array(finish.values.slice(12, 16));
   const material: Material = {
     bind: ceramicBinding(options.finish?.light),
-    shader,
+    shader: cardWGSL,
+    loadWebGL2: loadCard,
     parameters,
     passes: finish.shadows ? ["shadow", "surface"] : ["surface"],
     measurePadding: (w, h) =>
@@ -138,4 +139,8 @@ export function cardCeramic(
     }),
   });
   return material;
+}
+
+function loadCard() {
+  return import("./generated/card.js").then((m) => m.default);
 }

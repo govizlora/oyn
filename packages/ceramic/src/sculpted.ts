@@ -137,6 +137,7 @@ export function sculptedCeramic(options: SculptedOptions = {}) {
   setGeometry(options);
   return {
     ...base,
+    loadWebGL2: undefined,
     bind: ceramicBinding(),
     shader,
     setGeometry,

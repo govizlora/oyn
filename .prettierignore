@@ -7,3 +7,4 @@ playwright-report/
 .vite/
 .cache/
 package-lock.json
+packages/ceramic/src/generated/

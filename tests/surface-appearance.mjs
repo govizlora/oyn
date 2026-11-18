@@ -110,7 +110,11 @@ try{
    const requestAdapter=navigator.gpu.requestAdapter;
    const requestDevice=GPUAdapter.prototype.requestDevice;
    let device;
-   if(reason==='initialization') navigator.gpu.requestAdapter=async()=>null;
+   const getContext=HTMLCanvasElement.prototype.getContext;
+   if(reason==='initialization') {
+    navigator.gpu.requestAdapter=async()=>null;
+    HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:getContext.call(this,type,...args);};
+   }
    else GPUAdapter.prototype.requestDevice=async function(...args){device=await requestDevice.apply(this,args);return device;};
    const waitFor=async(test)=>{for(let i=0;i<200;i++){if(test())return;await new Promise(r=>setTimeout(r,10));}throw Error('Timed out: '+reason);};
    try {
@@ -126,7 +130,7 @@ try{
     await new Promise(r=>setTimeout(r,100));
     return {fallback,restarted:hosts.some(h=>h.hasAttribute('data-oyn-active'))};
    } finally {
-    navigator.gpu.requestAdapter=requestAdapter;GPUAdapter.prototype.requestDevice=requestDevice;
+    HTMLCanvasElement.prototype.getContext=getContext; navigator.gpu.requestAdapter=requestAdapter;GPUAdapter.prototype.requestDevice=requestDevice;
     engine.stop();instances.forEach(i=>i.dispose?.());hosts.forEach(h=>h.remove());style.remove();
    }
   },reason);

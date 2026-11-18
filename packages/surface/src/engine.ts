@@ -7,8 +7,10 @@ import { createPresentation } from "./presentation.js";
 type Entry = {
   mesh: Mesh;
   material: Material;
-  presentation: ReturnType<typeof createPresentation>;
-  target: Target;
+  output?: {
+    presentation: ReturnType<typeof createPresentation>;
+    target: Target;
+  };
   unsubscribe: () => void;
   parameters: Parameters;
   binding?: SurfaceBinding;
@@ -83,8 +85,14 @@ function startEngine(
     positionDirty = true;
     invalidate();
   }
+  function detach(entry: Entry) {
+    if (!entry.output) return;
+    entry.output.presentation.dispose();
+    renderer?.release(entry.output.target);
+    entry.output = undefined;
+  }
   function drop(entry: Entry) {
-    entry.presentation.dispose();
+    detach(entry);
     const binding = entry.binding;
     entry.binding = undefined;
     try {
@@ -93,7 +101,6 @@ function startEngine(
     } finally {
       entry.unsubscribe();
       resize.unobserve(entry.mesh.element);
-      renderer?.release(entry.target);
     }
   }
   function release(mesh: Mesh) {
@@ -119,11 +126,10 @@ function startEngine(
       for (const [element, mesh] of meshes) {
         if (!element.isConnected) continue;
         let entry = entries.get(element);
+        let measure = layoutDirty;
         if (!entry) {
           const controller = new AbortController();
           let binding: SurfaceBinding | undefined;
-          let presentation: ReturnType<typeof createPresentation> | undefined;
-          let target: Target | undefined;
           try {
             binding = mesh.material.bind?.({
               element,
@@ -134,35 +140,20 @@ function startEngine(
             });
             binding?.measure?.();
             const material = binding?.material ?? mesh.material;
-            presentation = createPresentation({
-              element,
-              get material() {
-                const current = entries.get(element);
-                return current
-                  ? (current.binding?.material ?? mesh.material)
-                  : (binding?.material ?? mesh.material);
-              },
-            });
-            presentation.measure(renderer.limit);
-            target = renderer.createTarget(presentation.canvas, material);
             entry = {
               controller,
               binding,
               binder: mesh.material.bind,
               mesh,
               material,
-              presentation,
-              target,
               parameters: material.parameters,
               unsubscribe: material.parameters.subscribe(invalidate),
             };
             entries.set(element, entry);
             resize.observe(element);
           } catch (error) {
-            presentation?.dispose();
             controller.abort();
             binding?.dispose?.();
-            if (target) renderer.release(target);
             throw error;
           }
         } else {
@@ -189,31 +180,52 @@ function startEngine(
             entry.parameters !== material.parameters;
           if (replaced) {
             entry.unsubscribe();
-            if (entry.target.size !== material.parameters.length * 4) {
-              renderer.release(entry.target);
-              entry.target = renderer.createTarget(
-                entry.presentation.canvas,
-                material,
-              );
-            }
             entry.material = material;
             entry.parameters = material.parameters;
             entry.unsubscribe = material.parameters.subscribe(invalidate);
           }
-          if (layoutDirty || rebound || replaced)
-            entry.presentation.measure(renderer.limit);
+          measure ||= rebound || replaced;
         }
+        if (renderer.ready && !renderer.ready(entry.material)) {
+          detach(entry);
+          continue;
+        }
+        if (!entry.output) {
+          const current = entry;
+          const presentation = createPresentation({
+            element,
+            get material() {
+              return current.material;
+            },
+          });
+          try {
+            presentation.measure(renderer.limit);
+            entry.output = {
+              presentation,
+              target: renderer.createTarget(
+                presentation.canvas,
+                entry.material,
+              ),
+            };
+          } catch (error) {
+            presentation.dispose();
+            throw error;
+          }
+        } else if (measure) entry.output.presentation.measure(renderer.limit);
       }
       layoutDirty = false;
       mutations.takeRecords();
       const items = [];
       for (const entry of entries.values()) {
-        const frame = entry.presentation.frame(entry.binding, positionDirty);
+        if (!entry.output) continue;
+        const { target, presentation } = entry.output;
+        const frame = presentation.frame(entry.binding, positionDirty);
         if (frame)
-          items.push({ target: entry.target, material: entry.material, frame });
+          items.push({ target, material: entry.material, frame, presentation });
       }
       positionDirty = false;
       renderer.draw(items);
+      for (const item of items) item.presentation.activate();
     } catch (error) {
       fail(error);
     }
@@ -269,7 +281,7 @@ function startEngine(
   const failed = (error: unknown) => {
     if (!disposed) fail(error);
   };
-  void createRenderer(failed)
+  void createRenderer(failed, invalidate)
     .then((value) => {
       if (disposed) {
         value.dispose();

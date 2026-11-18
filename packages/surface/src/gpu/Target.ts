@@ -6,7 +6,6 @@ export type Target = {
   parameters: GPUBuffer;
   bind: GPUBindGroup;
   pipelines: GPURenderPipeline[];
-  size: number;
   shader: string;
   passes: readonly string[];
   data?: StaticData;
