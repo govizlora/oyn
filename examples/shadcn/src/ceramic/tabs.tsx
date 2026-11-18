@@ -1,5 +1,7 @@
 "use client"
 
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
+
 import { ceramic } from '@oyn/ceramic'
 
 import * as React from "react"
@@ -51,19 +53,9 @@ function useSelectionGeometry(host: React.RefObject<HTMLDivElement | null>, enab
 function TabsList({ className, variant = "default", ref: forwardedRef, children, ...props }:
   React.ComponentProps<typeof TabsPrimitive.List> & VariantProps<typeof tabsListVariants>) {
   const host = React.useRef<HTMLDivElement>(null);
-  const capture = React.useCallback((node: HTMLDivElement | null) => {
-    host.current = node;
-    const cleanup = typeof forwardedRef === 'function' ? forwardedRef(node) : undefined;
-    if (forwardedRef && typeof forwardedRef !== 'function') forwardedRef.current = node;
-    return () => {
-      host.current = null;
-      if (typeof cleanup === 'function') cleanup();
-      else if (typeof forwardedRef === 'function') forwardedRef(null);
-      else if (forwardedRef) forwardedRef.current = null;
-    };
-  }, [forwardedRef]);
   const inset = variant === 'default';
-  const ref = useSurface({ appearance: ceramic, props: insetProps, enabled: inset }, capture);
+  const surfaceRef = useSurface({ appearance: ceramic, props: insetProps, enabled: inset });
+  const ref = useComposedRefs(surfaceRef, host, forwardedRef);
   const indicatorRef = useSurface({ appearance: ceramic, props: neutralProps, enabled: inset });
   const rect = useSelectionGeometry(host, inset);
   return (

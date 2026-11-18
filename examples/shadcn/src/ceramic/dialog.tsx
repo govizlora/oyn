@@ -1,5 +1,7 @@
 "use client"
 
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
+
 import { ceramic } from '@oyn/ceramic'
 
 import { useSurface } from "@oyn/surface"
@@ -61,7 +63,8 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const ref = useSurface({ appearance: ceramic, props: dialogProps }, forwardedRef)
+  const surfaceRef = useSurface({ appearance: ceramic, props: dialogProps })
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay className="bg-black/20" />

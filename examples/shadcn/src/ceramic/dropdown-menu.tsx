@@ -1,5 +1,7 @@
 "use client"
 
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
+
 import { ceramic } from '@oyn/ceramic'
 
 import * as React from "react"
@@ -42,7 +44,8 @@ function DropdownMenuContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  const ref = useSurface({ appearance: ceramic, props: popoverProps }, forwardedRef)
+  const surfaceRef = useSurface({ appearance: ceramic, props: popoverProps })
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -253,7 +256,8 @@ function DropdownMenuSubContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
-  const ref = useSurface({ appearance: ceramic, props: popoverProps }, forwardedRef)
+  const surfaceRef = useSurface({ appearance: ceramic, props: popoverProps })
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.SubContent

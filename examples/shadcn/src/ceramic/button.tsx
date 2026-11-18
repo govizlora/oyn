@@ -1,3 +1,4 @@
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
 import { ceramic } from '@oyn/ceramic'
 import { useSurfaceMode } from '@oyn/surface'
 import { useSurface } from '@oyn/surface'
@@ -55,7 +56,8 @@ function Button({
   const mode = useSurfaceMode()
   const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps : neutralProps
   const filled = variant !== 'ghost' && variant !== 'link'
-  const ref = useSurface({ appearance: ceramic, props: material, enabled: filled }, forwardedRef)
+  const surfaceRef = useSurface({ appearance: ceramic, props: material, enabled: filled })
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   const materialClass = variant === 'default' ? 'text-primary-foreground' : variant === 'destructive' ? 'text-white' : 'text-foreground'
   const Comp = asChild ? Slot.Root : "button"
 

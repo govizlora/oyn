@@ -1,5 +1,7 @@
 "use client"
 
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
+
 import { ceramic } from '@oyn/ceramic'
 
 import * as React from "react"
@@ -66,7 +68,8 @@ function SelectContent({
   ref: forwardedRef,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const ref = useSurface({ appearance: ceramic, props: popoverProps }, forwardedRef)
+  const surfaceRef = useSurface({ appearance: ceramic, props: popoverProps })
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

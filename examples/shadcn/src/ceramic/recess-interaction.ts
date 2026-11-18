@@ -1,3 +1,4 @@
+import { useComposedRefs } from '@radix-ui/react-compose-refs'
 import * as React from 'react'
 import { useSurface } from '@oyn/surface'
 import { useRecessMotion } from './elevation-motion'
@@ -21,7 +22,8 @@ export function useRecessInteraction<T extends HTMLElement>(
   const disabled = props.disabled || props['aria-disabled'] === true || props['aria-disabled'] === 'true'
   const target = disabled ? restingElevation : pressed ? recessElevations.pressed : highlighted ? recessElevations.hover : restingElevation
   const surface = useRecessMotion(target)
-  const ref = useSurface(surface, forwardedRef)
+  const surfaceRef = useSurface(surface)
+  const ref = useComposedRefs(surfaceRef, forwardedRef)
   React.useEffect(() => { if (disabled) { setHovered(false); setFocused(false); setPressed(false) } }, [disabled])
   const bindings: Omit<InteractionProps<T>, 'disabled' | 'aria-disabled'> & { ref: typeof ref; 'data-surface-recess'?: string; 'data-surface-elevation'?: number } = {
     ref,
