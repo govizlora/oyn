@@ -5,7 +5,6 @@ import { QuietStudy } from './studies';
 import { AirStudy, PlaygroundStudy } from './kinetic-studies';
 import { ObjectLibrary, type LibraryLocation } from './library';
 import { objects, rooms } from './library/registry';
-import { ColorLab } from './color-lab';
 import { ShadowLab } from './shadow-lab';
 import { CardComparison } from './card-comparison';
 import { SolidStudy } from './solid-study';
@@ -32,7 +31,6 @@ function readLocation() {
     library: params.get('view') === 'library',
     exploration: params.get('view') === 'solids',
     comparison: params.get('view') === 'card-comparison',
-    colorLab: params.get('view') === 'color-lab',
     shadowLab: params.get('view') === 'shadow-lab',
     landing: !params.has('study') && params.get('view') !== 'library',
     room:
@@ -55,7 +53,7 @@ function App() {
     return () => window.removeEventListener('popstate', pop);
   }, []);
   useEffect(() => {
-    document.title = route.colorLab ? 'Oyn — Color lab' : route.shadowLab ? 'Oyn — Shadow lab' : route.library
+    document.title = route.shadowLab ? 'Oyn — Shadow lab' : route.library
       ? 'Oyn — Object library'
       : route.landing
         ? route.comparison
@@ -71,7 +69,6 @@ function App() {
     route.exploration,
     route.comparison,
     route.shadowLab,
-    route.colorLab,
   ]);
   const visit = (params: Record<string, string>) => {
     const url = new URL(location.href);
@@ -116,7 +113,7 @@ function App() {
       >
         {!error &&
           (route.landing ? (
-            route.colorLab ? (<ColorLab />) : route.shadowLab ? (<ShadowLab />) : route.comparison ? (
+            route.shadowLab ? (<ShadowLab />) : route.comparison ? (
               <CardComparison home={() => visit({ view: 'solids' })} />
             ) : route.exploration ? (
               <SolidStudy
