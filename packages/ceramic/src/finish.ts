@@ -56,6 +56,8 @@ export type CeramicOptions = {
    * @defaultValue 1
    */
   sharpness?: number;
+  /** Glossy outer (Fresnel) reflection strength; defaults to reflectionStrength. */
+  rimReflectionStrength?: number;
   /**
    * Soft edge width.
    * @defaultValue 3
@@ -210,6 +212,10 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     (relativeLuminance(rgb) > lightingThreshold ? "soft" : "glossy");
   const glossy = lighting === "glossy";
   const shadows = environment === "light";
+  const rimStrength =
+    options.rimReflectionStrength ?? settings.reflectionStrength;
+  if (!Number.isFinite(Math.fround(rimStrength)) || rimStrength < 0)
+    throw Error("Invalid Ceramic rimReflectionStrength.");
   const values = [
     0,
     Math.max(0, elevation),
@@ -236,7 +242,7 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     settings.lightSurfaceTop,
     settings.lightSurfaceShade,
     0,
-    0,
+    rimStrength,
   ];
   return { values, rgb, elevation, validateSignedElevation, shadows, lighting };
 }

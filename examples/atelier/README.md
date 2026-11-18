@@ -230,3 +230,7 @@ The CSS-only controls have no change handler. Their checked properties drive `:h
 For strict observation, focus a control using the keyboard, park the pointer over the sample, then toggle with Space (or adjust a slider using arrow keys). Keep the pointer still before and after the change. Moving it afterward is a separate recovery check, not proof of automatic synchronization. No live DOM status panel is added, since its mutations could themselves wake the engine.
 
 These are diagnostic scenarios, not guaranteed supported behavior. A dotted native outline changing while the material does not is evidence to investigate, not something the demo should repair.
+
+### Ripple field (series 07)
+
+[The ripple workbench](http://127.0.0.1:5177/flip.html) pairs orange/white glossy Ceramic discs with live controls for their finish, profile, socket and wave spacing. Hover and press recess the stone into its socket. Only stones launch half-turn waves; empty desktop clicks do nothing. Each strike starts with angular velocity and settles into a magnetic detent with an underdamped spring. Duration, damping ratio and spacing are captured per wave. The inner specular glint and outer rim reflection can be tuned independently. Tab lights the focused socket amber, casting light back onto the stone; native Enter/Space activation uses that disc as the source.

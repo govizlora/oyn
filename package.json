@@ -33,6 +33,7 @@
     "test:atelier": "npm run build && node tests/motion-clock.mjs && node tests/atelier.mjs && node tests/atelier-archive.mjs",
     "build:atelier": "npm run build -w @oyn/example-atelier -- --outDir ../../dist --emptyOutDir",
     "test:library": "npm run build && node tests/library.mjs",
+    "test:flip-disc": "npm run build && node tests/flip-disc.mjs",
     "test:sculpted": "npm run build && node tests/sculpted.mjs",
     "test:solids": "npm run build && node tests/solids.mjs",
     "test:ceramic-compatibility": "npm run build:packages && node tests/ceramic-compatibility.mjs",

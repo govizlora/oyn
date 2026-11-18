@@ -1,34 +1,58 @@
 import {
-  useEffect,
-  useState,
+  use, useState,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
 } from 'react';
 import { useSurface } from '@oyn/surface';
-import { baked, type BakedGeometry } from '@oyn/ceramic/baked';
+import { baked, type BakedProps } from '@oyn/ceramic/baked';
 import { loadGeometry } from './geometry-assets';
 import { Surface } from './controls';
 
-type ControlShape = 'dish'|'thumbDial'|'dimple'|'bridge'|'rockerOn'|'rockerOff'|'latch'|'detent'|'saddle'|'pocketDial';
-type ControlOptions = { shape:ControlShape; color?:string; elevation?:number; rotation?:number };
-// Disabled during asset loading; never paints a competing fallback surface.
-function useBakedControl<T extends HTMLElement>({shape,color='#eeeee9',elevation=10,rotation=0}:ControlOptions) {
-  const [geometry,setAsset]=useState<BakedGeometry>();
-  const [error,setError]=useState<Error>();
-  useEffect(()=>{
-    let active=true;
-    loadGeometry(`controls/${shape}`).then(value=>{if(active)setAsset(value);},error=>{if(active)setError(error);});
-    return ()=>{active=false;};
-  },[shape]);
-  const ref=useSurface({appearance:baked,props:{geometry:geometry!,
-    colorScheme:'light',color,elevation,rotation,maxElevation:24,
-    lightZ:150,lightReflectionStrength:.65,lightEdgeShade:.38,
-    lightSurfaceTop:.05,lightSurfaceShade:.025,
-    shadowStrength:.18,contactShadowStrength:.07,
-  }});
-  if(error)throw error;
-  return geometry ? ref : undefined;
+type ControlShape =
+  | "dish"
+  | "thumbDial"
+  | "dimple"
+  | "bridge"
+  | "rockerOn"
+  | "rockerOff"
+  | "latch"
+  | "detent"
+  | "saddle"
+  | "pocketDial";
+type ControlOptions = {
+  shape: ControlShape;
+  color?: string;
+  elevation?: number;
+  rotation?: number;
+};
+// Mount only with a decoded profile. Ref attachment precedes layout effects.
+function useBakedControl<T extends HTMLElement>({
+  shape,
+  color = "#eeeee9",
+  elevation = 10,
+  rotation = 0,
+}: ControlOptions) {
+  const geometry = use(loadGeometry(`controls/${shape}`));
+  return useSurface<BakedProps, T>({
+    appearance: baked,
+    props: {
+      geometry,
+      colorScheme: "light",
+      color,
+      elevation,
+      rotation,
+      maxElevation: 24,
+      lightZ: 150,
+      lightReflectionStrength: 0.65,
+      lightEdgeShade: 0.38,
+      lightSurfaceTop: 0.05,
+      lightSurfaceShade: 0.025,
+      shadowStrength: 0.18,
+      contactShadowStrength: 0.07,
+    },
+  });
 }
+
 function SculptedButton({
   geometry,
   className = '',

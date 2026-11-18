@@ -25,6 +25,11 @@
       "types": "./dist/card.d.ts",
       "development": "./src/card.ts",
       "import": "./dist/card.js"
+    },
+    "./flip-disc": {
+      "types": "./dist/flip-disc.d.ts",
+      "development": "./src/flip-disc.ts",
+      "import": "./dist/flip-disc.js"
     }
   },
   "scripts": {

@@ -39,7 +39,12 @@ export function SculptedStudy({
           </a>
           <span>MATERIAL EXPLORATIONS / 004</span>
         </div>
-        <button onClick={explore}>Object library ↗</button>
+        <nav aria-label="Collections">
+          <a href="./flip.html" className="field-link">
+            Ripple field ↗
+          </a>
+          <button onClick={explore}>Object library ↗</button>
+        </nav>
       </header>
       <div className="sculpture-title">
         <h1>

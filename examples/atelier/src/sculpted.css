@@ -490,3 +490,14 @@
     transform: scale(0.82);
   }
 }
+
+.field-link {
+  color: #975233;
+  font: 10px monospace;
+  text-decoration: none;
+  padding: 8px;
+}
+.sculpture-heading nav { text-align: right; }
+@media (max-width: 700px) {
+  .field-link { font-size: 8px; }
+}
