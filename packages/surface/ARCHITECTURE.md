@@ -4,7 +4,7 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 
 ## Start with useSurface
 
-1. `src/react/useSurface.ts`: the application entry point. Read binding state, committed inputs, instance lifetime, props updates and registration, then the DOM ref.
+1. `src/react/useSurface.ts`: the application entry point. Read the ref callback for creation, registration, and cleanup, then the single layout effect for configuration updates. There is no DOM-to-state rerender.
 2. `src/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
 3. `src/react/SurfaceContext.ts`: the service contract between the hook and Provider; it does not create an engine.
 4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle and error handling.
@@ -64,3 +64,5 @@ GPU cache extraction only reorganizes renderer internals: the renderer still cre
 ## Type Organization
 
 Cross-module contracts live in `src/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `SurfaceOptions` in `react/useSurface.ts`, and the React service contract in `react/SurfaceContext.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.
+
+The hook keeps one memoized binding handle per appearance/service pair. Creating this handle has no side effects. Its ref creates and registers the instance, and its cleanup releases it. One layout effect saves committed configuration and updates the active instance; configuration changes do not replace the ref. Reattachment starts with the last committed configuration, then the layout effect applies the current commit before the scheduled draw.

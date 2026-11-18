@@ -25,6 +25,10 @@ try{
  const initialSize=await size();
  const initial=await state();await page.evaluate(()=>{window.firstCanvas=document.querySelector('canvas');api.rerender();});await settle();
  let current=await state();assert.equal(current.creates,initial.creates);assert.equal(current.stats.buffers,initial.stats.buffers);assert.equal(current.stats.submits,initial.stats.submits);
+ await page.evaluate(()=>api.prepare());await settle();
+ assert.equal(await page.evaluate(()=>api.records.updatedElevations.includes(77)),false,'Suspended render must not publish uncommitted configuration');
+ assert.equal((await state()).creates,initial.creates,'Suspended render must not recreate the active binding');
+ await page.evaluate(()=>api.cancel());await settle();
  await page.evaluate(()=>api.setProps({elevation:8,color:'#cc8844'}));await settle();current=await state();
  assert.equal(current.creates,initial.creates);assert.equal(current.stats.buffers,initial.stats.buffers);assert.equal(current.stats.pipelines,initial.stats.pipelines);assert.ok(current.stats.parameterWrites>initial.stats.parameterWrites);
  assert.equal(await page.evaluate(()=>window.firstCanvas===document.querySelector('canvas')),true);
@@ -49,8 +53,10 @@ try{
  await page.evaluate(()=>{window.boundNode=document.getElementById('sample');api.setAttached(false);});await settle();
  assert.equal(await page.locator('canvas').count(),0,'Ref detachment releases the surface');
  assert.equal(await page.evaluate(()=>document.getElementById('sample')===window.boundNode),true,'Ref detachment preserves the DOM');
+ await page.evaluate(()=>api.setProps({elevation:23}));await settle();
  await page.evaluate(()=>api.setAttached(true));await page.locator('canvas').waitFor();await settle();
  assert.equal(await page.locator('canvas').count(),1,'Ref reattachment recreates the surface');
+ assert.equal(await page.evaluate(()=>api.records.createdElevations.at(-1)),23,'Ref reattachment uses the latest committed configuration');
  await page.evaluate(()=>api.setQuiet(true));await settle();assert.equal((await state()).stats.pointerListeners,0,'No-input appearance has no implicit pointer subscription');const quiet=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:10,clientY:10})));await settle();assert.equal((await state()).stats.submits,quiet.stats.submits);
  await page.evaluate(()=>api.setMounted(false));await settle();assert.equal(await page.locator('canvas').count(),0);
  const final=await state();assert.equal(final.creates,final.disposes,'All instrumented instances disposed');assert.deepEqual(final.errors,[]);assert.deepEqual(errors,[]);
@@ -73,6 +79,7 @@ try{
  });
  assert.equal(inputChecks.initial.position,null);assert.equal(inputChecks.listenerCount,1);assert.equal(inputChecks.afterOne,1);assert.equal(inputChecks.afterBoth,0);
  assert.deepEqual(inputChecks.left.position,{x:321,y:123});assert.equal(inputChecks.left.inside,false);assert.equal(inputChecks.left.focused,false);assert.equal(inputChecks.hidden.visible,false);assert.equal(inputChecks.notifications,8);
+
  await page.evaluate(()=>window.unmountSurface());
  console.log('PASS appearance API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/appearance replacement and cleanup.');
 }finally{await browser?.close();server.kill();}
