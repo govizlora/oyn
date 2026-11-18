@@ -1,4 +1,4 @@
-import { useSurface, type Appearance } from '@oyn/surface';
+import { SurfaceProvider, useSurface, type Appearance } from '@oyn/surface';
 import { ceramic, type CeramicProps } from '@oyn/ceramic';
 const alternate:Appearance<{phase:number}>={create(){throw Error('type test only');}};
 function Generic<P>(appearance:Appearance<P>,props:P){return useSurface({appearance,props});}
@@ -18,5 +18,11 @@ function Check(){
  useSurface({material:{}});
  // @ts-expect-error Ref composition belongs to the consumer, not useSurface.
  useSurface({appearance:ceramic,props:{}}, () => {});
+ // @ts-expect-error Surface lifetime is controlled by DOM binding, not an enabled option.
+ useSurface({appearance:ceramic,props:{},enabled:false});
+ // @ts-expect-error Theme is an appearance prop, not a provider responsibility.
+ const provider = <SurfaceProvider mode="dark"><div /></SurfaceProvider>;
+ // @ts-expect-error Appearance no longer receives an ambient context.
+ ceramic.create({}, {mode:'dark'});
  return <button ref={ref}/>;
 }

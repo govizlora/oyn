@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/theme'
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
 import { ceramic } from '@oyn/ceramic'
 import { useSurface } from '@oyn/surface'
@@ -6,7 +7,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 function Card({ className, ref: forwardedRef, ...props }: React.ComponentProps<"div">) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: neutralProps })
+  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...neutralProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <div

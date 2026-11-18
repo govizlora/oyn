@@ -44,5 +44,5 @@ try {
     assert.ok(await brightness('fixed') < 100);
   }
   assert.deepEqual(errors, []);
-  console.log('Surface theme: live system mode, provider override, fixed material, shared-material isolation and elevation passed.');
+  console.log('Surface theme: live system mode, explicit mode props, fixed material, shared-material isolation and elevation passed.');
 } finally { await browser.close(); }

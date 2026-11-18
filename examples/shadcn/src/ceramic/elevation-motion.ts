@@ -67,5 +67,5 @@ export function useRecessMotion(target: number | null) {
     return () => { cancel(); media.removeEventListener('change', start) }
   }, [material, target])
 
-  return { appearance: materialAppearance, props: { material }, enabled: visible }
+  return { surface: { appearance: materialAppearance, props: { material } }, visible }
 }

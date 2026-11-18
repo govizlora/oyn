@@ -1,5 +1,6 @@
 import { ceramicResponseWGSL } from './effects/ceramic-response.js';
-import { createCeramicMaterial, type CeramicOptions } from './index.js';
+import { createCeramicMaterial } from './material.js';
+import type { CeramicOptions } from './finish.js';
 import { frameWGSL } from './effects/frame.js';
 import { geometryWGSL } from './effects/geometry.js';
 import { shadowWGSL } from './effects/shadow.js';

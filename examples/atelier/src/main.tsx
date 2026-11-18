@@ -106,7 +106,6 @@ function App() {
         </>
       )}
       <SurfaceProvider
-        mode="light"
         onError={(reason) => {
           console.error(reason);
           setError(true);

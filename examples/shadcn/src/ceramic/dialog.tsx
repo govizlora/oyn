@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/theme'
 "use client"
 
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
@@ -63,7 +64,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: dialogProps })
+  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...dialogProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DialogPortal data-slot="dialog-portal">

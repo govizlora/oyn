@@ -35,5 +35,5 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle('dark', dark);
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
   }, [dark]);
-  return <ThemeContext value={{ mode, dark, setMode }}><SurfaceProvider mode={dark ? 'dark' : 'light'}>{children}</SurfaceProvider></ThemeContext>;
+  return <ThemeContext value={{ mode, dark, setMode }}><SurfaceProvider>{children}</SurfaceProvider></ThemeContext>;
 }

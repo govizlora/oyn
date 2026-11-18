@@ -27,7 +27,7 @@ try {
     const h = React.createElement;
     function Fixture() {
       const [choice,setChoice] = React.useState('one');
-      return h(SurfaceProvider,{mode:'light'},h('main',{style:{padding:50,display:'flex',gap:24}},
+      return h(SurfaceProvider,{},h('main',{style:{padding:50,display:'flex',gap:24}},
         h(D.DropdownMenu,null,
           h(D.DropdownMenuTrigger,null,'Variants'),
           h(D.DropdownMenuContent,{ref:node=>{window.menuRef=node}},

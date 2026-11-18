@@ -46,8 +46,11 @@ try{
  await page.evaluate(()=>api.setMode('dark'));await settle();assert.equal((await state()).creates,initial.creates,'Theme updates existing appearance');
  await page.evaluate(()=>api.setAlternate(true));await settle();assert.ok((await state()).creates>initial.creates);
  const beforeTag=(await state()).creates;await page.evaluate(()=>api.setTag(true));await settle();assert.ok((await state()).creates>beforeTag,'New DOM target owns a new instance');
- await page.evaluate(()=>api.setEnabled(false));await settle();assert.equal(await page.locator('canvas').count(),0);
- await page.evaluate(()=>api.setEnabled(true));await page.locator('canvas').waitFor();await settle();assert.equal(await page.locator('canvas').count(),1);
+ await page.evaluate(()=>{window.boundNode=document.getElementById('sample');api.setAttached(false);});await settle();
+ assert.equal(await page.locator('canvas').count(),0,'Ref detachment releases the surface');
+ assert.equal(await page.evaluate(()=>document.getElementById('sample')===window.boundNode),true,'Ref detachment preserves the DOM');
+ await page.evaluate(()=>api.setAttached(true));await page.locator('canvas').waitFor();await settle();
+ assert.equal(await page.locator('canvas').count(),1,'Ref reattachment recreates the surface');
  await page.evaluate(()=>api.setQuiet(true));await settle();assert.equal((await state()).stats.pointerListeners,0,'No-input appearance has no implicit pointer subscription');const quiet=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:10,clientY:10})));await settle();assert.equal((await state()).stats.submits,quiet.stats.submits);
  await page.evaluate(()=>api.setMounted(false));await settle();assert.equal(await page.locator('canvas').count(),0);
  const final=await state();assert.equal(final.creates,final.disposes,'All instrumented instances disposed');assert.deepEqual(final.errors,[]);assert.deepEqual(errors,[]);

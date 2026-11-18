@@ -202,14 +202,14 @@ The production build also includes `surface.html`.
 - `src/surface-example.css`: isolated layout, without the Atelier component styles.
 - `src/surface-dom-controls.ts`: native input delegation; mutates only test-owned host styles, classes, and visibility, never React state or Surface services.
 
-Use window and nested scrolling, viewport and native container resizing, width/height sliders, radius classes, native details expansion, hidden ancestors, enable/disable, mount/unmount, replacement, theme, and CSS motion. Browser zoom / display changes exercise DPR; pointer leave / focus / visibility changes exercise input policy. There are no extra observers, synchronization listeners, or rendering loops in the example.
+Use window and nested scrolling, viewport and native container resizing, width/height sliders, radius classes, native details expansion, hidden ancestors, mount/unmount, replacement, theme, and CSS motion. Browser zoom / display changes exercise DPR; pointer leave / focus / visibility changes exercise input policy. There are no extra observers, synchronization listeners, or rendering loops in the example.
 
 ### Investigation Guide
 
 | Scenario | Surface path to inspect | Caveat |
 | --- | --- | --- |
 | Button click / ordinary rerender | `useSurface` commit and update effects | Numeric updates should retain the canvas |
-| Enable, mount, replacement | `useSurface` lifecycle effect and ref cleanup | Disable preserves native button state; replacement does not |
+| Mount, replacement | `useSurface` lifecycle effect and ref cleanup | Unmount and replacement dispose the previous binding |
 | Window / container / slider resize | Engine `ResizeObserver`, window resize | These signals can overlap; this page does not prove both are required |
 | Native radius class, hidden ancestor, details | Engine attribute observer, binding measurement | No React state updates; details moves the button without resizing it |
 | CSS-only radius / space above | CSS `:has(:checked)` | No attribute mutation or React update; can expose missing computed-style or position invalidation |
@@ -217,7 +217,7 @@ Use window and nested scrolling, viewport and native container resizing, width/h
 | CSS transition / animation | Engine end-event listeners | Continuous transform tracking is not guaranteed |
 | Browser zoom / display change | Engine resolution media query | Inspect physical canvas dimensions, not only CSS bounds |
 | Pointer / focus / visibility | Shared input subscription, Ceramic policy | Default Ceramic holds the last light position |
-| Theme | Provider mode, instance update | Does not require a new native button |
+| Theme | Explicit mode prop, instance update | Does not require a new native button |
 
 Use breakpoints or temporarily disable one existing path at a time when investigating necessity. Keep the example free of helper measurement loops: they could hide the very synchronization failures being studied. There is no promise that all DOM changes are supported (for example, arbitrary rotation, perspective, or unobserved stylesheet changes).
 

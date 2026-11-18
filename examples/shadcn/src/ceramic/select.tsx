@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/theme'
 "use client"
 
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
@@ -68,7 +69,7 @@ function SelectContent({
   ref: forwardedRef,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: popoverProps })
+  const surfaceRef = useSurface({ appearance: ceramic, props: { mode: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <SelectPrimitive.Portal>

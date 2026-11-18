@@ -8,7 +8,6 @@ import { bindSurfaceDomControls } from './surface-dom-controls';
 function Example() {
   const root = useRef<HTMLElement>(null);
   useEffect(() => bindSurfaceDomControls(root.current!), []);
-  const [enabled, setEnabled] = useState(true);
   const [mounted, setMounted] = useState(true);
   const [dark, setDark] = useState(false);
   const [generation, setGeneration] = useState(0);
@@ -97,14 +96,6 @@ function Example() {
         <label>
           <input
             type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-          />
-          Surface enabled
-        </label>
-        <label>
-          <input
-            type="checkbox"
             checked={mounted}
             onChange={(e) => setMounted(e.target.checked)}
           />
@@ -135,14 +126,13 @@ function Example() {
         corner of the dashed container.
       </p>
       <SurfaceProvider
-        mode={dark ? 'dark' : 'light'}
         onError={(error) => setError(String(error))}
       >
         <div className="scroll-box" aria-label="Resizable scroll container">
           <div className="scroll-content">
             <p className="scroll-hint">Scroll down to the button ↓</p>
             <div className="button-host">
-              {mounted && <SurfaceButton key={generation} enabled={enabled} />}
+              {mounted && <SurfaceButton key={generation} mode={dark ? 'dark' : 'light'} />}
             </div>
             <p className="scroll-hint">More native scroll space ↓</p>
           </div>

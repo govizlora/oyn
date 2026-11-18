@@ -26,9 +26,9 @@ function Button({ pressed }: { pressed: boolean }) {
 definition; unknown fields, missing required fields and wrong types are rejected.
 `ceramic` is no longer a callable mutable-material factory. `useSurface({material})`
 is removed. Ordinary React users need neither manual memoization nor instance setters.
-An optional second argument composes a forwarded React ref, including React 19 cleanup.
-`enabled: false` suspends the binding and releases its active instance/GPU target;
-re-enabling creates an instance without remounting the native DOM/form subtree.
+The hook accepts only appearance and props. Consumers compose additional refs outside
+the hook, preserving React 19 cleanup. Binding and unbinding the returned ref controls
+the instance lifetime.
 
 An appearance instance is created after commit for the bound node, not during render.
 Normal props/theme updates call its `update`, preserving the instance and canvas.
@@ -36,21 +36,17 @@ Fresh props object identity alone does not imply a new instance. Appearance or t
 replacement ends the old instance. StrictMode setup/cleanup replay is supported;
 there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-`SurfaceProvider` owns `mode="system" | "light" | "dark"` and `onError` (default
-console.error). `useSurfaceMode()` reads the resolved mode. A provider mode change
-updates existing appearance instances. GPU initialization, validation or device-loss
-failures dispose provider rendering and report an error; there is no automatic recovery.
-Appearance creation/update errors are reported through the same callback.
+`SurfaceProvider` owns the engine and `onError` (default console.error). Theme is application-owned: pass the resolved `mode` through appearance props.
 
 ## Appearance authoring
 
 ```ts
 import type { Appearance } from '@oyn/surface';
 const visual: Appearance<MyProps> = {
-  create(props, { mode }) {
+  create(props) {
     return {
       material: /* low-level GPU draw description */ program,
-      update(nextProps, { mode }) {
+      update(nextProps) {
         // Validate, compare, update owned parameters/resources.
         // Return 'layout' for changed visual bounds, 'draw' for visual-only changes,
         // or nothing if unchanged. Never mutate caller props.
@@ -63,14 +59,14 @@ const visual: Appearance<MyProps> = {
 
 `Material` is the low-level draw description (shader, parameters, passes, padding measurement,
 optional immutable data), not the React lifecycle API. `materialAppearance` is an
-explicit `Appearance<{material: Material}>` for existing GPU programs and externally
+explicit `Appearance<{material: Material; mode?: SurfaceMode}>` for existing GPU programs and externally
 controlled numeric sources. It uses exactly the same binding/engine path, not a
 legacy hook overload. Such externally controlled sources must remain stable.
 
 A program may provide `bind(context)` for per-target DOM subscriptions. Context has
 `element`, `signal`, `inputs`, `requestDraw()` and `requestMeasure()`. It returns
 optional `measure()`, `frame(frameContext)` and `dispose()` callbacks. Use the abort
-signal for event cleanup. Bindings end on program binding replacement, disable,
+signal for event cleanup. Bindings end on program binding replacement, ref detachment,
 unmount or provider disposal. They must not create devices, submit GPU commands,
 control canvas placement or introduce another rendering scheduler/resource owner.
 
@@ -134,7 +130,7 @@ Appearances own exterior-space policy. Material.measurePadding(width, height)
 returns horizontal/vertical CSS-pixel padding; contained effects return zero.
 Surface only sizes and positions the canvas from that result, without retaining
 a visual budget. Padding policy changes return 'layout'; resize/DPR/style changes
-remeasure. Disable/re-enable creates a new appearance instance.
+remeasure. Unbinding disposes the instance; rebinding creates a new one.
 Axis-aligned targets only; no general rotation/skew/perspective or animation tracking.
 
 ## React Compiler

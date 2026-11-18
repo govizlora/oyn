@@ -11,13 +11,13 @@ assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
 // Padding policy belongs to the appearance, including remeasurement after updates.
-const appearance = ceramic.create({ elevation: 16 }, { mode: 'light' });
+const appearance = ceramic.create({ elevation: 16, mode: 'light' });
 const reservedPadding = appearance.material.measurePadding(120, 40);
-appearance.update({ elevation: 32 }, { mode: 'dark' });
+appearance.update({ elevation: 32, mode: 'dark' });
 assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
-appearance.update({ elevation: 8, maxElevation: 40 }, { mode: 'dark' });
+appearance.update({ elevation: 8, maxElevation: 40, mode: 'dark' });
 assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
-appearance.update({ elevation: 8 }, { mode: 'light' });
+appearance.update({ elevation: 8, mode: 'light' });
 assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
 appearance.dispose?.();
 

@@ -7,7 +7,7 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 1. `src/react/useSurface.ts`: the application entry point. Read binding state, committed inputs, instance lifetime, props updates and registration, then the DOM ref.
 2. `src/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
 3. `src/react/SurfaceContext.ts`: the service contract between the hook and Provider; it does not create an engine.
-4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle, theme resolution, and error handling.
+4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle and error handling.
 5. `src/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
 6. `src/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
 7. `src/renderer.ts`: GPU initialization, target lifetime, uploads, and submission.
@@ -17,9 +17,7 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 | File | Responsibility |
 | --- | --- |
 | `react/useSurface.ts` | React lifecycle of one DOM / Appearance binding |
-| `react/SurfaceProvider.tsx` | Provider-level engine, theme, and error callback |
-| `react/useSurfaceMode.ts` | Read the theme Context |
-| `react/ModeContext.ts` | Declare the theme Context |
+| `react/SurfaceProvider.tsx` | Provider-level engine and error callback |
 | `react/SurfaceContext.ts` | Declare the service Context and contract |
 | `types/appearance.ts` | Visual definition and instance contracts |
 | `materialAppearance.ts` | Adapt an externally controlled Material to the same Appearance lifecycle |

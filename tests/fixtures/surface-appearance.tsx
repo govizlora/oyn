@@ -5,9 +5,9 @@ import { ceramic, type CeramicProps } from '@oyn/ceramic';
 
 const records = { creates:0, disposes:0, frames:[] as number[][], errors:[] as string[] };
 const probe: Appearance<CeramicProps> = {
- create(props,context) {
+ create(props) {
   records.creates++;
-  const instance=ceramic.create(props,context);
+  const instance=ceramic.create(props);
   const cache=new Map<NonNullable<typeof instance.material.bind>,NonNullable<typeof instance.material.bind>>();
   const material={...instance.material,
    get shader(){return instance.material.shader;}, get passes(){return instance.material.passes;},measurePadding:(w:number,h:number)=>instance.material.measurePadding(w,h),
@@ -26,22 +26,24 @@ const probe: Appearance<CeramicProps> = {
 const other:Appearance<CeramicProps>={create:probe.create};
 // No bind hook: a surface with no pointer consumer must not subscribe or redraw on it.
 const inert:Appearance<{}>={create(){
- const source=ceramic.create({light:{source:'fixed'}},{mode:'light'});
+ const source=ceramic.create({light:{source:'fixed'},mode:'light'});
  return {material:{...source.material,bind:undefined},update(){}};
 }};
 function App(){
+ const [attached,setAttached]=useState(true);
  const [props,setProps]=useState<CeramicProps>({elevation:16});
  const [mode,setMode]=useState<SurfaceMode>('light');
- const [mounted,setMounted]=useState(true),[enabled,setEnabled]=useState(true),[alternate,setAlternate]=useState(false),[tag,setTag]=useState(false);
+ const [mounted,setMounted]=useState(true),[alternate,setAlternate]=useState(false),[tag,setTag]=useState(false);
  const [quiet,setQuiet]=useState(false),[tick,setTick]=useState(0);
- useLayoutEffect(()=>{Object.assign(window,{api:{records,setProps,setMode,setMounted,setEnabled,setAlternate,setTag,setQuiet,rerender:()=>setTick(t=>t+1)}});});
- return <SurfaceProvider mode={mode} onError={error=>records.errors.push(String(error))}>
+ useLayoutEffect(()=>{Object.assign(window,{api:{records,setAttached,setProps,setMode,setMounted,setAlternate,setTag,setQuiet,rerender:()=>setTick(t=>t+1)}});});
+ return <SurfaceProvider onError={error=>records.errors.push(String(error))}>
   <span data-tick={tick}/>
-  {mounted&&<Sample appearance={quiet?inert:alternate?other:probe} props={props} enabled={enabled} tag={tag}/>}
+  {mounted&&<Sample appearance={quiet?inert:alternate?other:probe} props={{...props, mode}} attached={attached} tag={tag}/>}
  </SurfaceProvider>;
 }
-function Sample({appearance,props,enabled,tag}:{appearance:Appearance<CeramicProps>;props:CeramicProps;enabled:boolean;tag:boolean}){
- const ref=useSurface({appearance,props,enabled});
+function Sample({appearance,props,attached,tag}:{appearance:Appearance<CeramicProps>;props:CeramicProps;attached:boolean;tag:boolean}){
+ const surfaceRef=useSurface({appearance,props});
+ const ref=attached?surfaceRef:undefined;
  return tag?<section id="sample" ref={ref} style={{width:240,height:140,borderRadius:24,margin:150}}/>:<div id="sample" ref={ref} style={{width:240,height:140,borderRadius:24,margin:150}}/>;
 }
 const root=createRoot(document.getElementById('root')!);

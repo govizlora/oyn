@@ -1,32 +1,14 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createEngine } from '../engine.js';
-import type { SurfaceMode } from '../types/material.js';
 import { SurfaceContext, type SurfaceService } from './SurfaceContext.js';
-import { ModeContext } from './ModeContext.js';
 
 export function SurfaceProvider({
   children,
-  mode = 'system',
   onError = console.error,
 }: {
   children: ReactNode;
-  mode?: SurfaceMode | 'system';
   onError?: (error: unknown) => void;
 }) {
-  const [systemMode, setSystemMode] = useState<SurfaceMode>(() =>
-    typeof matchMedia !== 'undefined' &&
-    matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light',
-  );
-  useLayoutEffect(() => {
-    if (mode !== 'system') return;
-    const media = matchMedia('(prefers-color-scheme: dark)');
-    const update = () => setSystemMode(media.matches ? 'dark' : 'light');
-    update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
-  }, [mode]);
   const errorHandler = useRef(onError);
   useLayoutEffect(() => {
     errorHandler.current = onError;
@@ -54,9 +36,5 @@ export function SurfaceProvider({
       engine.dispose();
     };
   }, [service]);
-  return (
-    <ModeContext value={mode === 'system' ? systemMode : mode}>
-      <SurfaceContext value={service}>{children}</SurfaceContext>
-    </ModeContext>
-  );
+  return <SurfaceContext value={service}>{children}</SurfaceContext>;
 }

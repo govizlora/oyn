@@ -4,45 +4,41 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-} from 'react';
-import type { Mesh } from '../types/scene.js';
-import type { Appearance, AppearanceInstance } from '../types/appearance.js';
-import { SurfaceContext } from './SurfaceContext.js';
-import { useSurfaceMode } from './useSurfaceMode.js';
+} from "react";
+import type { Mesh } from "../types/scene.js";
+import type { Appearance, AppearanceInstance } from "../types/appearance.js";
+import { SurfaceContext } from "./SurfaceContext.js";
 
 export type SurfaceOptions<P> = {
   appearance: Appearance<P>;
   props: NoInfer<P>;
-  enabled?: boolean;
 };
 /** A stable definition + readonly props. Instances are owned by committed DOM bindings. */
-export function useSurface<P, T extends HTMLElement = HTMLElement>(
-  { appearance, props, enabled = true }: SurfaceOptions<P>,
-) {
-  const mode = useSurfaceMode();
+export function useSurface<P, T extends HTMLElement = HTMLElement>({
+  appearance,
+  props,
+}: SurfaceOptions<P>) {
   const service = useContext(SurfaceContext);
-  if (!service) throw new Error('useSurface requires SurfaceProvider');
+  if (!service) throw new Error("useSurface requires SurfaceProvider");
 
   // Binding state: DOM target, last committed inputs, live instance.
   const [element, setElement] = useState<T | null>(null);
-  const committed = useRef({ props, mode });
+  const committed = useRef(props);
   const active = useRef<{ mesh: Mesh; instance: AppearanceInstance<P> } | null>(
     null,
   );
 
   // 1. Commit inputs before lifecycle effects; abandoned renders never mutate instances.
   useLayoutEffect(() => {
-    committed.current = { props, mode };
+    committed.current = props;
   });
 
-  // 2. Own the instance lifetime for this target/appearance/enabled combination.
+  // 2. Own the instance lifetime for this target/appearance combination.
   useLayoutEffect(() => {
-    if (!element || !enabled) return;
+    if (!element) return;
     let instance: AppearanceInstance<P>;
     try {
-      instance = appearance.create(committed.current.props, {
-        mode: committed.current.mode,
-      });
+      instance = appearance.create(committed.current);
     } catch (error) {
       service.report(error);
       return;
@@ -65,37 +61,33 @@ export function useSurface<P, T extends HTMLElement = HTMLElement>(
       }
       service.invalidate();
     };
-  }, [element, appearance, enabled, service]);
+  }, [element, appearance, service]);
 
   // 3. Apply committed props and register the current material with the engine.
   useLayoutEffect(() => {
     const binding = active.current;
     if (!binding) return;
     try {
-      const update = binding.instance.update(props, { mode });
+      const update = binding.instance.update(props);
       const previous = binding.mesh.material;
       binding.mesh.material = binding.instance.material;
       const registered =
         service.entries.get(binding.mesh.element) === binding.mesh;
-      if (enabled) service.entries.set(binding.mesh.element, binding.mesh);
-      else if (registered) service.entries.delete(binding.mesh.element);
+      service.entries.set(binding.mesh.element, binding.mesh);
       if (
-        registered !== enabled ||
+        !registered ||
         previous !== binding.mesh.material ||
-        update === 'layout'
+        update === "layout"
       )
         service.invalidate();
-      else if (enabled && update === 'draw') service.requestDraw();
+      else if (update === "draw") service.requestDraw();
     } catch (error) {
       service.report(error);
     }
   });
 
-  // 4. Connect the DOM target; consumers compose any additional refs.
   return useCallback((node: T | null) => {
     setElement(node);
-    return () => {
-      setElement((current) => (current === node ? null : current));
-    };
+    return () => setElement(null);
   }, []);
 }

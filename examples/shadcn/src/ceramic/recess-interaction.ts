@@ -1,3 +1,4 @@
+import { useTheme } from '@/app/theme'
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
 import * as React from 'react'
 import { useSurface } from '@oyn/surface'
@@ -21,13 +22,13 @@ export function useRecessInteraction<T extends HTMLElement>(
   const [pressed, setPressed] = React.useState(false)
   const disabled = props.disabled || props['aria-disabled'] === true || props['aria-disabled'] === 'true'
   const target = disabled ? restingElevation : pressed ? recessElevations.pressed : highlighted ? recessElevations.hover : restingElevation
-  const surface = useRecessMotion(target)
-  const surfaceRef = useSurface(surface)
-  const ref = useComposedRefs(surfaceRef, forwardedRef)
+  const { surface, visible } = useRecessMotion(target)
+  const surfaceRef = useSurface({ ...surface, props: { mode: useTheme().dark ? 'dark' : 'light', ...surface.props } })
+  const ref = useComposedRefs(visible ? surfaceRef : undefined, forwardedRef)
   React.useEffect(() => { if (disabled) { setHovered(false); setFocused(false); setPressed(false) } }, [disabled])
   const bindings: Omit<InteractionProps<T>, 'disabled' | 'aria-disabled'> & { ref: typeof ref; 'data-surface-recess'?: string; 'data-surface-elevation'?: number } = {
     ref,
-    'data-surface-recess': surface.enabled ? '' : undefined,
+    'data-surface-recess': visible ? '' : undefined,
     'data-surface-elevation': target ?? undefined,
     onPointerEnter(event) { props.onPointerEnter?.(event); if (mode !== 'menu' && !event.defaultPrevented) setHovered(true) },
     onPointerLeave(event) { setPressed(false); setHovered(false); props.onPointerLeave?.(event) },
@@ -50,5 +51,5 @@ export function useRecessInteraction<T extends HTMLElement>(
     },
     onKeyUp(event) { if (event.key === ' ' || event.key === 'Enter') setPressed(false); props.onKeyUp?.(event) },
   }
-  return { bindings, enabled: surface.enabled }
+  return { bindings, visible }
 }

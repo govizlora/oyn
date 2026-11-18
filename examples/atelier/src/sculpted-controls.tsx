@@ -25,9 +25,9 @@ function useBakedControl<T extends HTMLElement>({shape,color='#eeeee9',elevation
     lightZ:150,lightReflectionStrength:.65,lightEdgeShade:.38,
     lightSurfaceTop:.05,lightSurfaceShade:.025,
     shadowStrength:.18,contactShadowStrength:.07,
-  },enabled:!!geometry});
+  }});
   if(error)throw error;
-  return ref;
+  return geometry ? ref : undefined;
 }
 function SculptedButton({
   geometry,

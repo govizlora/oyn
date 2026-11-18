@@ -45,11 +45,11 @@ function SidebarMenuButton({
   const Comp = asChild ? Slot.Root : "button"
   const { isMobile, state } = useSidebar()
 
-  const { bindings, enabled } = useRecessInteraction<HTMLButtonElement>(props, forwardedRef)
+  const { bindings, visible } = useRecessInteraction<HTMLButtonElement>(props, forwardedRef)
 
   const button = (
     <Comp
-      data-surface-navigation={enabled ? "" : undefined}
+      data-surface-navigation={visible ? "" : undefined}
       data-slot="sidebar-menu-button" 
       data-sidebar="menu-button"
       data-size={size}
