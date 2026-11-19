@@ -5,23 +5,9 @@ import {
   Detent,
   LampRack,
   PocketKeyboard,
-  Rotor,
   TactilePills,
 } from '../playful-controls';
 
-export function MovingAir() {
-  const [speed, setSpeed] = useState(56),
-    [power, setPower] = useState(false);
-  return (
-    <div className="hardware-demo">
-      <Rotor speed={speed} powered={power} onPower={() => setPower(!power)} />
-      <div className="hardware-controls">
-        <Fader label="Rotor speed" value={speed} onChange={setSpeed} />
-        <output>{speed}</output>
-      </div>
-    </div>
-  );
-}
 export function LightBank() {
   const [lamps, setLamps] = useState([
       true,

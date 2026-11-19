@@ -456,13 +456,6 @@ export const objects: ObjectSpec[] = [
   ]),
   ...group('hardware', 'hardware', [
     [
-      'moving-air',
-      'Moving air',
-      'MovingAir',
-      Hardware.MovingAir,
-      'fan rotor spin speed knob',
-    ],
-    [
       'light-bank',
       'Little lights',
       'LightBank',

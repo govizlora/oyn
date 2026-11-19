@@ -1,7 +1,7 @@
 # Object library / first collection
 
-54 separately exported, locally interactive specimens plus two preserved full
-compositions: 56 entries in ten rooms. This is an
+53 separately exported, locally interactive specimens plus two preserved full
+compositions: 55 entries in ten rooms. This is an
 **app-local exploration library**, not a published component package or a stable
 public API. The text-rich Daily objects and Everyday desktop compositions now live in the
 last Archive room, unchanged. The library is a scrolling workbench for composing.
@@ -11,8 +11,8 @@ last Archive room, unchanged. The library is a scrolling workbench for composing
 - The last homepage pictogram opens `/?view=library&room=hardware`.
 - `/?view=library&room=controls` still opens Touch.
 - Rooms: `systems`, `controls`, `navigation`, `studio`, `organize`, `feedback`,
-  `time`, `curiosities`, `hardware`, `archive`. All have six specimens except
-  Archive, which contains two full-width compositions. Hardware is first, Archive last.
+  `time`, `curiosities`, `hardware`, `archive`. Most have six specimens; Hardware has five and
+  Archive has two full-width compositions. Hardware is first, Archive last.
 - `room=all` browses the full collection, six mounted specimens per page.
 - `room=picked` shows the chosen objects, also paginated.
 - `/?view=library&room=curiosities&object=terminal` isolates one specimen. The
@@ -40,8 +40,8 @@ last Archive room, unchanged. The library is a scrolling workbench for composing
 | Time · 31–36     | Days in clay; A span of days; A little availability; Time blocks; Somewhere else; Quiet activity      |
 | Play · 37–42     | Phosphor paper; Dot by dot; A point in space; Pocket arithmetic; A small obsession; Six secrets       |
 | Everyday · 43–48 | Option capsule; A little filter; Rows with presence; Window things; Folded paper; Property drawer     |
-| Hardware · 49–54 | Moving air; Little lights; Three positions; Little keys; Soft messages; Candy switches                |
-| Archive · 55–56  | Daily objects; Everyday desktop (original full compositions)                                          |
+| Hardware · 49–53 | Little lights; Three positions; Little keys; Soft messages; Candy switches                |
+| Archive · 54–55  | Daily objects; Everyday desktop (original full compositions)                                          |
 
 The interactions are real local UI operations: native multi-select/radio controls,
 keyboard tabs, dropdown dismissal, search/sort, table selection, proportional
@@ -54,9 +54,7 @@ Scope: the collection doesn't change OS settings, upload files, send invitations
 authenticate a PIN, run a live clock, synchronize files, or perform real transfers.
 File picking reads names/sizes only. World-clock hands show the selected reference
 instant (18 November 2026, UTC input), converted with the browser's timezone data.
-Progress, storage and activity are explicitly local/sample studies. Powered nonzero-speed fans subscribe to one shared numeric motion clock; hidden
-documents and reduced-motion preferences stop it. All fans start off. No separate
-render loop is introduced. Bubbles only change local glyphs, never send messages.
+Progress, storage and activity are explicitly local/sample studies. Bubbles only change local glyphs, never send messages.
 
 ## Composition and extension
 
@@ -77,9 +75,8 @@ prematurely making the entire collection into a public API.
 - `../everyday.tsx`: reused Calendar, Check, native Menu/SelectMenu and the entire
   Files component. The small file table is a sizing adapter, **not another search,
   sorting or selection implementation**.
-- `../playful-controls.tsx`: shared rotor, detent, lamp bank, keycaps, bubbles and pills.
-- `../instrument-material.tsx`: one shader/pipeline for spinning blades and luminous lenses;
-  `../motion-clock.ts` is the sole numeric time source, not another renderer.
+- `../playful-controls.tsx`: shared detent, lamp bank, keycaps, bubbles and pills.
+- `../glow.tsx`: one shader for luminous lenses.
 - `archive.tsx`: re-exports the unchanged original compositions. Registry layout
   metadata selects full-width cards and avoids specimen sizing overrides.
 - `shared.tsx`: native radio Rail, input Field, Range, Plate and Readout.
@@ -97,20 +94,19 @@ semantics; each visible value has one React owner. There are no per-widget rende
 copies, CSS bevel/shadow substitutes, image copies, separate GPU devices, or
 redundant reduced-motion rules. The common reduced-motion rule remains authoritative.
 
-Only the visible page's six specimens (or one isolated object) are mounted. This
-bounds demo size; it is **not** viewport culling or a mobile performance claim. No
-WebGL/Canvas2D/CSS fallback is introduced. WebGPU support policy is unchanged.
+Only the visible page's specimens (up to six) (or one isolated object) are mounted. This
+bounds demo size; it is **not** viewport culling or a mobile performance claim. Without WebGPU, standard Ceramic surfaces use the shared WebGL2 fallback; the custom lens material is skipped.
 
 ## Verification
 
 `npm run test:library` builds production, starts its own local preview, and runs
-headless Chrome. It exercises all 54 specimens and mounts both archived compositions, persistent picks, JSON download,
-search, paging, isolation/history, storage-denied behavior and unsupported WebGPU.
+headless Chrome. It exercises all 53 specimens and mounts both archived compositions, persistent picks, JSON download,
+search, paging, isolation/history, storage-denied behavior and hardware controls without WebGPU.
 It verifies actual changed pixels for custom Ceramic color and live CRT glyphs,
 one live GPU device/five cached pipelines/zero Canvas2D copies, idle rendering,
 reduced motion, and 30 room/viewport screenshots (1440, 1024, 390 pixels wide).
 Outputs are gitignored under `test-results/library/`.
 
-`npm run test:atelier` covers Card, Quiet, the shared motion-clock policy,
+`npm run test:atelier` covers Card, Quiet,
 and the full original calendar/list/table regression suite inside Archive.
 No remote deployment, push, or publishing happens in either command.

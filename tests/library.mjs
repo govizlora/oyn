@@ -613,14 +613,7 @@ try {
   assert.equal(gpu.copies, 0);
   results.push({ interactions: '48 specimens passed', gpu });
   await room('Hardware');
-  await spec('moving-air')
-    .getByRole('button', { name: 'Rotor power', exact: true })
-    .click();
-  await setRange('Rotor speed', 0);
-  assert.equal(
-    await spec('moving-air').getByRole('img').getAttribute('aria-label'),
-    'Rotor, stopped, 5 blades',
-  );
+  assert.equal(await page.locator('.library-specimen').count(), 5);
   await spec('light-bank')
     .getByRole('button', { name: 'Lamp 2', exact: true })
     .click();
@@ -667,7 +660,7 @@ try {
   assert.equal(await page.locator('.file-table').count(), 1);
   assert.equal((await page.evaluate(() => window.gpuStats)).pipelines, 5);
   results.push({
-    interactions: '6 hardware objects and 2 preserved compositions passed',
+    interactions: '5 hardware objects and 2 preserved compositions passed',
   });
   await page.getByRole('button', { name: /^Picked/ }).click();
   assert.equal(await page.locator('.library-specimen').count(), 3);
@@ -739,7 +732,7 @@ try {
         .getByRole('button', { name: 'Next library page', exact: true })
         .click();
   }
-  assert.equal(new Set(allIds).size, 56);
+  assert.equal(new Set(allIds).size, 55);
   await page
     .getByRole('link', { name: 'Quiet', exact: true })
     .click();
@@ -852,20 +845,24 @@ try {
     /Browser storage is unavailable/,
   );
   await blockedStorage.close();
-  const unavailable = await browser.newPage();
-  await unavailable.addInitScript(() =>
+  const fallback = await browser.newPage();
+  await fallback.addInitScript(() =>
     Object.defineProperty(navigator, 'gpu', { value: undefined }),
   );
-  await unavailable.goto(`${base}/?view=library`);
-  await unavailable.waitForSelector('[role=alert]');
-  assert.equal(await unavailable.locator('canvas').count(), 0);
-  await unavailable.close();
+  await fallback.goto(`${base}/?view=library&object=light-bank`);
+  const lightBank = fallback.locator('[data-object="light-bank"]');
+  await lightBank.locator('.lamp-bezel[data-oyn-active] canvas').first().waitFor();
+  assert.equal(await lightBank.locator('.glow-lens canvas').count(), 0);
+  const lamp = lightBank.getByRole('button', { name: 'Lamp 2', exact: true });
+  await lamp.click();
+  assert.equal(await lamp.getAttribute('aria-pressed'), 'true');
+  await fallback.close();
   await writeFile(
     new URL('results.json', out),
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: 54 interactive objects + 2 preserved compositions; 10 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/zero copies; 30 responsive screenshots; idle/reduced-motion; explicit unsupported state.',
+    'PASS: 53 interactive objects + 2 preserved compositions; 10 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/zero copies; 30 responsive screenshots; idle/reduced-motion; hardware controls with WebGL2 fallback.',
   );
 } finally {
   server?.kill('SIGTERM');

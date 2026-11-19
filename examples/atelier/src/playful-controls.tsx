@@ -1,54 +1,7 @@
 import { useId, useState } from 'react';
 import { Icon, Key, Surface, css, type Glyph, type Tone } from './controls';
-import { Glow, RotorPaint, type LampColor } from './instrument-material';
+import { Glow, type LampColor } from './glow';
 
-export function Rotor({
-  speed,
-  powered,
-  onPower,
-  reverse = false,
-  covered = false,
-  blades = 5,
-  className = '',
-}: {
-  speed: number;
-  powered: boolean;
-  onPower: () => void;
-  reverse?: boolean;
-  covered?: boolean;
-  blades?: number;
-  className?: string;
-}) {
-  return (
-    <div className={`rotor ${className}`} data-powered={powered}>
-      <div className="rotor-index" aria-hidden="true">
-        {Array.from({ length: 48 }, (_, i) => (
-          <i key={i} style={{ transform: `rotate(${i * 7.5}deg)` }} />
-        ))}
-      </div>
-      <Surface className="rotor-frame" elevation={5} rim={6}>
-        <Surface className="rotor-well" elevation={-4}>
-          <RotorPaint
-            speed={speed}
-            powered={powered}
-            reverse={reverse}
-            covered={covered}
-            blades={blades}
-          />
-        </Surface>
-      </Surface>
-      <Key
-        className="rotor-hub"
-        label="Rotor power"
-        active={powered}
-        onClick={onPower}
-      >
-        <Glow level={powered ? 0.9 : 0} className="rotor-pilot" />
-        <span className="rotor-hub-ring" />
-      </Key>
-    </div>
-  );
-}
 export function Detent({
   value,
   onChange,

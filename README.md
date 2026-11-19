@@ -39,10 +39,10 @@ facts. Ceramic interprets pointer state as light and owns hold/return/fixed poli
 See [API decisions](docs/surface-api.md) and [Surface contracts](packages/surface/README.md).
 React Compiler validation remains future work, not a current compatibility claim.
 
-## Object library — 54 objects + 2 compositions
+## Object library — 53 objects + 2 compositions
 
 `/?view=library&room=hardware` opens the new tactile objects. Ten rooms contain
-56 entries, including all previous objects. The text-heavy Daily objects and
+55 entries. The text-heavy Daily objects and
 Everyday desktop compositions are **preserved intact** in the final Archive room
 (`/?view=library&room=archive`): calendars, tasks, tables, dropdowns and CRT code.
 

@@ -33,7 +33,7 @@ npm run test:library        # full collection and selection workflow
 - `/?view=card`: native Ceramic card with theme-aware defaults and a background brightness control.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
-- `/?view=library&room=hardware`: the six new hardware objects, separately reusable.
+- `/?view=library&room=hardware`: the five hardware objects, separately reusable.
 - `/?view=library&room=archive`: the former **Daily objects** and **Everyday desktop**
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
@@ -77,7 +77,7 @@ The checkpoint before this exploration is `557ac86`.
 
 ## Object library
 
-56 entries: **54 interactive object specimens plus 2 preserved compositions**, in
+55 entries: **53 interactive object specimens plus 2 preserved compositions**, in
 10 rooms. Up to six entries mount per page; archived compositions span the full
 width. Inspect individually, star a shortlist, export named source references,
 and recombine later. This is an app-local exploration library, not a public package.
@@ -94,27 +94,19 @@ remain native activation of the focused key. It never installs global shortcuts.
 Lamp levels change actual shader light output. Bubble elevation has a fixed
 material budget, so its fader updates the existing material rather than rebinding it.
 Reaction keys shift a two-bubble local queue; clicking a bubble changes its glyph.
-Fan power controls all share one state. Zero speed also stops motion.
 
-All data and effects are local demonstrations. No OS settings, physical fans,
-networking, real messages, file transfers, audio, microphone, backend or accounts
+All data and effects are local demonstrations. No OS settings, networking, real messages, file transfers, audio, microphone, backend or accounts
 are involved. Dates/files/status meters in the archive are samples, not live data.
 
 ## Rendering ownership
 
 - `controls.tsx`: sole Ceramic configuration and basic Surface/Key/Dial/Fader/Switch.
-- `playful-controls.tsx`: shared rotor housing, detent, lamps, keyboard, bubbles/pills.
+- `playful-controls.tsx`: shared detent, lamps, keyboard, bubbles/pills.
 - `everyday.tsx`: shared Calendar, Check, native Menu/SelectMenu, Files and ChoiceChips.
 - `desktop.tsx`: untouched original compositions, re-exported by `library/archive.tsx`.
-- `instrument-material.tsx`: one app-local optical shader/pipeline for rotor blades
-  and luminous lenses. The rotor rotates **inside WGSL**, not by rotating a bound
-  DOM surface. Housings, knobs, buttons and wells remain Ceramic.
+- `glow.tsx`: app-local optical material for luminous lenses.
 - `phosphor.tsx`: one additional shader/pipeline for graphical fields and editable
   CRT glyphs. Text uniforms and semantic HTML come from one string.
-- `motion-clock.ts`: one shared 30 Hz numeric time source, with no GPU submission.
-  It exists only while a powered, nonzero-speed rotor subscribes; it stops on
-  unmount, hidden document or reduced-motion preference. Fans start off. Resuming
-  never simulates hidden time. There is no per-widget timer or renderer.
 
 One SurfaceProvider owns one GPU device, its pipeline cache and the existing draw
 scheduler. Every raised/recessed element is HTML bound to Ceramic; CSS lays out
@@ -129,7 +121,7 @@ mobile GPU performance guarantee. Use HTTPS or localhost for WebGPU. Materials w
 ## Validation
 
 `test:sculpted` covers the current baked homepage. `test:atelier` builds production
-and runs the shared-clock policy unit test, Card, Quiet, and the
+and runs Card, Quiet, and the
 archive regression suite. The browser
 suites run headless with local previews; `BASE_URL` can use an existing
 server. Tests include actual changed pixels, mouse/keyboard input, single device,
@@ -139,7 +131,7 @@ reduced-motion policy, history, WebGL2 fallback and five viewport sizes:
 small screens reflow. Archive tests retain calendar/search/sort/filter/dropdown and
 mixed-selection coverage. Outputs: `test-results/atelier-archive/`.
 
-The library suite covers all 56 entries, persisted picks/export, isolated links,
+The library suite covers all 55 entries, persisted picks/export, isolated links,
 search/paging, denied storage, and 30 room/viewport screenshots. Outputs:
 `test-results/library/`. All screenshots are ignored by git.
 
