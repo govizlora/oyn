@@ -129,46 +129,27 @@ try {
     path: 'test-results/solids/mobile.png',
     fullPage: true,
   });
-  await page.getByRole('button', { name: 'Back to ceramic controls' }).click();
+  await page.getByRole('link', { name: 'Sculpted' }).click();
   await page.locator('.sculpture-board canvas').first().waitFor();
   await page.setViewportSize({ width: 1200, height: 900 });
   await page.goto(`${base}/?view=card-comparison`);
-  await page.locator('.comparison-card canvas').waitFor();
-  const stage = page.locator('.comparison-stage');
-  await stage.focus();
-  await page.mouse.move(400, 290);
-  await page.waitForTimeout(250);
-  await mkdir('test-results/card-comparison', { recursive: true });
-  await page.screenshot({ path: 'test-results/card-comparison/original.png' });
-  const bounds = await page.locator('.comparison-card').boundingBox();
-  await page.keyboard.press('2');
-  await page.waitForTimeout(200);
-  assert.equal(
-    await page
-      .getByRole('button', { name: '2 / Geometry renderer' })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  assert.deepEqual(
-    await page.locator('.comparison-card').boundingBox(),
-    bounds,
-    'Switching renderers preserves the exact card placement',
-  );
-  await page.screenshot({ path: 'test-results/card-comparison/geometry.png' });
-  await page.keyboard.press('1');
-  assert.equal(
-    await page
-      .getByRole('button', { name: '1 / Original Ceramic' })
-      .getAttribute('aria-pressed'),
-    'true',
-  );
-  for (const renderer of ['1 / Original Ceramic', '2 / Geometry renderer']) {
-    await page.getByRole('button', { name: renderer }).click();
-    await page.getByRole('slider', { name: 'Card elevation' }).fill('40');
-    await page.getByRole('slider', { name: 'Card corner radius' }).fill('0');
-    await page.getByRole('slider', { name: 'Card corner radius' }).fill('64');
-    await page.waitForTimeout(100);
+  await page.getByRole('link', { name: 'Card', exact: true }).click();
+  assert.equal(new URL(page.url()).searchParams.get('view'), 'card');
+  await page.locator('.card-specimen canvas').waitFor();
+  const slider = page.getByRole('slider', { name: 'Background brightness' });
+  const background = () => page.locator('html').evaluate(el => getComputedStyle(el).backgroundColor);
+  assert.equal(await slider.inputValue(), '0');
+  const initial = await background();
+  for (const extreme of ['-100', '100']) {
+    await slider.fill(extreme);
+    assert.notEqual(await background(), initial);
   }
+  await page.getByRole('button', { name: 'Reset background brightness' }).click();
+  assert.equal(await background(), initial);
+  const scheme = () => page.locator('.card-specimen').evaluate(el => getComputedStyle(el).colorScheme);
+  const previous = await scheme();
+  await page.getByRole('button', { name: 'Dark mode' }).click();
+  assert.notEqual(await scheme(), previous);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200);
   assert.ok(
@@ -178,7 +159,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    'Solids: Baked presets, true aperture alpha, all edits, two cached passes, idle scheduling, mobile, navigation and in-place card A/B passed.',
+    'Solids: Baked presets, true aperture alpha, all edits, two cached passes, idle scheduling, mobile, navigation and native card controls passed.',
   );
 } finally {
   await browser?.close();

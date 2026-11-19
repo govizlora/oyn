@@ -1,3 +1,4 @@
+import { ProjectSwitch } from './projects';
 import { StrictMode, useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SurfaceProvider } from '@oyn/surface';
@@ -9,11 +10,10 @@ function Example() {
   const root = useRef<HTMLElement>(null);
   useEffect(() => bindSurfaceDomControls(root.current!), []);
   const [mounted, setMounted] = useState(true);
-  const [dark, setDark] = useState(false);
   const [generation, setGeneration] = useState(0);
 
   return (
-    <main ref={root} className={dark ? 'example dark' : 'example'}>
+    <main ref={root} className="example">
       <header>
         <a href="/">Atelier</a>
         <h1>One native button.</h1>
@@ -100,14 +100,6 @@ function Example() {
           />
           Button mounted
         </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={dark}
-            onChange={(e) => setDark(e.target.checked)}
-          />
-          Dark theme
-        </label>
         <button type="button" onClick={() => setGeneration((n) => n + 1)}>
           Replace button
         </button>
@@ -128,7 +120,7 @@ function Example() {
           <div className="scroll-content">
             <p className="scroll-hint">Scroll down to the button ↓</p>
             <div className="button-host">
-              {mounted && <SurfaceButton key={generation} colorScheme={dark ? 'dark' : 'light'} />}
+              {mounted && <SurfaceButton key={generation} />}
             </div>
             <p className="scroll-hint">More native scroll space ↓</p>
           </div>
@@ -191,6 +183,7 @@ function Example() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ProjectSwitch/>
     <Example />
   </StrictMode>,
 );

@@ -1,15 +1,13 @@
 :root {
-  color-scheme: light;
-  color: #30332e;
-  background: #f7f6f1;
+  color: light-dark(#30332e,#e9ece3);
   font:
     14px/1.4 "Helvetica Neue",
     Helvetica,
     Arial,
     sans-serif;
   --mono: ui-monospace, Consolas, monospace;
-  --rule: #c6c8be;
-  --muted: #676b60;
+  --rule: light-dark(#c6c8be,#41463c);
+  --muted: light-dark(#676b60,#b4baab);
 }
 * {
   box-sizing: border-box;
@@ -91,7 +89,7 @@ footer span:last-child {
   isolation: isolate;
   position: relative;
   min-width: 0;
-  background: #e8e9e2;
+  background: var(--preview-background);
   display: grid;
   place-items: center;
   min-height: 360px;
@@ -104,7 +102,7 @@ footer span:last-child {
   left: 18px;
   right: 18px;
   pointer-events: none;
-  color: #63695d;
+  color: light-dark(#63695d,#b9c1ad);
   font-size: 9px;
 }
 .bench-head {
@@ -141,7 +139,7 @@ footer span:last-child {
   }
 }
 aside {
-  border-top: 1px solid #656a60;
+  border-top: 1px solid light-dark(#656a60,#646d5b);
   padding-top: 11px;
 }
 .panel-head h2 {
@@ -170,7 +168,7 @@ fieldset {
 }
 legend {
   padding: 0 8px 0 0;
-  color: #42473c;
+  color: light-dark(#42473c,#e3e6da);
   font-size: 11px;
   font-weight: 600;
 }
@@ -191,7 +189,7 @@ aside label + label {
 }
 output {
   letter-spacing: 0;
-  color: #43483d;
+  color: light-dark(#43483d,#cbd2c2);
   font-variant-numeric: tabular-nums;
 }
 output small {
@@ -210,11 +208,11 @@ input[type="range"] {
 }
 input[type="range"]::-webkit-slider-runnable-track {
   height: 2px;
-  background: #c4c7bb;
+  background: light-dark(#c4c7bb,#535a4d);
 }
 input[type="range"]::-moz-range-track {
   height: 2px;
-  background: #c4c7bb;
+  background: light-dark(#c4c7bb,#535a4d);
 }
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
@@ -222,7 +220,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 9px;
   border: 0;
   border-radius: 50%;
-  background: #844d35;
+  background: light-dark(#844d35,#dd9168);
   margin-top: -3.5px;
 }
 input[type="range"]::-moz-range-thumb {
@@ -230,7 +228,7 @@ input[type="range"]::-moz-range-thumb {
   height: 9px;
   border: 0;
   border-radius: 50%;
-  background: #844d35;
+  background: light-dark(#844d35,#dd9168);
 }
 footer {
   margin-top: 13px;
@@ -255,7 +253,7 @@ footer span:last-child {
   .bench {
     min-height: 280px;
   }
-  .panel-head {
+  .tuning-head {
     grid-column: 1/-1;
   }
   aside {

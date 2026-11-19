@@ -35,10 +35,10 @@ export function createEngine() {
       engine.stop();
       console.error(error);
     },
-    start() {
+    start(hdr = false) {
       if (running || failed) return;
       try {
-        running = startEngine(entries, engine.fail);
+        running = startEngine(entries, engine.fail, hdr);
       } catch (error) {
         engine.fail(error);
       }
@@ -65,6 +65,7 @@ export function createEngine() {
 function startEngine(
   meshes: Map<HTMLElement, Mesh>,
   fail: (error: unknown) => void,
+  hdr: boolean,
 ) {
   let renderer: Renderer | undefined,
     disposed = false,
@@ -281,7 +282,7 @@ function startEngine(
   const failed = (error: unknown) => {
     if (!disposed) fail(error);
   };
-  void createRenderer(failed, invalidate)
+  void createRenderer(failed, invalidate, hdr)
     .then((value) => {
       if (disposed) {
         value.dispose();

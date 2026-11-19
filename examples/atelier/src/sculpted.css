@@ -3,13 +3,7 @@
   min-height: 100svh;
   display: block;
   overflow: hidden;
-  background: radial-gradient(
-    ellipse at 25% 10%,
-    #f1f0ed,
-    #e3e4e0 75%,
-    #d6d9d5
-  );
-  color: #73786e;
+  color: light-dark(#73786e,#c7cfbd);
 }
 .sculpture-page {
   width: 100%;
@@ -33,12 +27,12 @@
   font-weight: 700;
   letter-spacing: -4px;
   text-decoration: none;
-  color: #697263;
+  color: var(--preview-ink);
 }
 .sculpture-heading span {
   font: 8px monospace;
   letter-spacing: 1.6px;
-  color: #969b91;
+  color: var(--preview-ink);
 }
 .sculpture-heading button,
 .sculpture-footer button {
@@ -59,18 +53,18 @@
   letter-spacing: -0.9px;
   font-weight: 400;
   margin: 0;
-  color: #636d5e;
+  color: var(--preview-ink);
 }
 .sculpture-title em {
   font-family: Georgia, serif;
   font-weight: 400;
-  color: #92998a;
+  color: light-dark(#92998a,#abb5a2);
 }
 .sculpture-title p {
   font-size: 10px;
   line-height: 1.7;
   margin: 0;
-  color: #909689;
+  color: light-dark(#909689,#b6bfae);
 }
 .sculpture-board {
   border-radius: 28px;
@@ -489,15 +483,4 @@
   .detent-body {
     transform: scale(0.82);
   }
-}
-
-.field-link {
-  color: #975233;
-  font: 10px monospace;
-  text-decoration: none;
-  padding: 8px;
-}
-.sculpture-heading nav { text-align: right; }
-@media (max-width: 700px) {
-  .field-link { font-size: 8px; }
 }

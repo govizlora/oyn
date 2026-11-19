@@ -30,9 +30,7 @@ npm run test:library        # full collection and selection workflow
 
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
-- `/?view=card-comparison`: in-place comparison of the original Ceramic card and
-  the analytic geometry adapter. Click the comparison area, park the cursor and press 1/2.
-  Shared 280×160 footprint, color, elevation, corner radius and original optical equations.
+- `/?view=card`: native Ceramic card with theme-aware defaults and a background brightness control.
 - `/?view=solids`: **Geometry Lab**, six primitive/boolean specimens with prebaked presets.
   Run `npm run test:solids` for production headless checks.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
@@ -47,7 +45,7 @@ npm run test:library        # full collection and selection workflow
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The bottom pictograms switch studies; the **last** opens the component library.
+The top project switch links all ten destinations directly, including Ripple field, Native button and Shadow lab.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
 
@@ -233,4 +231,4 @@ These are diagnostic scenarios, not guaranteed supported behavior. A dotted nati
 
 ### Ripple field (series 07)
 
-[The ripple workbench](http://127.0.0.1:5177/flip.html) pairs orange/white glossy Ceramic discs with live controls for their finish, profile, socket and wave spacing. Hover and press recess the stone into its socket. Only stones launch half-turn waves; empty desktop clicks do nothing. Each strike starts with angular velocity and settles into a magnetic detent with an underdamped spring. Duration, damping ratio and spacing are captured per wave. The inner specular glint and outer rim reflection can be tuned independently. Tab lights the focused socket amber, casting light back onto the stone; native Enter/Space activation uses that disc as the source.
+[The ripple workbench](http://127.0.0.1:5177/flip.html) pairs orange/white glossy Ceramic discs with live controls for their finish, profile, socket and wave spacing. Hover and press recess the stone into its socket. Only stones launch half-turn waves; empty desktop clicks do nothing. Every stone turns about its fixed Y diameter. Tuning is saved in this browser. Each strike starts with angular velocity and settles into a magnetic detent with an underdamped spring. Duration, damping ratio and spacing are captured per wave. Both faces mirror one studio lamp: round overhead, with a longer, tapered reflection at oblique angles. Tangential extension controls how long the image grows away from the pointer without widening the overhead spot. Lamp height scales the specular emitter’s elevation independently of the broad fill. Sharpness controls its apparent size; rim strength sets the grazing reflection of the surroundings, separate from the lamp. Tab lights the focused socket amber, casting light back onto the stone; native Enter/Space activation uses that disc as the source.

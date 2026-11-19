@@ -9,6 +9,7 @@ import { createStaticResources } from "./gpu/createStaticResources.js";
 export function createWebGPU(
   device: GPUDevice,
   fail: (error: unknown) => void,
+  requestHDR = false,
 ) {
   let disposed = false;
   device.lost.then((info) => {
@@ -17,7 +18,21 @@ export function createWebGPU(
   device.addEventListener("uncapturederror", (event) => {
     if (!disposed) fail(event.error);
   });
-  const format = navigator.gpu.getPreferredCanvasFormat();
+  // Check the negotiated mode: older browsers silently ignore toneMapping.
+  let hdr = false;
+  if (requestHDR) {
+    const probe = document.createElement("canvas").getContext("webgpu");
+    if (probe?.getConfiguration) {
+      probe.configure({
+        device,
+        format: "rgba16float",
+        toneMapping: { mode: "extended" },
+      });
+      hdr = probe.getConfiguration()?.toneMapping?.mode === "extended";
+      probe.unconfigure();
+    }
+  }
+  const format = hdr ? "rgba16float" : navigator.gpu.getPreferredCanvasFormat();
   const layouts = createLayouts(device);
   const { layout, dataLayout } = layouts;
   const { retain, drop } = createStaticResources(device);
@@ -60,7 +75,12 @@ export function createWebGPU(
       data: material.data,
     };
     targets.add(target);
-    context.configure({ device, format, alphaMode: "premultiplied" });
+    context.configure({
+      device,
+      format,
+      alphaMode: "premultiplied",
+      ...(hdr && { toneMapping: { mode: "extended" as const } }),
+    });
     return target;
   }
   function release(target: Target) {

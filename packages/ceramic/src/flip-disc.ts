@@ -1,25 +1,21 @@
 import { createParameters, type Appearance } from "@oyn/surface";
 import { frameWGSL } from "./effects/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
-import { ceramicGlossyNormalsWGSL } from "./effects/ceramic-geometry.js";
-import { ceramicLightingWGSL } from "./effects/ceramic-lighting.js";
-import { ceramicFinish } from "./finish.js";
 import { parseColor } from "./color.js";
 import { ceramicBinding } from "./interaction.js";
 
 // Top view: XY is the desk, +Z points toward the viewer.
-// Rotation is about an unmarked Y diameter. There is no axle geometry.
+// All stones flip about a fixed Y diameter.
 export const flipDiscWGSL = /* wgsl */ `
 ${frameWGSL}
 ${geometryWGSL}
-${ceramicLightingWGSL}
-${ceramicGlossyNormalsWGSL}
 struct Stock {
   lens:vec4f, // core radius, sphere offset, sphere radius, edge roll
   cut:vec4f,  // bowl radius, lip fillet, deck height above pivot, lip centre radius
-  glaze:CeramicOptics, reverse:vec4f, interaction:vec4f // pivot travel, keyboard focus, unused, unused
+  front:vec4f, reverse:vec4f, finish:vec4f, interaction:vec4f, // pivot travel, keyboard focus, tangential extension, lamp height
 }
 @group(0) @binding(1) var<uniform> m:Stock;
+const lampRadius=1.95;
 fn deck()->f32 {return m.cut.z+m.interaction.x;}
 // Weak perspective about the resting plane: the moving stone recedes;
 // the socket and button hit target stay anchored to the desktop.
@@ -105,7 +101,7 @@ fn ground(xy:vec2f,r:f32,cs:vec2f,l:vec3f,px:f32)->vec4f {
   let base=select(vec4f(cone*dark,dark),vec4f(vec3f(-dark*2.8),-dark*2.8),dark<0.0);
   return socketLight(base,p,n,true);
 }
-fn scene(deskXY:vec2f,cs:vec2f,key:vec3f,px:f32)->vec4f {
+fn scene(deskXY:vec2f,cs:vec2f,key:vec3f,emitter:vec3f,px:f32)->vec4f {
   let xy=deskXY/viewScale();let r=length(xy);
   let l=normalize(key-vec3f(deskXY,deck()));
   if(r>1.002){return ground(deskXY,length(deskXY),cs,l,px);}
@@ -132,39 +128,55 @@ fn scene(deskXY:vec2f,cs:vec2f,key:vec3f,px:f32)->vec4f {
   let inv=vec2f(cs.x,-cs.y);let world=rotate(q,inv);
   let n=rotate(profile(q).xyz,inv);
   let lamp=normalize(key-world);
-  var optics=m.glaze;if(q.z<0.0){optics.colorMode=m.reverse;}
-  // Actual curvature lights the pigment; Ceramic's calibrated normals light the glaze.
-  let size=min(frame.rect.z,frame.rect.w)*.5;
-  optics.reflection.x=(key.z-world.z)*size;
-  optics.colorMode=vec4f(optics.colorMode.rgb*(.59+.43*max(dot(n,lamp),0.0)),optics.colorMode.w);
-  let slope=length(n.xy);
-  let grad=select(vec2f(1,0),n.xy/max(slope,.0001),slope>.0001);
-  // Support of the rolled lens along the screen-space outline normal.
-  // Measure the optical rim in screen units like Ceramic, not by surface tilt:
-  // at a rounded silhouette the latter changes almost entirely within one pixel.
-  let axis=rotate(vec3f(grad,0),cs);
-  let reach=select(m.lens.x*length(axis.xy),m.lens.z-m.lens.y*abs(axis.z),m.lens.z*abs(axis.z)>m.lens.y)+m.lens.w;
-  let inset=(reach-dot(world.xy,grad))*size*viewScale();
-  let band=1.0-clamp(inset/optics.shape.z,0.0,1.0);
-  let glossy=ceramicGlossyNormals(grad,band);
-  let g=CeramicGeometry(n,grad,band,1.0,band,band,world.xy*size,vec2f(size),vec2f(0),world.xy*size,sky(world,lamp),glossy[0],glossy[1]);
-  return socketLight(lightCeramic(optics,g,key.xy*size),world,n,false);
+  // Mirror one studio emitter: round overhead, longer along the tangent
+  // at oblique incidence. No screen-space line or second specular spot.
+  let mirror=reflect(vec3f(0,0,-1),n);
+  let axis=normalize(emitter);
+  let cosine=dot(mirror,axis);
+  let t=dot(emitter-world,axis)/max(cosine,.0001);
+  let offset=world+t*mirror-emitter;
+  let sideways=length(axis.xy);
+  let tangent=vec3f(-axis.y,axis.x,0)/max(sideways,.0001);
+  let stretch=1.0+m.interaction.z*pow(sideways,4);
+  let along=dot(offset,tangent);
+  let miss=length(offset-tangent*along*(1.0-1.0/stretch));
+  let radius=.26*inverseSqrt(m.finish.x);
+  let aa=px*.5*(1.0+2.0*length(emitter-world)/(m.lens.z+m.lens.w));
+  let image=select(0.0,1.0-smoothstep(radius-aa,radius+aa,miss),cosine>0.0 && t>0.0);
+  let taper=1.0-.65*smoothstep(.2,1.0,abs(along)/(stretch*radius))*pow(sideways,4);
+  // Like the Card: distinguish the image of the lamp from the grazing
+  // reflection of its surroundings. The latter follows roll, not a border mask.
+  let grazing=pow(1.0-clamp(n.z,0.0,1.0),2.1);
+  let facing=max(dot(n.xy,axis.xy),0.0);
+  let surround=1.0-exp(-m.finish.z*grazing*(.65+3.0*facing));
+  let visibility=sky(world,lamp);
+  let pigment=select(m.front.rgb,m.reverse.rgb,q.z<0.0);
+  let body=pigment*(.99-m.finish.w*(1.0-visibility*max(dot(n,lamp),0.0)));
+  let glint=image*taper*(1.0-exp(-.38*m.finish.y))*sky(world,normalize(emitter-world));
+  let surface=mix(body,vec3f(1),surround);
+  // One emitter for both output formats. Only the final SDR target clips at white.
+  let lampWhite=1.55;
+  return socketLight(vec4f(mix(surface,vec3f(lampWhite),glint),1),world,n,false);
 }
 @fragment fn surface(in:VertexOut)->@location(0) vec4f {
   let size=min(in.card.z,in.card.w);
   let xy=(in.local-in.card.zw*.5)*vec2f(2,-2)/size;
   let cs=vec2f(cos(frame.geometry.x),sin(frame.geometry.x));
   let delta=(frame.viewportLight.zw-in.card.xy-in.card.zw*.5)*vec2f(1,-1);
-  let key=vec3f(4.5*delta/sqrt(190.0*190.0+dot(delta,delta)),3.0+deck());
+  // Swing the finite lamp from overhead toward the side of the socket.
+  // At grazing angles the rolled edge compresses its image into a thin arc.
+  let arm=delta/sqrt(110.0*110.0+dot(delta,delta));
+  let key=vec3f(4.5*arm,deck()+3.0); // broad fill and soft shadows only
+  let emitter=vec3f(lampRadius*arm,deck()+m.interaction.w*mix(3.0f,.22f,dot(arm,arm)));
   let pixel=2.0/(size*frame.geometry.y);
   let r=length(xy);
   // Cover the moving silhouette and the annular transitions in physical
   // pixels. The canvas already tracks native DPR; no CSS upscaling.
-  if((abs(cs.y)>.001 && r<1.0+pixel) || (r>=viewScale()-2.0*m.glaze.shape.z/size-pixel && r<=1.0+pixel) || (r>m.cut.x-.04 && r<m.cut.w+pixel)){
+  if((abs(cs.y)>.001 && r<1.0+pixel) || (r>=viewScale()*m.lens.x-pixel && r<=1.0+pixel) || (r>m.cut.x-.04 && r<m.cut.w+pixel)){
     let a=vec2f(.375,.125)*pixel;let b=vec2f(-a.y,a.x);
-    return .25*(scene(xy+a,cs,key,pixel)+scene(xy-a,cs,key,pixel)+scene(xy+b,cs,key,pixel)+scene(xy-b,cs,key,pixel));
+    return .25*(scene(xy+a,cs,key,emitter,pixel)+scene(xy-a,cs,key,emitter,pixel)+scene(xy+b,cs,key,emitter,pixel)+scene(xy-b,cs,key,emitter,pixel));
   }
-  return scene(xy,cs,key,pixel);
+  return scene(xy,cs,key,emitter,pixel);
 }
 `;
 
@@ -181,29 +193,17 @@ export type StoneProfile = Readonly<{
 }>;
 export type FlipDiscProps = {
   profile: StoneProfile;
+  focusTarget?: HTMLElement | null;
+  contrast: number;
   sharpness: number;
   reflectionStrength: number;
   rimStrength: number;
+  extension: number;
+  lampHeight: number;
   /** Maximum press travel as a fraction of the remaining socket clearance. */
   stroke: number;
   pose: (now: number, reduced: boolean) => { angle: number; active: boolean };
 };
-const optical = ({
-  sharpness,
-  reflectionStrength,
-  rimStrength,
-}: FlipDiscProps) =>
-  ceramicFinish({
-    color: "#F4F2E9",
-    colorScheme: "light",
-    lighting: "glossy",
-    sharpness,
-    reflectionStrength,
-    rimReflectionStrength: rimStrength,
-    darkFrost: 0,
-    shadowStrength: 0.28,
-  }).values;
-
 export const flipDisc: Appearance<FlipDiscProps> = {
   create(initial) {
     function stock(p: StoneProfile) {
@@ -237,13 +237,18 @@ export const flipDisc: Appearance<FlipDiscProps> = {
     let previous = initial;
     const parameters = createParameters([
       ...stock(initial.profile),
-      ...optical(initial),
-      ...parseColor("#F16A32"),
+      ...parseColor("#F4F2E9"),
+      0,
+      ...parseColor("#FF6900"),
+      0,
+      initial.sharpness,
+      initial.reflectionStrength,
+      initial.rimStrength,
+      initial.contrast,
       0,
       0,
-      0,
-      0,
-      0, // interaction
+      initial.extension,
+      initial.lampHeight,
     ]);
     return {
       material: {
@@ -342,11 +347,19 @@ export const flipDisc: Appearance<FlipDiscProps> = {
                     Math.exp(-dt / (target > travel ? 24 : 55));
               if (Math.abs(target - travel) < 0.002) travel = target;
               const { depth, gap } = previous.profile;
-              parameters.set(40, travel * previous.stroke * (gap - depth));
-              parameters.set(41, Number(el.matches(":focus-visible")));
+              parameters.set(20, travel * previous.stroke * (gap - depth));
+              parameters.set(21, Number(el.matches(":focus-visible")));
               const { angle, active } = previous.pose(now, reduce.matches);
               if (active || travel !== target || now < holdUntil)
                 ctx.requestDraw();
+              if (previous.focusTarget) {
+                const box = previous.focusTarget.getBoundingClientRect();
+                const point = frame.toLocal({
+                  x: box.left + box.width / 2,
+                  y: box.top + box.height / 2,
+                });
+                return [point.x, point.y, angle];
+              }
               const [x, y] = lighting.frame!(frame);
               return [x, y, angle];
             },
@@ -356,14 +369,16 @@ export const flipDisc: Appearance<FlipDiscProps> = {
       update(next) {
         if (next.profile !== previous.profile)
           stock(next.profile).forEach((v, i) => parameters.set(i, v));
-        if (
-          next.rimStrength !== previous.rimStrength ||
-          next.sharpness !== previous.sharpness ||
-          next.reflectionStrength !== previous.reflectionStrength
-        )
-          optical(next).forEach((v, i) => parameters.set(8 + i, v));
+        parameters.set(16, next.sharpness);
+        parameters.set(17, next.reflectionStrength);
+        parameters.set(18, next.rimStrength);
+        parameters.set(19, next.contrast);
+        parameters.set(22, next.extension);
+        parameters.set(23, next.lampHeight);
         const moved =
-          previous.pose !== next.pose || previous.stroke !== next.stroke;
+          previous.focusTarget !== next.focusTarget ||
+          previous.pose !== next.pose ||
+          previous.stroke !== next.stroke;
         previous = next;
         if (moved) return "draw";
       },

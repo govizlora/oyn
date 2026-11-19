@@ -7,14 +7,14 @@
   border: 1px solid #b0b7a640;
   border-radius: 16px;
   padding: 17px 20px;
-  background: #f1f1eb66;
+  background: light-dark(#f1f1eb66,#31372f);
 }
 .solid-tile header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font: 9px monospace;
-  color: #7a8472;
+  color: light-dark(#7a8472,#bbc3b2);
   gap: 8px;
 }
 .solid-tile header button {

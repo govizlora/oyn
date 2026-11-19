@@ -21,15 +21,7 @@ const specimens = [
   ['08', 'Saddle fader', 'A little room in between.', SaddleFader],
   ['09', 'Pocket dial', 'A flat disc. A spherical subtraction.', PocketDial],
 ] as const;
-export function SculptedStudy({
-  explore,
-  exploration,
-  studies,
-}: {
-  explore: () => void;
-  exploration: () => void;
-  studies: () => void;
-}) {
+export function SculptedStudy() {
   return (
     <section className="sculpture-page">
       <header className="sculpture-heading">
@@ -39,12 +31,6 @@ export function SculptedStudy({
           </a>
           <span>MATERIAL EXPLORATIONS / 004</span>
         </div>
-        <nav aria-label="Collections">
-          <a href="./flip.html" className="field-link">
-            Ripple field ↗
-          </a>
-          <button onClick={explore}>Object library ↗</button>
-        </nav>
       </header>
       <div className="sculpture-title">
         <h1>
@@ -76,10 +62,6 @@ export function SculptedStudy({
         <span>
           <i /> REAL-TIME LIGHT. REAL SURFACE GEOMETRY.
         </span>
-        <button onClick={studies}>
-          Original ceramic studies <span>↗</span>
-        </button>
-        <button onClick={exploration}>Geometry lab ↗</button>
       </footer>
     </section>
   );

@@ -1,11 +1,17 @@
 // Distances are expressed in lattice pitches, independent of screen size.
 const rowPitch = Math.sqrt(3) / 2;
-export const lattice = { width: 7.5, height: 1 + 3 * rowPitch };
-export const stones = Array.from({ length: 28 }, (_, i) => {
-  const row = Math.floor(i / 7),
-    col = i % 7;
-  return { x: 0.5 + col + (row % 2) * 0.5, y: 0.5 + row * rowPitch, row, col };
-});
+const columns = 8, rows = 5;
+export const lattice = { width: columns, height: 1 + (rows - 1) * rowPitch };
+// A rectangular panel cut from a triangular lattice, with equal end margins.
+export const stones = Array.from({ length: rows }, (_, row) => {
+  const inset = row % 2;
+  return Array.from({ length: columns - inset }, (_, col) => ({
+    x: 0.5 + inset / 2 + col,
+    y: 0.5 + row * rowPitch,
+    row,
+    col,
+  }));
+}).flat();
 
 type Motion = { interval: number; duration: number; damping: number };
 type Pulse = Motion & { arrivals: number[]; end: number };

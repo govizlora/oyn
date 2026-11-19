@@ -1,0 +1,14 @@
+.card-stage {
+  display: grid;
+  place-items: center;
+  min-height: clamp(300px, 57svh, 600px);
+  border: 1px solid light-dark(#00000026, #ffffff2e);
+  border-radius: 20px;
+  overflow: clip;
+}
+.card-specimen {
+  position: relative;
+  width: min(72%, 320px);
+  aspect-ratio: 7 / 4;
+  border-radius: 24px;
+}

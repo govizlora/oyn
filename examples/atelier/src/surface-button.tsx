@@ -3,11 +3,11 @@ import { useSurface } from '@oyn/surface';
 import { ceramic } from '@oyn/ceramic';
 
 // The entire subject: one native button, one ref, no synchronization helpers.
-export function SurfaceButton({ colorScheme }: { colorScheme: 'light' | 'dark' }) {
+export function SurfaceButton() {
   const [pressed, setPressed] = useState(false);
   const ref = useSurface({
     appearance: ceramic,
-    props: { colorScheme, elevation: pressed ? 4 : 16, maxElevation: 16 },
+    props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
   });
 
   return (

@@ -26,10 +26,8 @@ export function ObjectLibrary({
   room,
   object,
   navigate,
-  home,
 }: LibraryLocation & {
   navigate: (next: LibraryLocation) => void;
-  home: () => void;
 }) {
   const search = useRef<HTMLInputElement>(null);
   const [storageAvailable, setStorageAvailable] = useState(true);
@@ -121,12 +119,7 @@ export function ObjectLibrary({
   return (
     <div className="library-shell">
       <header className="library-header">
-        <button
-          type="button"
-          className="library-brand"
-          onClick={home}
-          aria-label="Back to homepage"
-        >
+        <div className="library-brand">
           <span className="library-mark">
             <i />
             <i />
@@ -134,7 +127,7 @@ export function ObjectLibrary({
           <span>
             OYN <b>/</b> OBJECT LIBRARY
           </span>
-        </button>
+        </div>
         <div className="library-tools">
           <button
             type="button"

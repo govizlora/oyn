@@ -5,8 +5,7 @@
   min-height: 100svh;
   display: block;
   overflow: visible;
-  background: #e8e9e2;
-  color: #53614f;
+  color: light-dark(#53614f,#d0d8c7);
 }
 .library-shell {
   width: 100%;
@@ -157,8 +156,8 @@
   border-radius: 8px;
 }
 .library-rooms button[aria-current='page'] {
-  background: #dfe2d6;
-  color: #52604a;
+  background: light-dark(#dfe2d6,#363d32);
+  color: light-dark(#52604a,#d6decf);
 }
 .library-rooms button[aria-current='page'] svg {
   color: #bc6940;
@@ -181,7 +180,7 @@
   min-width: 0;
   border: 0;
   background: none;
-  color: #53614f;
+  color: light-dark(#53614f,#d0d8c7);
   font-size: 11px;
 }
 .library-search input::placeholder {

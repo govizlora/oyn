@@ -17,6 +17,7 @@ export interface Renderer {
 export async function createRenderer(
   fail: (error: unknown) => void,
   invalidate = () => {},
+  hdr = false,
 ): Promise<Renderer> {
   let device: GPUDevice | undefined;
   try {
@@ -30,6 +31,6 @@ export async function createRenderer(
   } catch (error) {
     console.warn("WebGPU acquisition failed; trying WebGL2.", error);
   }
-  if (device) return createWebGPU(device, fail);
+  if (device) return createWebGPU(device, fail, hdr);
   return (await import("./webgl2.js")).createWebGL2(fail, invalidate);
 }

@@ -113,7 +113,7 @@ try {
   const role = (type, name) => page.getByRole(type, { name, exact: true });
   const countTimers = () => page.evaluate(() => window.activeIntervals.size);
   const choose = async (name) => {
-    await role('radio', name).check();
+    await role('link', name).click();
     await ready();
   };
   const idle = async () => {
@@ -143,12 +143,8 @@ try {
   await page.goto(base + '/?study=1');
   await ready();
   await idle();
-  assert.equal(
-    await page.locator('.study-selector > button').getAttribute('aria-label'),
-    'Object library',
-    'library is the last navigation choice',
-  );
-  await choose('Air · Kinetic objects');
+  assert.equal(await page.locator('.project-switch [aria-current]').textContent(), 'Quiet');
+  await choose('Air');
   const speed = role('slider', 'Rotor speed');
   await speed.focus();
   await speed.press('End');
@@ -234,7 +230,7 @@ try {
     document.dispatchEvent(new Event('visibilitychange'));
   });
   assert.equal(await countTimers(), 1);
-  await choose('Play · Tactile playground');
+  await choose('Play');
   assert.equal(
     await countTimers(),
     0,
@@ -323,16 +319,16 @@ try {
   await page.goForward();
   await ready();
   assert.equal(new URL(page.url()).searchParams.get('study'), '3');
-  await role('button', 'Object library').click();
+  await role('link', 'Object library').click();
   await page.waitForSelector('.specimen-stage canvas');
-  assert.equal(new URL(page.url()).searchParams.get('room'), 'hardware');
+  assert.equal(new URL(page.url()).searchParams.get('view'), 'library');
   await page
     .getByRole('navigation', { name: 'Object rooms' })
     .getByRole('button', { name: /^Archive/ })
     .click();
   assert.equal(await page.locator('.task-list').count(), 1);
   assert.equal(await page.locator('.file-table').count(), 1);
-  await role('button', 'Back to homepage').click();
+  await role('link', 'Quiet').click();
   await ready();
   await idle();
   results.push({ interactions: 'passed', gpu });

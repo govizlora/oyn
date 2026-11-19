@@ -55,13 +55,7 @@ function SolidSpecimen({ index }: { index: number }) {
     </article>
   );
 }
-export function SolidStudy({
-  home,
-  compare,
-}: {
-  home: () => void;
-  compare: () => void;
-}) {
+export function SolidStudy() {
   return (
     <section className="sculpture-page solid-page">
       <header className="sculpture-heading">
@@ -70,10 +64,6 @@ export function SolidStudy({
             oyn
           </a>
           <span>GEOMETRY LAB / EXPERIMENTAL</span>
-        </div>
-        <div>
-          <button onClick={compare}>Compare original card ↗</button>
-          <button onClick={home}>Back to ceramic controls ↗</button>
         </div>
       </header>
       <div className="sculpture-title">

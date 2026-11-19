@@ -14,13 +14,7 @@ input {
 .example {
   min-height: 180vh;
   padding: 40px max(24px, calc((100vw - 1000px) / 2));
-  background: #e8e8e8;
-  color: #222;
-}
-.example.dark {
-  background: #181818;
-  color: #eee;
-  color-scheme: dark;
+  color: light-dark(#222,#eee);
 }
 h1 {
   margin: 16px 0 4px;
@@ -151,9 +145,6 @@ footer {
 
 /* Native appearance remains the default until Surface takes over. */
 .surface-button:not([data-oyn-active]) {
-  background: #eee;
+  background: light-dark(#eee,#333);
   box-shadow: 0 4px 12px #0003;
-}
-.dark .surface-button:not([data-oyn-active]) {
-  background: #333;
 }

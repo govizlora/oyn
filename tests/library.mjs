@@ -741,12 +741,12 @@ try {
   }
   assert.equal(new Set(allIds).size, 56);
   await page
-    .getByRole('button', { name: 'Back to homepage', exact: true })
+    .getByRole('link', { name: 'Quiet', exact: true })
     .click();
   await settle();
   assert.equal(await page.locator('.instrument').count(), 1);
   assert.equal(await page.locator('.library-shell').count(), 0);
-  await page.getByRole('button', { name: /Object library/ }).click();
+  await page.getByRole('link', { name: /Object library/ }).click();
   await settle();
   assert.equal(await page.locator('.library-specimen').count(), 6);
   const rooms = [

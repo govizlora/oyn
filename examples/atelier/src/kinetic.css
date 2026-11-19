@@ -1,21 +1,5 @@
 /* Solid geometry belongs to Ceramic; light and moving blades to the optical
    material. CSS only arranges the semantic HTML and prints the surface marks. */
-.study-selector {
-  display: flex;
-  gap: 3px;
-}
-.library-option {
-  border: 0;
-  background: none;
-  margin-left: 5px;
-}
-.library-option:before {
-  content: '';
-  position: absolute;
-  left: -4px;
-  height: 14px;
-  border-left: 1px solid #acb3a333;
-}
 .glow-lens {
   display: inline-block;
   position: relative;
