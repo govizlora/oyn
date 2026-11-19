@@ -132,26 +132,11 @@ function Atelier() {
   }
   return (
     <SurfaceProvider hdr={values.hdr}>
-      <main className="atelier">
-        <header className="mast">
-          <a href="./" aria-label="Oyn atelier">
-            oyn
-          </a>
-          <span>Material atelier</span>
-          <small>STUDY　/　007</small>
-        </header>
-        <div className="intro">
-          <p>SPATIAL CONTROLS　/　03</p>
-          <h1>
-            Ripple field<span>.</span>
-          </h1>
-        </div>
+      <main className="ripple-page">
+        <h1>Ripple field</h1>
+        <p>悬停轻沉，按下再沉一档。点中棋子，波纹从这里散开。</p>
         <div className="workspace">
           <section className="bench" aria-label="波纹场">
-            <div className="bench-head">
-              <span>PLAN VIEW</span>
-              <span>GRILLE　/　{stones.length}</span>
-            </div>
             <div
               className="wave-grid"
               onFocus={(e) =>
@@ -185,12 +170,8 @@ function Atelier() {
                 />
               ))}
             </div>
-            <div className="bench-foot">
-              <span>＋</span>
-              <span>SHUTTER ORANGE　/　PORCELAIN</span>
-            </div>
           </section>
-          <aside aria-label="波纹设置">
+          <aside className="tuning" aria-label="波纹设置">
             <header className="tuning-head">
               <div className="panel-head">
                 <h2>调校</h2>
@@ -208,6 +189,7 @@ function Atelier() {
                   恢复默认
                 </button>
               </div>
+              <small>R = 圆盘半径</small>
               {import.meta.env.DEV && (
                 <div>
                   <button
@@ -287,10 +269,6 @@ function Atelier() {
             ))}
           </aside>
         </div>
-        <footer>
-          <span>悬停轻沉，按下再沉一档。点中棋子，波纹从这里散开。</span>
-          <span>R = 圆盘半径</span>
-        </footer>
       </main>
     </SurfaceProvider>
   );

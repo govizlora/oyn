@@ -71,7 +71,7 @@ try {
         .getByRole("navigation", { name: "Projects" })
         .getByRole("link")
         .count(),
-      10,
+      6,
     );
     assert.ok(
       await page
@@ -85,12 +85,14 @@ try {
           ),
         ),
     );
+    const board = await page.locator(".wave-grid").boundingBox();
+    assert.ok(board.width >= 500, "desktop board uses the available content width");
     const orange = await shot(near),
       farOrange = await shot(far);
     const center =
       ((orange.height >> 1) * orange.width + (orange.width >> 1)) * 4;
     assert.ok(orange.data[center] > orange.data[center + 2] + 70);
-    await page.locator(".mast a").focus(); // navigate from the project header
+    await page.getByRole("button", { name: "Dark mode" }).focus(); // navigate from the project sidebar
     await page.keyboard.press("Tab");
     assert.ok(await near.evaluate((el) => el.matches("button:focus-visible")));
     const socket = async () => {
@@ -131,7 +133,7 @@ try {
       "Tab lights the socket and leaving extinguishes it",
     );
     await near.press("Enter");
-    await page.locator(".mast a").focus(); // Compare wave motion with the socket unlit.
+    await page.getByRole("button", { name: "Dark mode" }).focus(); // Compare wave motion with the socket unlit.
     await tick(170);
     assert.ok(difference(orange, await shot(near)) > 4);
     assert.ok(
@@ -149,10 +151,10 @@ try {
     // Until the second front arrives the original trajectory must be unchanged.
     await load();
     await near.press("Enter");
-    await page.locator(".mast a").focus(); // Compare wave motion with the socket unlit.
+    await page.getByRole("button", { name: "Dark mode" }).focus(); // Compare wave motion with the socket unlit.
     await tick(800);
     await far.press("Enter");
-    await page.locator(".mast a").focus();
+    await page.getByRole("button", { name: "Dark mode" }).focus();
     await tick(170);
     assert.ok(
       difference(uncontestedNear, await shot(near)) < 0.2,
@@ -216,7 +218,7 @@ try {
     );
     await page.emulateMedia({ reducedMotion: "reduce" });
     await near.press("Space");
-    await page.locator(".mast a").focus(); // Compare faces with the same lamp.
+    await page.getByRole("button", { name: "Dark mode" }).focus(); // Compare faces with the same lamp.
     await tick(0);
     assert.ok(difference(beforeGap, await shot(near)) > 8);
     assert.ok(
