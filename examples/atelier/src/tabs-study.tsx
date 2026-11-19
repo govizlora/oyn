@@ -2,13 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@oyn/ui/tabs";
 import "./tabs-study.css";
 
-const panels = {
-  Overview: "A recessed track with one raised selection.",
-  Material:
-    "Both surfaces use standard Ceramic. Inverse changes the pigment, not the lighting.",
-  Motion:
-    "The selection slides to the active tab. Reduced motion switches instantly.",
-};
+const tabs = ["Overview", "Material", "Motion"] as const;
 
 export function TabsStudy() {
   const [radius, setRadius] = useState(16);
@@ -18,10 +12,6 @@ export function TabsStudy() {
       <header>
         <small>COMPONENTS / 01</small>
         <h1>Tabs</h1>
-        <p>
-          One panel at a time. Click a tab or use the arrow keys to switch
-          views.
-        </p>
       </header>
       <div className="tabs-workbench">
         <div className="tabs-preview">
@@ -32,16 +22,15 @@ export function TabsStudy() {
               radius={radius}
               selectedTone={tone}
             >
-              {Object.keys(panels).map((label) => (
+              {tabs.map((label) => (
                 <TabsTrigger key={label} value={label}>
                   {label}
                 </TabsTrigger>
               ))}
             </TabsList>
-            {Object.entries(panels).map(([label, text]) => (
-              <TabsContent key={label} value={label}>
-                <h2>{label}</h2>
-                <p>{text}</p>
+            {tabs.map((label) => (
+              <TabsContent key={label} value={label} className="sr-only" tabIndex={-1}>
+                {label}
               </TabsContent>
             ))}
           </Tabs>
