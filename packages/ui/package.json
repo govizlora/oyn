@@ -1,0 +1,26 @@
+{
+  "name": "@oyn/ui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tabs": {
+      "types": "./dist/tabs.d.ts",
+      "development": "./src/tabs.tsx",
+      "import": "./dist/tabs.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cp src/tabs.css dist/tabs.css"
+  },
+  "dependencies": {
+    "@radix-ui/react-tabs": "^1.2.1",
+    "@radix-ui/react-compose-refs": "^1.1.5"
+  },
+  "peerDependencies": {
+    "@oyn/ceramic": "0.0.0",
+    "@oyn/surface": "0.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

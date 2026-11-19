@@ -71,7 +71,7 @@ try {
         .getByRole("navigation", { name: "Projects" })
         .getByRole("link")
         .count(),
-      6,
+      7,
     );
     assert.ok(
       await page

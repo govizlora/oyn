@@ -11,6 +11,7 @@
     "@oyn/ceramic": "0.0.0",
     "@oyn/surface": "0.0.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@oyn/ui": "0.0.0"
   }
 }

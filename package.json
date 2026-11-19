@@ -10,7 +10,7 @@
     "dev:mui": "npm run dev -w @oyn/example-mui",
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
     "build:all": "npm run build:packages && npm run build:benchmark && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
-    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic",
+    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic && npm run build -w @oyn/ui",
     "test:ceramic-policy": "npm run build:packages && node tests/ceramic-policy.mjs",
     "test:ceramic": "npm run build:packages && node tests/ceramic-light.mjs && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",
@@ -43,7 +43,8 @@
     "format:check": "prettier --check .",
     "test:webgl-copy": "npm run build:packages && node tests/webgl-copy.mjs",
     "check:webgl-shaders": "node tools/webgl/generate.mjs --check",
-    "test:webgl-fallback": "npm run check:webgl-shaders && npm run build:packages && node tests/webgl-fallback.mjs"
+    "test:webgl-fallback": "npm run check:webgl-shaders && npm run build:packages && node tests/webgl-fallback.mjs",
+    "test:atelier-tabs": "npm run build && node tests/atelier-tabs.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

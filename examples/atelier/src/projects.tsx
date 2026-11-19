@@ -4,6 +4,7 @@ import "./projects.css";
 const projects = [
   ["Sculpted", "./"],
   ["Ripple field", "./flip.html"],
+  ["Tabs", "./?view=tabs"],
   ["Card", "./?view=card"],
   ["Quiet", "./?study=1"],
   ["Object library", "./?view=library"],

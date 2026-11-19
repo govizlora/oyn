@@ -30,6 +30,7 @@ npm run test:library        # full collection and selection workflow
 
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
+- `/?view=tabs`: shared `@oyn/ui/tabs` with live radius and matching/inverse controls.
 - `/?view=card`: native Ceramic card with theme-aware defaults and a background brightness control.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
@@ -38,7 +39,7 @@ npm run test:library        # full collection and selection workflow
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The left sidebar (Projects menu on narrow screens) links all six destinations directly, including Ripple field and Native button.
+The left sidebar (Projects menu on narrow screens) links all seven destinations directly, including Ripple field and Native button.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
 

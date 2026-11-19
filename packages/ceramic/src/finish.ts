@@ -96,7 +96,8 @@ export type CeramicOptions = {
   /** Pointer/fixed light-source policy, independent of environment and lighting. */
   light?: CeramicLight;
   /**
-   * One opaque sRGB base color: #RGB, #RRGGBB or numeric rgb().
+   * One opaque sRGB base color (#RGB, #RRGGBB or numeric rgb()), or "inverse"
+   * for the opposite default pigment without changing the lighting environment.
    * Theme palettes must be resolved by the caller.
    * @defaultValue #f0f0f0 in light environments; #0c0c0c in dark environments.
    */
@@ -204,9 +205,9 @@ export function ceramicFinish(options: CeramicOptions = {}) {
   if (options.color !== undefined && typeof options.color !== "string")
     throw Error("Ceramic color must be a single string.");
   const environment = options.colorScheme ?? preferredColorScheme();
-  const rgb = parseColor(
-    options.color ?? (environment === "dark" ? "#0c0c0c" : "#f0f0f0"),
-  );
+  const inverse = options.color === "inverse";
+  const defaultColor = (environment === "dark") !== inverse ? "#0c0c0c" : "#f0f0f0";
+  const rgb = parseColor(inverse ? defaultColor : options.color ?? defaultColor);
   const lighting =
     options.lighting ??
     (relativeLuminance(rgb) > lightingThreshold ? "soft" : "glossy");

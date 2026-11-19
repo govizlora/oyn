@@ -1,0 +1,84 @@
+.tabs-study {
+  width: 100%;
+  max-width: 1080px;
+  padding: clamp(20px, 4vw, 64px);
+  margin: auto;
+  color: var(--preview-ink);
+  font:
+    15px/1.5 system-ui,
+    sans-serif;
+}
+.tabs-study small {
+  font: 11px/1.4 monospace;
+  letter-spacing: 0.1em;
+}
+.tabs-study h1 {
+  margin: 8px 0;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+.tabs-study p {
+  max-width: 50ch;
+  margin: 8px 0;
+}
+.tabs-workbench {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  border-block: 1px solid light-dark(#ccc, #444);
+}
+.tabs-preview {
+  padding: 32px 0;
+}
+.tabs-preview > small {
+  display: block;
+  margin-bottom: 28px;
+}
+.tabs-study h2 {
+  font-size: 18px;
+  margin: 0;
+}
+.tabs-preview [role="tabpanel"] {
+  padding-block: 22px;
+  min-height: 110px;
+}
+.tabs-workbench aside {
+  padding: 24px 0 24px 24px;
+  border-inline-start: 1px solid light-dark(#ccc, #444);
+}
+.tabs-radius-control {
+  display: block;
+  margin: 16px 0;
+}
+.tabs-workbench output {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+.tabs-workbench input[type="range"] {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+.tabs-workbench fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tabs-workbench legend {
+  padding: 0;
+  margin-bottom: 6px;
+}
+.tabs-workbench fieldset label {
+  display: block;
+}
+@media (max-width: 860px) {
+  .tabs-workbench {
+    grid-template-columns: 1fr;
+  }
+  .tabs-workbench aside {
+    padding: 20px 0;
+    border-inline: 0;
+    border-top: 1px solid light-dark(#ccc, #444);
+  }
+}

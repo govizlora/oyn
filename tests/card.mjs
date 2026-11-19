@@ -38,7 +38,7 @@ try {
   });
   await page.goto(base);
   const nav = page.getByRole('navigation', { name: 'Projects' });
-  const pages = ['Sculpted', 'Ripple field', 'Card', 'Quiet', 'Object library', 'Native button'];
+  const pages = ['Sculpted', 'Ripple field', 'Tabs', 'Card', 'Quiet', 'Object library', 'Native button'];
   for (const name of pages) {
     await nav.getByRole('link', { name, exact: true }).click();
     assert.equal(await nav.locator('[aria-current="page"]').innerText(), name);

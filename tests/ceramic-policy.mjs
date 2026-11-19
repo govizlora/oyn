@@ -13,6 +13,13 @@ import {
 } from "../packages/ceramic/dist/finish.js";
 import { cardCeramic } from "../packages/ceramic/dist/card.js";
 
+for (const scheme of ["light", "dark"]) {
+  const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
+  const opposite = ceramicFinish({ colorScheme: scheme === "light" ? "dark" : "light" });
+  assert.deepEqual(inverse.values.slice(4, 8), opposite.values.slice(4, 8));
+  assert.equal(inverse.shadows, ceramicFinish({ colorScheme: scheme }).shadows);
+}
+
 for (const value of [0, 160, 170, 176, 180, 191, 192, 193, 240, 255]) {
   for (const colorScheme of ["light", "dark"]) {
     const options = { colorScheme, color: `rgb(${value} ${value} ${value})` };

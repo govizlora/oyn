@@ -5,6 +5,7 @@ import { SurfaceProvider } from "@oyn/surface";
 import { QuietStudy } from "./studies";
 import { ObjectLibrary, type LibraryLocation } from "./library";
 import { objects, rooms } from "./library/registry";
+import { TabsStudy } from "./tabs-study";
 import { Card } from "./card";
 import { SculptedStudy } from "./sculpted-study";
 import "./style.css";
@@ -77,6 +78,8 @@ function App() {
               object={object}
               navigate={library}
             />
+          ) : project === "Tabs" ? (
+            <TabsStudy />
           ) : project === "Card" ? (
             <Card />
           ) : (

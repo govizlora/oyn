@@ -129,6 +129,7 @@ Mouse-follow lighting remains the default. Choose automatic lighting and auto-sc
 ## Packages
 
 - `packages/surface`: `@oyn/surface` — SurfaceProvider, useSurface, DOM integration and WebGPU rendering; one canvas per element and one device/scheduler per Provider.
+- `packages/ui`: reusable React controls such as `@oyn/ui/tabs`. Try the [Tabs workbench](http://127.0.0.1:5177/?view=tabs) in Atelier.
 - `packages/ceramic`: `@oyn/ceramic` — composable shader fragments; explicit light/dark optical modes.
 
 ## Dashboard comparison — separate migration example
