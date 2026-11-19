@@ -1,10 +1,6 @@
 /** Offline only. No imports from this directory may enter the browser bundle.
  * Orthographic 2.5D assets, not a general camera/mesh interchange format.
  */
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { bakeControls } from './controls.mjs';
-import { specimens } from './recipes.mjs';
 export const N = 192, EXTENT = 130, S = 96, SHADOW_EXTENT = 320;
 const sigmas = [0, 1, 2, 4, 8, 16, 32];
 export function distance(node, p) {
@@ -77,15 +73,4 @@ export function bake(node) {
     packed[i*2]=(x|(y<<16))>>>0;floats[i*2+1]=field[i*4+3];
   }
   return Buffer.concat([Buffer.from(header.buffer),Buffer.from(packed.buffer),Buffer.from(shadows.buffer)]);
-}
-if(process.argv[1]===fileURLToPath(import.meta.url)) {
-  const output=new URL('../../examples/atelier/public/geometries/',import.meta.url);await mkdir(output,{recursive:true});
-  const check=process.argv.includes('--check');
-  await bakeControls(check);
-  for(let i=0;i<specimens.length;i++)for(const preset of ['primitive',0,40,100]) {
-    const name=`${i}-${preset}.bin`,bytes=bake(specimens[i].geometry(preset==='primitive'?40:preset,preset!=='primitive'));
-    if(check){if(!bytes.equals(await readFile(new URL(name,output))))throw Error(`Stale geometry: ${name}`);}
-    else await writeFile(new URL(name,output),bytes);
-    console.log(`${check?'Checked':'Baked'} ${name}: ${bytes.length} bytes`);
-  }
 }

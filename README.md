@@ -14,9 +14,9 @@ implemented boundaries, source map, one-run 500-card benchmark, known limits and
 plan to make the approach canonical across shaders. That wider migration is not
 yet complete. Original Ceramic defaults remain unchanged.
 
-Quiet (`?study=1`), Air (`?study=2`) and Play (`?study=3`) remain available, along with
+Quiet (`?study=1`) remains available, along with
 the object library and archived compositions. `npm run build` outputs root `dist/`.
-`npm run test:sculpted` checks the homepage; `test:atelier` covers preserved studies
+`npm run test:sculpted` checks the homepage; `test:atelier` covers Card, Quiet
 and archive behavior. See [Atelier notes](examples/atelier/README.md) for routes.
 
 The shadcn migration remains separate: `dev:shadcn` (:5176) / `build:shadcn`.

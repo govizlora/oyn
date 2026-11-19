@@ -118,7 +118,7 @@ export function Glow({
   return <span ref={ref} className={`glow-lens ${className}`} {...props} />;
 }
 // The dial/readout and shader share this single speed calibration.
-export const rotorRadiansPerSecond = (speed: number) =>
+const rotorRadiansPerSecond = (speed: number) =>
   speed > 0 ? 0.5 + speed / 17 : 0;
 
 export function RotorPaint({

@@ -3,12 +3,9 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SurfaceProvider } from "@oyn/surface";
 import { QuietStudy } from "./studies";
-import { AirStudy, PlaygroundStudy } from "./kinetic-studies";
 import { ObjectLibrary, type LibraryLocation } from "./library";
 import { objects, rooms } from "./library/registry";
-import { ShadowLab } from "./shadow-lab";
 import { Card } from "./card";
-import { SolidStudy } from "./solid-study";
 import { SculptedStudy } from "./sculpted-study";
 import "./style.css";
 import "./desktop.css";
@@ -16,7 +13,6 @@ import "./library/library.css";
 import "./kinetic.css";
 import "./sculpted.css";
 
-const studies = { Quiet: QuietStudy, Air: AirStudy, Play: PlaygroundStudy };
 function readLocation() {
   const url = new URL(location.href);
   const [project] = currentProject(url);
@@ -54,10 +50,7 @@ function App() {
     setRoute(readLocation());
     window.scrollTo(0, 0);
   };
-  const Study =
-    project === "Quiet" || project === "Air" || project === "Play"
-      ? studies[project]
-      : undefined;
+  const quiet = project === "Quiet";
   return (
     <>
       <ProjectSwitch />
@@ -65,20 +58,17 @@ function App() {
         aria-label="Oyn interactive material studies"
         className={
           "atelier " +
-          (Study
+          (quiet
             ? ""
             : project === "Object library"
               ? "atelier-library"
               : "atelier-sculpture")
         }
-        data-study={
-          Study ? Object.values(studies).indexOf(Study) + 1 : undefined
-        }
       >
         <SurfaceProvider>
-          {Study ? (
+          {quiet ? (
             <div className="composition">
-              <Study />
+              <QuietStudy />
             </div>
           ) : project === "Object library" ? (
             <ObjectLibrary
@@ -87,10 +77,6 @@ function App() {
               object={object}
               navigate={library}
             />
-          ) : project === "Shadow lab" ? (
-            <ShadowLab />
-          ) : project === "Geometry lab" ? (
-            <SolidStudy />
           ) : project === "Card" ? (
             <Card />
           ) : (

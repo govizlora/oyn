@@ -584,15 +584,14 @@ try {
     }
   }
   assert.deepEqual(errors, []);
-  // Explicit unsupported state, not a CSS material fallback or a blank page.
-  const unsupported = await browser.newPage();
-  await unsupported.addInitScript(() =>
+  // Without WebGPU, the analytic card still renders via WebGL2.
+  const fallback = await browser.newPage();
+  await fallback.addInitScript(() =>
     Object.defineProperty(navigator, 'gpu', { get: () => undefined }),
   );
-  await unsupported.goto(base);
-  await unsupported.getByRole('alert').waitFor();
-  assert.equal(await unsupported.locator('canvas').count(), 0);
-  await unsupported.close();
+  await fallback.goto(base + '/?view=card');
+  await fallback.locator('.card-specimen[data-oyn-active] canvas').waitFor();
+  await fallback.close();
   await writeFile(
     new URL(
       `results${process.env.BROWSER === 'firefox' ? '-firefox' : ''}.json`,
@@ -601,7 +600,7 @@ try {
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: Quiet and both preserved archive compositions; calendar, mixed multi-selection, dropdown keyboard/dismissal, search, sorting, table/grid, shortcuts; four cached pipelines; one live device; idle/reduced-motion; history; 5 responsive sizes; no WebGPU errors; explicit unsupported state.',
+    'PASS: Quiet and both preserved archive compositions; calendar, mixed multi-selection, dropdown keyboard/dismissal, search, sorting, table/grid, shortcuts; four cached pipelines; one live device; idle/reduced-motion; history; 5 responsive sizes; no WebGPU errors; card fallback.',
   );
 } finally {
   server?.kill();

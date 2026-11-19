@@ -10,7 +10,7 @@ try{
  browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage({viewport:{width:640,height:480},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto('http://127.0.0.1:5196/tests/fixtures/surface.html');
  await page.evaluate(async()=>{
- const {labMaterial,initial,heightRules}=await import('/examples/atelier/src/shadow-lab-material.ts');const {createRenderer}=await import('/packages/surface/src/renderer.ts');const {createCeramicMaterial}=await import('/packages/ceramic/src/index.ts');
+ const {labMaterial,initial,heightRules}=await import('/tests/fixtures/shadow-layer-material.ts');const {createRenderer}=await import('/packages/surface/src/renderer.ts');const {createCeramicMaterial}=await import('/packages/ceramic/src/index.ts');
  for(let rule=0;rule<heightRules.length;rule++){
  const {heights,weights}=heightRules[rule];if(weights.some(w=>w<=0))throw Error('Nonpositive weight');
  const degree=1;

@@ -111,6 +111,6 @@ one live GPU device/five cached pipelines/zero Canvas2D copies, idle rendering,
 reduced motion, and 30 room/viewport screenshots (1440, 1024, 390 pixels wide).
 Outputs are gitignored under `test-results/library/`.
 
-`npm run test:atelier` covers all three current homepage studies, the shared motion-clock policy,
+`npm run test:atelier` covers Card, Quiet, the shared motion-clock policy,
 and the full original calendar/list/table regression suite inside Archive.
 No remote deployment, push, or publishing happens in either command.

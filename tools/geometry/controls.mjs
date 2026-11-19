@@ -1,5 +1,6 @@
 /** Offline recipes for the homepage. Dimensions are in CSS/world pixels. */
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 export const controls = {
   dish: { width:45,height:45,radius:22.5,hollow:2.5,hollowRadius:.82 },
   thumbDial: { width:102,height:102,radius:51,hollow:3,hollowRadius:.36,hollowX:.52 },
@@ -51,3 +52,5 @@ export async function bakeControls(check=false) {
   console.log(`${check?'Checked':'Baked'} control ${key}: ${bytes.length} bytes`);
  }
 }
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) await bakeControls(process.argv.includes('--check'));

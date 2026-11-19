@@ -4,12 +4,8 @@ import "./projects.css";
 const projects = [
   ["Sculpted", "./"],
   ["Ripple field", "./flip.html"],
-  ["Geometry lab", "./?view=solids"],
   ["Card", "./?view=card"],
-  ["Shadow lab", "./?view=shadow-lab"],
   ["Quiet", "./?study=1"],
-  ["Air", "./?study=2"],
-  ["Play", "./?study=3"],
   ["Object library", "./?view=library"],
   ["Native button", "./surface.html"],
 ] as const;

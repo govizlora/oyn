@@ -69,14 +69,6 @@ label {
   aspect-ratio: 1.8;
   margin-top: -20px;
 }
-[data-study='2'] .composition {
-  aspect-ratio: 1.92;
-  width: min(1160px, calc(100% - 144px), calc((100svh - 186px) * 1.92));
-}
-[data-study='3'] .composition {
-  aspect-ratio: 1.68;
-  width: min(1240px, calc(100% - 112px), calc((100svh - 160px) * 1.68));
-}
 .instrument {
   height: 100%;
   width: 100%;
@@ -493,65 +485,6 @@ label {
   outline-offset: 5px;
   border-radius: 1cqw;
 }
-.fader-vertical {
-  height: 100%;
-  width: 3.6cqw;
-}
-.fader-vertical .fader-track {
-  top: 0;
-  bottom: 0;
-  left: calc(50% - 0.35cqw);
-  right: auto;
-  width: 0.7cqw;
-  height: auto;
-}
-.fader-vertical .fader-fill {
-  width: 100%;
-  height: calc(var(--value) * 100%);
-  top: auto;
-  bottom: 0;
-}
-.fader-vertical .fader-travel {
-  top: 1.5cqw;
-  bottom: 1.5cqw;
-  left: 0;
-  right: 0;
-  height: auto;
-}
-.fader-vertical .fader-thumb {
-  left: 50%;
-  top: calc((1 - var(--value)) * 100%);
-  width: 3.4cqw;
-  height: 2.7cqw;
-  border-radius: 0.65cqw;
-}
-.fader-vertical .fader-thumb > span {
-  width: 0.65cqw;
-  height: 1px;
-}
-.fader-vertical .fader-thumb {
-  flex-direction: column;
-}
-.fader-vertical .fader-ticks {
-  top: 1cqw;
-  bottom: 1cqw;
-  left: calc(50% + 1.2cqw);
-  right: auto;
-  height: auto;
-  width: 0.45cqw;
-  background: repeating-linear-gradient(
-    0deg,
-    #bac1b3 0px,
-    #bac1b3 1px,
-    transparent 1px,
-    transparent 10%
-  );
-}
-.fader-vertical input {
-  writing-mode: vertical-lr;
-  direction: rtl;
-  cursor: ns-resize;
-}
 .speaker {
   background-image: radial-gradient(
     circle,
@@ -807,23 +740,11 @@ label {
   .composition {
     width: min(1320px, calc((100svh - 220px) * 1.8));
   }
-  [data-study='2'] .composition {
-    width: min(1320px, calc((100svh - 220px) * 1.92));
-  }
-  [data-study='3'] .composition {
-    width: min(1420px, calc((100svh - 220px) * 1.68));
-  }
 }
 @media (max-height: 640px) and (min-width: 761px) {
   .composition {
     width: min(1100px, calc(100% - 130px), calc((100svh - 100px) * 1.8));
     margin-top: -10px;
-  }
-  [data-study='2'] .composition {
-    width: min(1100px, calc(100% - 130px), calc((100svh - 100px) * 1.92));
-  }
-  [data-study='3'] .composition {
-    width: min(1100px, calc(100% - 100px), calc((100svh - 100px) * 1.68));
   }
 }
 @media (max-width: 760px) {
@@ -833,9 +754,7 @@ label {
     padding: 100px 22px 110px;
     overflow: hidden;
   }
-  .composition,
-  [data-study='2'] .composition,
-  [data-study='3'] .composition {
+  .composition {
     width: 100%;
     aspect-ratio: auto;
     margin: 0;

@@ -500,18 +500,16 @@ export function Fader({
   label,
   value,
   onChange,
-  vertical = false,
   tone = 'porcelain',
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
-  vertical?: boolean;
   tone?: Tone;
 }) {
   return (
     <div
-      className={`fader ${vertical ? 'fader-vertical' : ''}`}
+      className="fader"
       style={css({ '--value': value / 100 })}
     >
       <span className="fader-ticks" aria-hidden="true" />
@@ -527,7 +525,6 @@ export function Fader({
       </div>
       <input
         type="range"
-        aria-orientation={vertical ? 'vertical' : 'horizontal'}
         min="0"
         max="100"
         value={value}

@@ -125,6 +125,7 @@ try {
     path: 'test-results/sculpted/mobile.png',
     fullPage: true,
   });
+  await page.getByRole('button', { name: /Projects/ }).click();
   await page.getByRole('link', { name: 'Quiet' }).click();
   assert.match(page.url(), /study=1/);
   await page.locator('.composition canvas').first().waitFor();

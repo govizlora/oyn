@@ -31,30 +31,20 @@ npm run test:library        # full collection and selection workflow
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
 - `/?view=card`: native Ceramic card with theme-aware defaults and a background brightness control.
-- `/?view=solids`: **Geometry Lab**, six primitive/boolean specimens with prebaked presets.
-  Run `npm run test:solids` for production headless checks.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
-- `/?study=2`: **Air — Kinetic objects**. Swept ceramic rotor, speed dial, reverse,
-  removable grille, three/five/seven-blade detents, luminous pilot and switches.
-- `/?study=3`: **Play — Tactile playground**. Pocket rotor, eight independently
-  latched lamps, graphical phosphor field, twelve keycaps, three vertical faders,
-  reaction bubbles and colored checkbox pills. Each control changes something.
 - `/?view=library&room=hardware`: the six new hardware objects, separately reusable.
 - `/?view=library&room=archive`: the former **Daily objects** and **Everyday desktop**
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The left sidebar (Projects menu on narrow screens) links all ten destinations directly, including Ripple field, Native button and Shadow lab.
+The left sidebar (Projects menu on narrow screens) links all six destinations directly, including Ripple field and Native button.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
 
-## Geometry Lab (experimental)
+## Baked controls
 
-The general runtime CSG experiment has been replaced with **offline-baked geometry**.
-Run `npm run bake:geometry` deliberately after editing the internal shape recipes.
-Normal builds consume checked-in assets; they never run the compiler in the browser.
-The controls select baked presets rather than recomputing boolean cuts.
+Run `npm run bake:geometry` after editing the homepage control profiles. Normal builds use the checked-in assets.
 
 See [the current architecture and next-chat handoff](../../HANDOFF.md) for
 ownership, asset formats, measured performance, limitations and migration plans.
@@ -80,7 +70,7 @@ to make a test pass. The A/B page uses the same footprint and light position.
 resource sharing/cleanup and 100 instances. It is not a promise that hundreds of
 unique assets have the same memory cost as repeated instances.
 
-The homepage uses the same baked adapter as the lab, with exact analytic rounded
+The homepage uses the baked adapter, with exact analytic rounded
 silhouette shadows for those rounded control bodies. Its profiles are not changed
 by live input; only rigid pose changes. See [the single 500-card benchmark](../../HANDOFF.md#6-validation-and-the-single-500-card-benchmark).
 The checkpoint before this exploration is `557ac86`.
@@ -102,8 +92,7 @@ The pocket keyboard accepts physical letter/arrow keys while focused; Enter/Spac
 remain native activation of the focused key. It never installs global shortcuts.
 
 Lamp levels change actual shader light output. Bubble elevation has a fixed
-material budget, so its fader updates the existing material rather than rebinding it. The play keyboard toggles the first
-lamp; vertical faders control rotor speed, lamp intensity and bubble elevation.
+material budget, so its fader updates the existing material rather than rebinding it.
 Reaction keys shift a two-bubble local queue; clicking a bubble changes its glyph.
 Fan power controls all share one state. Zero speed also stops motion.
 
@@ -115,7 +104,6 @@ are involved. Dates/files/status meters in the archive are samples, not live dat
 
 - `controls.tsx`: sole Ceramic configuration and basic Surface/Key/Dial/Fader/Switch.
 - `playful-controls.tsx`: shared rotor housing, detent, lamps, keyboard, bubbles/pills.
-- `kinetic-studies.tsx`: composes Air and Play using those same primitives.
 - `everyday.tsx`: shared Calendar, Check, native Menu/SelectMenu, Files and ChoiceChips.
 - `desktop.tsx`: untouched original compositions, re-exported by `library/archive.tsx`.
 - `instrument-material.tsx`: one app-local optical shader/pipeline for rotor blades
@@ -136,21 +124,20 @@ baked adapter). Visiting other studies can cache additional instrument/phosphor
 programs; five is not a provider-wide maximum across every route.
 
 This does not add partial redraw, viewport culling, arbitrary DOM rotation or a
-mobile GPU performance guarantee. WebGPU/HTTPS or localhost remains required;
-unsupported environments show an explicit error, not a CSS/Canvas2D/WebGL fallback.
+mobile GPU performance guarantee. Use HTTPS or localhost for WebGPU. Materials with a WebGL2 implementation can render without WebGPU.
 
 ## Validation
 
 `test:sculpted` covers the current baked homepage. `test:atelier` builds production
-and runs the shared-clock policy unit test, preserved study interactions, and the
-archive regression suite. Both browser
-suites run headless, with their own preview on :5191; `BASE_URL` can use an existing
+and runs the shared-clock policy unit test, Card, Quiet, and the
+archive regression suite. The browser
+suites run headless with local previews; `BASE_URL` can use an existing
 server. Tests include actual changed pixels, mouse/keyboard input, single device,
 cached pipelines, zero Canvas2D copies, idle rendering, motion cleanup, hidden and
-reduced-motion policy, history, unsupported state and five viewport sizes:
+reduced-motion policy, history, WebGL2 fallback and five viewport sizes:
 1440×1000, 1440×900, 1280×720, 900×600, 390×844 (DPR 2). Desktop studies fit one screen;
 small screens reflow. Archive tests retain calendar/search/sort/filter/dropdown and
-mixed-selection coverage. Outputs: `test-results/atelier/` and `atelier-archive/`.
+mixed-selection coverage. Outputs: `test-results/atelier-archive/`.
 
 The library suite covers all 56 entries, persisted picks/export, isolated links,
 search/paging, denied storage, and 30 room/viewport screenshots. Outputs:
@@ -160,26 +147,6 @@ Chrome is the rendered review target. Stock installed headless Firefox blocklist
 WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison,
 core material defaults and historical benchmark are unchanged. Nothing is pushed
 or publicly deployed by these commands.
-
-### Shadow research
-
-`/?view=shadow-lab` compares uniform six-, five-, four-, and three-height shadows.
-Each uses equal weights 1/N and heights H * [1/12 + (i + 1/2)/N], i=0..N-1.
-The mean height stays 7H/12 across counts. Four layers are production; six layers retain the historical reference
-arithmetic, and three layers retain the previous paired-average positions. Other sampling
-experiments have been removed from this page and its shader assembly.
-
-Each group displays five sizes/elevations: large sheet, portrait, round token, small
-note and paper strip. All use Surface's global pointer light, unchanged surface optics
-and shared contact darkening. Controls adjust height, radius, light height/size,
-shadow strength, contact, surface light/highlight, color, and shadows-only rendering.
-Same-position A/B supports keys 1 and 2 after focus. Preview boundaries and a 240 px
-per-card drawing margin may crop extreme shadows. Work counts are not GPU timings.
-
-`npm run test:shadow-lab` checks all 20 specimens, global light, interaction and mobile
-layout headlessly. `node tests/shadow-height-comparison.mjs` verifies equal spacing,
-weights, counts and mean heights, then renders all four counts at identical positions
-with contact on/off and near/far/soft lights. Reports/screenshots: `test-results/`.
 
 ### Declarative appearance migration
 

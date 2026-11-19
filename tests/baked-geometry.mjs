@@ -3,13 +3,17 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { bake } from '../tools/geometry/bake.mjs';
-import { specimens } from '../tools/geometry/recipes.mjs';
 import { decodeGeometry, bakedCeramic } from '@oyn/ceramic/baked';
-const shape = specimens[0].geometry(40, true),
-  bytes = bake(shape);
+const depth = 1 + 40 * 0.06, radius = (17 ** 2 + depth ** 2) / (2 * depth);
+const shape = {
+  kind: 'subtract',
+  a: { kind: 'box', center: [0, 0, 12], halfSize: [45, 28, 8], bevel: 2 },
+  b: { kind: 'sphere', center: [18, 0, 20 + radius - depth], radius },
+};
+const bytes = bake(shape);
 assert.deepEqual(
   bytes,
-  await readFile('examples/atelier/public/geometries/0-40.bin'),
+  await readFile('tests/fixtures/pocket-geometry.bin'),
   'Generated asset is reproducible',
 );
 assert.deepEqual(
@@ -70,7 +74,7 @@ try {
       const { createEngine } = await import('/packages/surface/src/engine.ts');
       const geometry = decodeGeometry(
         await (
-          await fetch('/examples/atelier/public/geometries/0-40.bin')
+          await fetch('/tests/fixtures/pocket-geometry.bin')
         ).arrayBuffer(),
       );
       const stats = {
@@ -114,7 +118,8 @@ try {
       root.style.cssText =
         'display:grid;grid-template-columns:repeat(10,100px);gap:10px';
       document.body.append(root);
-      const meshes = new Map();
+      const engine = createEngine();
+      const meshes = engine.entries;
       for (let i = 0; i < surfaceCount; i++) {
         const element = document.createElement('div');
         element.style.cssText = 'width:100px;height:70px';
@@ -124,8 +129,7 @@ try {
           material: bakedCeramic(geometry, { colorScheme: 'light' }),
         });
       }
-      const errors = [],
-        engine = createEngine(meshes, (e) => errors.push(String(e)));
+      engine.start();
       const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       const settle = async () => {
         for (let i = 0; i < 4; i++) await new Promise(requestAnimationFrame);
@@ -135,7 +139,7 @@ try {
           let i = 0;
           i < 200 &&
           root.querySelectorAll('canvas').length !== surfaceCount &&
-          !errors.length;
+          !engine.failed;
           i++
         )
           await sleep(25);
@@ -168,28 +172,29 @@ try {
         const mounted = root.querySelectorAll('canvas').length;
         // Remove one owner: the shared resource must survive the remaining owners.
         const first = meshes.keys().next().value;
+        engine.release(meshes.get(first));
         meshes.delete(first);
         first.remove();
-        engine.invalidate();
+        engine.requestMeasure();
         await settle();
         const destroyedWhileShared = stats.storageDestroyed;
-        engine.dispose();
+        engine.stop();
         return {
           mounted,
           idleSubmits,
           destroyedWhileShared,
           ...(stress ? { fps } : {}),
           ...stats,
-          errors,
+          failed: engine.failed,
         };
       } finally {
-        engine.dispose();
+        engine.stop();
         root.remove();
       }
     },
     { surfaceCount, stress },
   );
-  assert.deepEqual(result.errors, []);
+  assert.equal(result.failed, false);
   assert.equal(result.mounted, surfaceCount);
   assert.equal(result.storageCreated, 1);
   assert.equal(result.storageWrites, 1);

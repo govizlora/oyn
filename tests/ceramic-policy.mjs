@@ -68,7 +68,7 @@ assert.deepEqual(
   ["surface"],
 );
 
-const bytes = await readFile("examples/atelier/public/geometries/0-40.bin");
+const bytes = await readFile("tests/fixtures/pocket-geometry.bin");
 const geometry = decodeGeometry(
   bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
 );
