@@ -58,22 +58,24 @@ label {
   position: relative;
   display: grid;
   place-items: center;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
 
 }
 .composition {
+  max-width: 100%;
   position: relative;
-  width: min(1160px, calc(100vw - 144px), calc((100svh - 186px) * 1.8));
+  width: min(1160px, calc(100% - 144px), calc((100svh - 186px) * 1.8));
   aspect-ratio: 1.8;
   margin-top: -20px;
 }
 [data-study='2'] .composition {
   aspect-ratio: 1.92;
-  width: min(1160px, calc(100vw - 144px), calc((100svh - 186px) * 1.92));
+  width: min(1160px, calc(100% - 144px), calc((100svh - 186px) * 1.92));
 }
 [data-study='3'] .composition {
   aspect-ratio: 1.68;
-  width: min(1240px, calc(100vw - 112px), calc((100svh - 160px) * 1.68));
+  width: min(1240px, calc(100% - 112px), calc((100svh - 160px) * 1.68));
 }
 .instrument {
   height: 100%;
@@ -814,14 +816,14 @@ label {
 }
 @media (max-height: 640px) and (min-width: 761px) {
   .composition {
-    width: min(1100px, calc(100vw - 130px), calc((100svh - 100px) * 1.8));
+    width: min(1100px, calc(100% - 130px), calc((100svh - 100px) * 1.8));
     margin-top: -10px;
   }
   [data-study='2'] .composition {
-    width: min(1100px, calc(100vw - 130px), calc((100svh - 100px) * 1.92));
+    width: min(1100px, calc(100% - 130px), calc((100svh - 100px) * 1.92));
   }
   [data-study='3'] .composition {
-    width: min(1100px, calc(100vw - 100px), calc((100svh - 100px) * 1.68));
+    width: min(1100px, calc(100% - 100px), calc((100svh - 100px) * 1.68));
   }
 }
 @media (max-width: 760px) {

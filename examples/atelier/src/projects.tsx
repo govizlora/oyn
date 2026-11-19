@@ -101,69 +101,85 @@ export function ProjectSwitch() {
     saveSetting(themeKey, next);
   }
 
+  const [expanded, setExpanded] = useState(false);
   const current = currentProject();
   return (
-    <nav className="project-switch" aria-label="Projects">
-      <div>
-        {projects.map((project) => (
-          <a
-            key={project[1]}
-            href={project[1]}
-            aria-current={project === current ? "page" : undefined}
-          >
-            {project[0]}
-          </a>
-        ))}
-      </div>
-      <section className="preview-controls" aria-label="Preview settings">
-        <label htmlFor="preview-brightness">Background brightness</label>
-        <input
-          id="preview-brightness"
-          type="range"
-          min="-100"
-          max="100"
-          value={brightness}
-          aria-valuetext={brightness ? brightness + "%" : "Default"}
-          onChange={(e) => changeBrightness(e.currentTarget.valueAsNumber)}
-        />
-        <button
-          type="button"
-          aria-label="Reset background brightness"
-          disabled={!brightness}
-          onClick={() => changeBrightness(0)}
-        >
-          Reset
-        </button>
-      </section>
+    <aside className="project-sidebar">
       <button
         type="button"
-        className="theme-switch"
-        aria-label="Dark mode"
-        aria-pressed={dark}
-        title={dark ? "Switch to light mode" : "Switch to dark mode"}
-        onClick={toggle}
+        className="project-menu"
+        aria-expanded={expanded}
+        aria-controls="project-navigation"
+        onClick={() => setExpanded(!expanded)}
       >
-        <svg
-          viewBox="0 0 24 24"
-          width="19"
-          height="19"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {dark ? (
-            <>
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
-            </>
-          ) : (
-            <path d="M20.5 14A8.6 8.6 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z" />
-          )}
-        </svg>
+        {expanded ? "Close projects" : "Projects"} {expanded ? "×" : "☰"}
       </button>
-    </nav>
+      <nav
+        id="project-navigation"
+        className="project-switch"
+        aria-label="Projects"
+      >
+        <div>
+          {projects.map((project) => (
+            <a
+              key={project[1]}
+              href={project[1]}
+              aria-current={project === current ? "page" : undefined}
+            >
+              {project[0]}
+            </a>
+          ))}
+        </div>
+        <section className="preview-controls" aria-label="Preview settings">
+          <label htmlFor="preview-brightness">Background brightness</label>
+          <input
+            id="preview-brightness"
+            type="range"
+            min="-100"
+            max="100"
+            value={brightness}
+            aria-valuetext={brightness ? brightness + "%" : "Default"}
+            onChange={(e) => changeBrightness(e.currentTarget.valueAsNumber)}
+          />
+          <button
+            type="button"
+            aria-label="Reset background brightness"
+            disabled={!brightness}
+            onClick={() => changeBrightness(0)}
+          >
+            Reset
+          </button>
+        </section>
+        <button
+          type="button"
+          className="theme-switch"
+          aria-label="Dark mode"
+          aria-pressed={dark}
+          title={dark ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={toggle}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="19"
+            height="19"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {dark ? (
+              <>
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+              </>
+            ) : (
+              <path d="M20.5 14A8.6 8.6 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z" />
+            )}
+          </svg>
+        </button>
+      </nav>
+    </aside>
   );
 }

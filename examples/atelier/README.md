@@ -45,7 +45,7 @@ npm run test:library        # full collection and selection workflow
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The top project switch links all ten destinations directly, including Ripple field, Native button and Shadow lab.
+The left sidebar (Projects menu on narrow screens) links all ten destinations directly, including Ripple field, Native button and Shadow lab.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
 

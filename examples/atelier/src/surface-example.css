@@ -13,7 +13,7 @@ input {
 }
 .example {
   min-height: 180vh;
-  padding: 40px max(24px, calc((100vw - 1000px) / 2));
+  padding: 40px max(24px, calc((100% - 1000px) / 2));
   color: light-dark(#222,#eee);
 }
 h1 {
