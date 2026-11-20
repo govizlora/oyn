@@ -138,7 +138,7 @@ search/paging, denied storage, and 30 room/viewport screenshots. Outputs:
 
 Chrome is the rendered review target. Stock installed headless Firefox blocklists
 WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison,
-core material defaults and historical benchmark are unchanged. Nothing is pushed
+and core material defaults are unchanged. Nothing is pushed
 or publicly deployed by these commands.
 
 ### Declarative appearance migration

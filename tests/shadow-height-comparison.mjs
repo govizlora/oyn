@@ -3,12 +3,13 @@ import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
+const fixtureUrl = 'http://127.0.0.1:5196/tests/fixtures/surface.html';
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5196','--strictPort'],{stdio:'pipe'});
 let browser;
 try{
- for(let i=0;i<80;i++){try{if((await fetch('http://127.0.0.1:5196')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ for(let i=0;i<80;i++){try{if((await fetch(fixtureUrl)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage({viewport:{width:640,height:480},deviceScaleFactor:1});const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
- await page.goto('http://127.0.0.1:5196/tests/fixtures/surface.html');
+ await page.goto(fixtureUrl);
  await page.evaluate(async()=>{
  const {labMaterial,initial,heightRules}=await import('/tests/fixtures/shadow-layer-material.ts');const {createRenderer}=await import('/packages/surface/src/renderer.ts');const {createCeramicMaterial}=await import('/packages/ceramic/src/index.ts');
  for(let rule=0;rule<heightRules.length;rule++){

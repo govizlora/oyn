@@ -98,6 +98,7 @@ for (const colorScheme of ["light", "dark"]) {
     assert.deepEqual(material.measurePadding(100, 60), { x: 0, y: 0 });
 }
 
+const fixtureUrl = "http://127.0.0.1:5199/tests/fixtures/surface-appearance.html";
 const server = spawn(
   process.execPath,
   [
@@ -114,15 +115,13 @@ let browser;
 try {
   for (let i = 0; i < 80; i++) {
     try {
-      if ((await fetch("http://127.0.0.1:5199")).ok) break;
+      if ((await fetch(fixtureUrl)).ok) break;
     } catch {}
     await new Promise((r) => setTimeout(r, 100));
   }
   browser = await chromium.launch({ channel: "chrome", headless: true });
   const page = await browser.newPage({ colorScheme: "light" });
-  await page.goto(
-    "http://127.0.0.1:5199/tests/fixtures/surface-appearance.html",
-  );
+  await page.goto(fixtureUrl);
   const result = await page.evaluate(async () => {
     const { createCeramicMaterial } =
       await import("/packages/ceramic/src/material.ts");

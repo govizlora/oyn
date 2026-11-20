@@ -7,6 +7,7 @@ const fixture = await readFile(
   new URL('./fixtures/ceramic-before-separation.wgsl', import.meta.url),
   'utf8',
 );
+const fixtureUrl = 'http://127.0.0.1:5201/tests/fixtures/surface.html';
 const server = spawn(
   process.execPath,
   [
@@ -23,7 +24,7 @@ let browser;
 try {
   for (let i = 0; i < 80; i++) {
     try {
-      if ((await fetch('http://127.0.0.1:5201')).ok) break;
+      if ((await fetch(fixtureUrl)).ok) break;
     } catch {}
     if (i === 79) throw Error('Vite did not start');
     await new Promise((r) => setTimeout(r, 100));
@@ -38,7 +39,7 @@ try {
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(m.text());
   });
-  await page.goto('http://127.0.0.1:5201/tests/fixtures/surface.html');
+  await page.goto(fixtureUrl);
   const results = await page.evaluate(async (reference) => {
     const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
     const { cardCeramic } =

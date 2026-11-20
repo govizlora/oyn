@@ -12,6 +12,7 @@ const budget = Number(process.env.BUDGET ?? 40);
 const out = process.env.REPORT_DIR ?? 'test-results/ceramic-scale';
 const rounds = Number(process.env.ROUNDS ?? 2),
   sampleMs = Number(process.env.SAMPLE_MS ?? 1400);
+const fixtureUrl = 'http://127.0.0.1:5197/tests/fixtures/surface.html';
 const server = spawn(
   process.execPath,
   [
@@ -42,7 +43,7 @@ const report = {
 try {
   for (let i = 0; i < 80; i++) {
     try {
-      if ((await fetch('http://127.0.0.1:5197')).ok) break;
+      if ((await fetch(fixtureUrl)).ok) break;
     } catch {}
     if (i === 79) throw Error('Vite did not start');
     await new Promise((r) => setTimeout(r, 100));
@@ -68,7 +69,7 @@ try {
         page.on('console', (m) => {
           if (m.type() === 'error') errors.push(m.text());
         });
-        await page.goto('http://127.0.0.1:5197/tests/fixtures/surface.html');
+        await page.goto(fixtureUrl);
         const raw = await page.evaluate(
           async ({ count, mode, frozen, sampleMs, budget }) => {
             const { createEngine } =

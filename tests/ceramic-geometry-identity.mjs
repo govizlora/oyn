@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
+const fixtureUrl = 'http://127.0.0.1:5196/tests/fixtures/surface.html';
 const server = spawn(
   process.execPath,
   [
@@ -19,14 +20,14 @@ let browser;
 try {
   for (let i = 0; i < 80; i++) {
     try {
-      if ((await fetch('http://127.0.0.1:5196')).ok) break;
+      if ((await fetch(fixtureUrl)).ok) break;
     } catch {}
     if (i === 79) throw Error('Server failed');
     await new Promise((r) => setTimeout(r, 100));
   }
   browser = await chromium.launch({ channel: 'chrome', headless: true });
   const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
-  await page.goto('http://127.0.0.1:5196/tests/fixtures/surface.html');
+  await page.goto(fixtureUrl);
   const captures = await page.evaluate(async () => {
     const { createEngine } = await import('/packages/surface/src/engine.ts');
     const { solidCeramic } =

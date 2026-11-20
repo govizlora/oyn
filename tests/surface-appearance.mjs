@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
-const base='http://127.0.0.1:5193';
+const fixtureUrl = 'http://127.0.0.1:5193/tests/fixtures/surface-appearance.html';
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5193','--strictPort'],{stdio:'pipe'});
 let browser;
 try{
- for(let i=0;i<80;i++){try{if((await fetch(base)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ for(let i=0;i<80;i++){try{if((await fetch(fixtureUrl)).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  browser=await chromium.launch({channel:'chrome',headless:true});const page=await browser.newPage({viewport:{width:900,height:700}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.addInitScript(()=>{
@@ -17,7 +17,7 @@ try{
   for(const [proto,name,key]of [[GPUDevice.prototype,'createBuffer','buffers'],[GPUDevice.prototype,'createRenderPipeline','pipelines'],[GPUQueue.prototype,'submit','submits']]){const original=proto[name];proto[name]=function(...args){stats[key]++;return original.apply(this,args);};}
   const write=GPUQueue.prototype.writeBuffer;GPUQueue.prototype.writeBuffer=function(buffer,...args){if(buffer.size===48)stats.frameWrites++;else if(buffer.size===112)stats.parameterWrites++;return write.call(this,buffer,...args);};
  });
- await page.goto(`${base}/tests/fixtures/surface-appearance.html`);await page.locator('#sample canvas').waitFor();
+ await page.goto(fixtureUrl);await page.locator('#sample canvas').waitFor();
  const settle=()=>page.waitForTimeout(150);
  const state=()=>page.evaluate(()=>({stats:{...window.stats},creates:api.records.creates,disposes:api.records.disposes,last:api.records.frames.at(-1),errors:api.records.errors}));
  await settle();assert.equal((await state()).stats.pointerListeners,1);

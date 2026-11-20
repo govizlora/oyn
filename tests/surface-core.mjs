@@ -49,18 +49,18 @@ assert.deepEqual(shadowBounds(120, 40, 0), { x: 2, y: 2 });
 
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5189', '--strictPort'], { stdio: 'pipe' });
 let serverOutput = ''; server.stderr.on('data', chunk => serverOutput += chunk);
-const base = 'http://127.0.0.1:5189';
+const fixtureUrl = 'http://127.0.0.1:5189/tests/fixtures/surface.html';
 let browser;
 try {
   for (let i = 0; ; i++) {
-    try { if ((await fetch(base)).ok) break; } catch {}
+    try { if ((await fetch(fixtureUrl)).ok) break; } catch {}
     if (i > 100) throw Error('Vite did not start: ' + serverOutput);
     await new Promise(r => setTimeout(r, 100));
   }
   browser = process.env.BROWSER === 'firefox' ? await firefox.launch({ headless: true }) : await chromium.launch({ channel: 'chrome', headless: true });
   const page = await browser.newPage();
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
-  await page.goto(base + '/tests/fixtures/surface.html');
+  await page.goto(fixtureUrl);
   const result = await page.evaluate(async () => {
     const { createEngine } = await import('/packages/surface/src/engine.ts');
     const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');

@@ -38,6 +38,7 @@ assert.ok(
   !material.shader.includes('fn geometry(') &&
     !material.shader.includes('raymarch'),
 );
+const fixtureUrl = 'http://127.0.0.1:5199/tests/fixtures/surface.html';
 const server = spawn(
   process.execPath,
   [
@@ -56,7 +57,7 @@ let browser;
 try {
   for (let i = 0; i < 80; i++) {
     try {
-      if ((await fetch('http://127.0.0.1:5199')).ok) break;
+      if ((await fetch(fixtureUrl)).ok) break;
     } catch {}
     await new Promise((r) => setTimeout(r, 100));
   }
@@ -65,7 +66,7 @@ try {
     viewport: { width: 1440, height: 1000 },
     deviceScaleFactor: 1,
   });
-  await page.goto('http://127.0.0.1:5199/tests/fixtures/surface.html');
+  await page.goto(fixtureUrl);
   const result = await page.evaluate(
     async ({ surfaceCount, stress }) => {
       const { decodeGeometry, bakedCeramic } = await import(
