@@ -1,0 +1,112 @@
+@layer oyn-layout {
+  @scope (.oyn-ui, [data-oyn-popup]) {
+    [data-slot="accordion"] {
+      --accordion-turn: 240ms;
+      --accordion-travel: 280ms;
+      display: grid;
+      gap: 10px;
+      width: min(100%, 28rem);
+      min-width: 0;
+      margin-inline: auto;
+    }
+    [data-slot="accordion-item"] {
+      --accordion-radius: 18px;
+      --accordion-inset: 4px;
+      min-width: 0;
+      padding: var(--accordion-inset);
+      border-radius: var(--accordion-radius);
+    }
+    [data-slot="accordion-header"] {
+      display: flex;
+      margin: 0;
+      font: inherit;
+    }
+    [data-slot="accordion-trigger"] {
+      display: flex;
+      width: 100%;
+      min-height: 44px;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: calc(var(--accordion-radius) - var(--accordion-inset));
+      color: var(--ink);
+      font: inherit;
+      font-weight: 600;
+      line-height: 1.4;
+      text-align: start;
+      cursor: pointer;
+
+      & > svg:last-of-type {
+        order: 1;
+        flex: none;
+        margin-inline-start: auto;
+        color: var(--muted);
+        rotate: -90deg;
+        transition: rotate var(--accordion-turn) cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      &[data-open] > svg:last-of-type {
+        rotate: 0deg;
+      }
+      /* A label-only trigger also gets a trailing disclosure mark. */
+      &:not(:has(> svg))::after {
+        content: "";
+        flex: none;
+        width: 6px;
+        height: 6px;
+        margin-inline: auto 3px;
+        border: solid var(--muted);
+        border-width: 0 1.5px 1.5px 0;
+        rotate: -45deg;
+        transition: rotate var(--accordion-turn) cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      &[data-open]:not(:has(> svg))::after {
+        rotate: 45deg;
+      }
+      &:has(
+          > [data-slot="hint"]:nth-last-child(1 of :not([data-oyn-layer]))
+        )::after {
+        margin-inline-start: 0;
+      }
+      & > [data-slot="hint"]:nth-last-child(1 of :not([data-oyn-layer])) {
+        margin-inline-start: auto;
+      }
+      &:not([data-open]) [data-show="open"],
+      &[data-open] [data-show="closed"] {
+        display: none;
+      }
+      &[data-disabled] {
+        cursor: default;
+        color: var(--muted);
+      }
+    }
+    [data-slot="accordion-panel"] {
+      box-sizing: border-box;
+      height: var(--accordion-panel-height, auto);
+      padding-inline: 14px;
+      color: var(--muted);
+      font-size: var(--text-md);
+      line-height: 1.55;
+      transition: height var(--accordion-travel) cubic-bezier(0.22, 1, 0.36, 1);
+      &::after {
+        display: block;
+        height: 12px;
+        content: "";
+      }
+      &:is([data-starting-style], [data-ending-style]) {
+        height: 0;
+      }
+      overflow: clip;
+      & [data-slot="accordion"] {
+        width: 100%;
+        padding-block: 6px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      [data-slot="accordion"] {
+        --accordion-travel: 0s;
+        --accordion-turn: 0s;
+      }
+    }
+  }
+}

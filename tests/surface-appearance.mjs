@@ -95,6 +95,60 @@ try{
  assert.equal((await state()).creates,failedCreates);
  assert.equal(await page.locator('canvas').count(),0);
  await page.evaluate(()=>window.unmountSurface());
+ // Empty programs retain their one binding, but own no presentation or target.
+ // Numeric notifications restore drawing without a second visibility API.
+ const emptyProgram = await page.evaluate(async () => {
+  const {createEngine} = await import('/packages/surface/src/engine.ts');
+  const {createCeramicMaterial} = await import('/packages/ceramic/src/index.ts');
+  const source = createCeramicMaterial({elevation:0,maxElevation:8,colorScheme:'light',light:{source:'fixed'}});
+  const element = document.createElement('div');
+  element.style.cssText = 'width:100px;height:60px';
+  document.body.append(element);
+  const counts = {bindings:0,aborts:0,disposals:0,frames:0};
+  const material = {
+   ...source,
+   get passes(){return source.parameters.snapshot()[1] === 0 ? [] : source.passes;},
+   bind({signal}) {
+    counts.bindings++;
+    signal.addEventListener('abort',()=>counts.aborts++);
+    return {frame(){counts.frames++;return [0,0,0];},dispose(){counts.disposals++;}};
+   },
+  };
+  const engine = createEngine();
+  engine.entries.set(element,{element,material});
+  const wait = async (ready) => {
+   for(let i=0;i<200;i++) {
+    if(ready())return;
+    await new Promise(r=>setTimeout(r,10));
+   }
+   throw Error('Empty program lifecycle did not settle');
+  };
+  const buffers = window.stats.buffers;
+  try {
+   engine.start();
+   await wait(()=>counts.bindings===1);
+   const initial = {canvases:element.querySelectorAll('canvas').length,buffers:window.stats.buffers-buffers,frames:counts.frames};
+   const cycles = [];
+   for(let i=0;i<2;i++) {
+    source.setElevation(8);
+    await wait(()=>element.hasAttribute('data-oyn-active'));
+    const canvas = element.querySelector('canvas');
+    source.setElevation(0);
+    await wait(()=>!element.querySelector('canvas'));
+    const submits = window.stats.submits;
+    engine.requestDraw();
+    await new Promise(r=>setTimeout(r,100));
+    cycles.push({bindings:counts.bindings,aborts:counts.aborts,active:element.hasAttribute('data-oyn-active'),released:canvas.width===0&&canvas.height===0,idle:window.stats.submits===submits});
+   }
+   engine.stop();
+   return {initial,cycles,cleanup:[counts.aborts,counts.disposals]};
+  } finally {engine.stop();element.remove();}
+ });
+ assert.deepEqual(emptyProgram,{
+  initial:{canvases:0,buffers:0,frames:0},
+  cycles:Array.from({length:2},()=>({bindings:1,aborts:0,active:false,released:true,idle:true})),
+  cleanup:[1,1],
+ });
  // Exercise actual renderer failure channels with two surfaces and native CSS.
  for (const reason of ['initialization','validation','device-lost']) {
   const result=await page.evaluate(async(reason)=>{

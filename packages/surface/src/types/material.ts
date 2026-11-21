@@ -48,7 +48,8 @@ export type Material = Readonly<{
   /** Optional immutable read-only storage at binding 2; never uploaded per frame. */
   data?: StaticData;
   parameters: Parameters;
-  /** Fragment entry points, drawn in this order within this surface only. */
+  /** Fragment entry points, drawn in order. Empty means no presentation; the
+   * binding stays alive. Notify parameters/requestDraw when drawability changes. */
   passes: readonly string[];
   /** Appearance-owned exterior padding in CSS pixels, measured per axis.
    * Return zero for effects contained within the element. */

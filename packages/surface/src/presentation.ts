@@ -31,6 +31,9 @@ export function createPresentation(mesh: Mesh) {
     height = 0,
     pad: Insets = { x: 0, y: 0 };
   function measure(limit: number) {
+    // React may replace a text label or append new content after the bitmap.
+    // Keep the original layer last so content retains its DOM order.
+    if (host.lastChild !== layer) host.append(layer);
     width = host.offsetWidth;
     height = host.offsetHeight;
     cachedBounds = undefined;

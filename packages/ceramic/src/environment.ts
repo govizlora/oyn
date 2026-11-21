@@ -25,10 +25,10 @@ export function elementColorScheme(
  * Attach one target-local material without leaking theme policy into Surface.
  * Both automatic and explicit configurations use this same binding path.
  */
-export function environmentBinding(
+export function environmentBinding<T extends Material>(
   explicit: ColorScheme | undefined,
-  create: (scheme: ColorScheme) => Material,
-  connect?: (update: () => void) => () => void,
+  create: (scheme: ColorScheme) => T,
+  connect?: (update: (write?: (material: T) => void) => void) => () => void,
 ): NonNullable<Material["bind"]> {
   return (context: SurfaceBindingContext) => {
     const media =
@@ -61,9 +61,11 @@ export function environmentBinding(
     };
     // Light input policy is independent of theme; its subscription stays stable.
     const input = source.bind?.(context);
-    const refresh = () => {
-      const next = create(scheme);
-      next.parameters.snapshot().forEach((v, i) => parameters.set(i, v));
+    const refresh = (write?: (material: T) => void) => {
+      // Numeric updates mutate the current program, not a fresh material per frame.
+      const next = write ? (write(source), source) : create(scheme);
+      if (next.parameters !== parameters)
+        next.parameters.snapshot().forEach((v, i) => parameters.set(i, v));
       source = next;
     };
     const measure = () => {

@@ -61,7 +61,7 @@ export function createEngine() {
   return engine;
 }
 
-/** Sole scheduling owner. Parameter notifications never invalidate layout. */
+/** Sole GPU draw scheduler. Consumer animation clocks only publish parameters. */
 function startEngine(
   meshes: Map<HTMLElement, Mesh>,
   fail: (error: unknown) => void,
@@ -187,7 +187,12 @@ function startEngine(
           }
           measure ||= rebound || replaced;
         }
-        if (renderer.ready && !renderer.ready(entry.material)) {
+        // An empty draw program has a binding, but no presentation/resources.
+        // Parameter notifications can make it drawable again through this path.
+        if (
+          !entry.material.passes.length ||
+          (renderer.ready && !renderer.ready(entry.material))
+        ) {
           detach(entry);
           continue;
         }

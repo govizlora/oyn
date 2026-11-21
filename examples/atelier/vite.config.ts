@@ -71,6 +71,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        componentPreview: new URL("./component-preview.html", import.meta.url).pathname,
+        components: new URL("./components.html", import.meta.url).pathname,
         main: new URL("./index.html", import.meta.url).pathname,
         flip: new URL("./flip.html", import.meta.url).pathname,
         surface: new URL("./surface.html", import.meta.url).pathname,

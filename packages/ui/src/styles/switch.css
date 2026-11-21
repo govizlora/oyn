@@ -1,0 +1,42 @@
+@layer oyn-layout {
+  @scope (.oyn-ui, [data-oyn-popup]) {
+    [data-slot="switch"] {
+      --thumb: 22px;
+      --inset: 4px;
+      display: inline-flex;
+      align-items: center;
+      flex: none;
+      width: calc(2 * (var(--thumb) + var(--inset)));
+      height: calc(var(--thumb) + 2 * var(--inset));
+      padding: var(--inset);
+      border: 0;
+      border-radius: 100px;
+      cursor: pointer;
+    }
+    [data-slot="switch"][data-size="sm"] {
+      --thumb: 18px;
+      --inset: 3px;
+    }
+    [data-slot="switch-thumb"] {
+      display: grid;
+      place-items: center;
+      width: var(--thumb);
+      height: var(--thumb);
+      border-radius: 50%;
+      transition: translate var(--duration) cubic-bezier(0.2, 0.75, 0.3, 1);
+    }
+    [data-slot="switch-thumb"][data-checked] {
+      translate: 100% 0;
+    }
+    [data-slot="switch-thumb"][data-checked]:dir(rtl) {
+      translate: -100% 0;
+    }
+    [data-slot="switch-thumb"] svg {
+      width: 11px;
+      height: 11px;
+    }
+    [data-slot="switch"]:is([data-disabled], [data-readonly]) {
+      cursor: default;
+    }
+  }
+}

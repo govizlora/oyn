@@ -2,9 +2,12 @@
 
 Environment-aware soft/glossy Ceramic optics for @oyn/surface's WebGPU renderer.
 
+Read [ARCHITECTURE.md](../../ARCHITECTURE.md) before changing animation or package boundaries.
+Ceramic consumes instantaneous values; it has no spring/transition or UI gesture policy.
+
 Raised analytic cards and baked controls now share the geometry/lighting contract
-and surface entry point. See [the architecture handoff](../../HANDOFF.md) for
-ownership, asset formats and benchmarks.
+and surface entry point. See [the historical handoff](../../HANDOFF.md) for
+asset formats and benchmark evidence.
 `ceramic` is a stable `Appearance<CeramicProps>` definition. `./baked` also exports
 `baked` with `{ geometry, ...options }` props. `./card` remains an explicit low-level
 comparison adapter; `./sculpted` is deprecated and unused by Atelier. Inset Ceramic
@@ -155,7 +158,7 @@ square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised.
 Recess floors use the same resolved Ceramic base color,
 not a separate darker palette. Depth controls floor coverage via `1 - exp(-depth)`;
-floor color darkens by `min(depth * 0.006, 0.06)`, equivalent to a subtle black overlay,
+the floor mixes toward black at 0.6% per depth unit in light mode or toward white at 1.2% per unit in dark mode (both capped at 12%),
 while wall lighting supplies the edge shading. This bounded linear mapping is
 a visual approximation, not a physical light-transport model.
 All use the same material API and Surface binding; no nested wrapper is needed.
@@ -215,3 +218,13 @@ need more space. Increasing elevation beyond the reserved budget can clip shadow
 `ceramicDefaults.light` explicitly contains source pointer, position (100,100),
 and onLeave/onBlur/onHidden all set to hold. No return behavior is enabled unless
 requested. These same defaults drive the input adapter, not a duplicate preset.
+
+## Flip-disc exploration material
+
+`@oyn/ceramic/flip-disc` exports `createFlipDiscMaterial(options)` and numeric
+`setAngle`, `setTravel`, `setGlow` setters. It contains only geometry, optics and
+light-coordinate binding. The former gesture/time-driven `flipDisc` appearance
+was replaced, not retained as a second animation path. Atelier's
+`stone-appearance.ts` owns its stroke timing, wave sampling and focus feedback,
+and connects the three channels with `bindMotion`. The demo is not the UI catalog's
+shared spring policy.

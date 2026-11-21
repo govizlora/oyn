@@ -13,16 +13,26 @@
 }
 [data-oyn-tabs] > [data-slot="tabs-indicator"] {
   position: absolute;
+  left: var(--active-tab-left);
+  top: var(--active-tab-top);
+  width: var(--active-tab-width);
+  height: var(--active-tab-height);
   pointer-events: none;
   border-radius: max(0px, calc(var(--tabs-radius) - 4px));
 }
+/* Keep selection legible even when accelerated rendering is unavailable. */
+[data-oyn-tabs] > [data-slot="tabs-indicator"]:not([data-oyn-active]) {
+  background: light-dark(#e0e0e0, #444);
+}
+[data-oyn-tabs][data-tone="inverse"]
+  > [data-slot="tabs-indicator"]:not([data-oyn-active]) {
+  background: light-dark(#272727, #ededed);
+}
 @media (prefers-reduced-motion: no-preference) {
   [data-oyn-tabs] > [data-slot="tabs-indicator"] {
-    transition:
-      left 260ms cubic-bezier(0.22, 1, 0.36, 1),
-      top 260ms ease-out,
-      width 260ms ease-out,
-      height 260ms ease-out;
+    transition-property: left, top, width, height;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.16, 0.8, 0.32, 1);
   }
 }
 [data-oyn-tabs] > [role="tab"] {
@@ -43,7 +53,7 @@
   outline: 2px solid currentColor;
   outline-offset: -3px;
 }
-[data-oyn-tabs] > [role="tab"]:disabled {
+[data-oyn-tabs] > [role="tab"][aria-disabled="true"] {
   opacity: 0.5;
   cursor: default;
 }

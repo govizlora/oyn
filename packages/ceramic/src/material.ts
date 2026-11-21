@@ -1,5 +1,9 @@
 import { ceramicDefaults } from "./defaults.js";
-import { environmentBinding, preferredColorScheme } from "./environment.js";
+import {
+  environmentBinding,
+  preferredColorScheme,
+  type ColorScheme,
+} from "./environment.js";
 import { createParameters, type Material } from "@oyn/surface";
 import { ceramicBinding } from "./interaction.js";
 import { insetWGSL, insetParameters } from "./inset.js";
@@ -30,20 +34,22 @@ export function createMaterial(
   let elevation = config.elevation;
   const reservation =
     reservedElevation ?? config.elevation ?? ceramicDefaults.elevation;
-  const listeners = new Set<() => void>();
-  const create = (colorScheme: import("./environment.js").ColorScheme) =>
+  const listeners = new Set<(value: number) => void>();
+  const create = (colorScheme: ColorScheme) =>
     createResolvedMaterial({ ...config, colorScheme, elevation }, reservation);
   const material = create(config.colorScheme ?? preferredColorScheme());
   const setElevation = material.setElevation;
   material.setElevation = (value) => {
     setElevation(value);
     elevation = value;
-    listeners.forEach((update) => update());
+    listeners.forEach((update) => update(value));
   };
   Object.defineProperty(material, "bind", {
     value: environmentBinding(config.colorScheme, create, (update) => {
-      listeners.add(update);
-      return () => listeners.delete(update);
+      const receive = (value: number) =>
+        update((target) => target.setElevation(value));
+      listeners.add(receive);
+      return () => listeners.delete(receive);
     }),
   });
   return material;
@@ -51,7 +57,7 @@ export function createMaterial(
 
 /** Internal factory shared by imperative and declarative entry points. */
 function createResolvedMaterial(
-  options: CeramicOptions,
+  options: CeramicOptions & { colorScheme: ColorScheme },
   reservedElevation?: number,
 ): CeramicMaterial {
   const {
@@ -83,7 +89,10 @@ function createResolvedMaterial(
     }
     const values =
       value < 0
-        ? [...insetParameters(-value, rgb), ...Array(12).fill(0)]
+        ? [
+            ...insetParameters(-value, rgb, options.colorScheme),
+            ...Array(12).fill(0),
+          ]
         : Array.from(raised);
     if (value >= 0) values[1] = value;
     if (!values.every((v) => Number.isFinite(Math.fround(v))))

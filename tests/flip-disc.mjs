@@ -54,7 +54,7 @@ try {
       await page.goto("about:blank");
       await page.goto(server.resolvedUrls.local[0] + "flip.html#ripple");
       await page.waitForFunction(
-        () => document.querySelectorAll("[data-oyn-active]").length === 38,
+        () => document.querySelectorAll(".stone[data-oyn-active]").length === 38,
       );
       await page.mouse.move(250, 210);
       await page.mouse.move(300, 260);
@@ -69,13 +69,13 @@ try {
     assert.equal(
       await page
         .getByRole("navigation", { name: "Projects" })
-        .getByRole("link")
+        .locator("a[data-family]")
         .count(),
-      7,
+      55,
     );
     assert.ok(
       await page
-        .locator("canvas")
+        .locator(".stone canvas")
         .evaluateAll((cs) =>
           cs.every(
             (c) =>

@@ -1,7 +1,8 @@
 # @oyn/surface
 
-React 19 DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second scheduler, or runtime backend switching.
+React 19 DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second GPU draw scheduler, or runtime backend switching.
 
+Read the [architecture contract](../../ARCHITECTURE.md) for ownership and animation rules.
 See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useSurface.ts`.
 
 ## Declarative API
@@ -67,6 +68,8 @@ optional `measure()`, `frame(frameContext)` and `dispose()` callbacks. Use the a
 signal for event cleanup. Bindings end on program binding replacement, ref detachment,
 unmount or provider disposal. They must not create devices, submit GPU commands,
 control canvas placement or introduce another rendering scheduler/resource owner.
+A consumer numeric animation clock is not a renderer; it publishes values through
+the existing numeric adapter.
 
 ## Optional input facts — not a light model
 
@@ -107,7 +110,7 @@ reference counts it; no second GPU cache owns lifetime. Pipeline keys include sh
 ordered passes and storage layout, not colors or individual asset identities.
 
 Parameters have change versions. Only changed parameter blocks and frame data are
-uploaded. Numeric changes notify the one scheduler, never React or layout. Changing
+uploaded. Numeric changes notify the one GPU draw scheduler, never React or layout. Changing
 bindings/data/layout may require specific GPU resources to be replaced; normal
 numeric props updates do not recreate the instance/canvas/pipeline. Dirty frames
 still draw all registered surfaces; per-target redraw and viewport culling are not
@@ -136,7 +139,7 @@ Axis-aligned targets only; no general rotation/skew/perspective or animation tra
 Render-time writes to live instance/ref state and render-time mode resolution were
 removed from the hook. Correctness does not depend on memoization. Compiler-enabled
 consumer/library validation remains future work: no Compiler certification or
-`use no memo` workaround is claimed. See `docs/surface-api.md` and headless
+`use no memo` workaround is claimed. See [API decisions](../../docs/surface-api.md) and headless
 `test:surface-appearance` for current lifecycle/input/type coverage.
 
 ## Optional external animation adapter
@@ -145,10 +148,20 @@ consumer/library validation remains future work: no Compiler certification or
 `@oyn/surface/adapters/motion`, with no Motion runtime dependency in core. One writer
 owns each parameter. Use `materialAppearance` for such explicit externally driven
 programs; do not simultaneously write the same property from declarative props.
+The consumer owns animation targets, interpolation, reduced-motion policy and
+cancellation. Its animation clock emits numbers; it is not a second renderer.
+Surface coalesces parameter notifications into GPU work and does not calculate
+animation curves or require an animation-specific frame API.
 
 ## Focused Resource Tests
 
 `npm run test:baked` checks geometry reproducibility, shared GPU storage and pipelines, idle scheduling, and resource release with three surfaces. It does not collect frame-rate samples. Run `BAKED_STRESS=1 npm run test:baked` explicitly for the 100-surface workload and frame-rate sampling; both modes use the same test implementation.
+
+An empty `material.passes` list means there is currently nothing to draw. Surface
+releases its presentation/target and removes `data-oyn-active`, but preserves the
+binding and parameter subscription. A parameter notification or requestDraw wakes
+that same path when the material has passes again. No separate enabled/visibility
+state or consumer-owned canvas lifecycle is needed.
 
 A binding may expose a target-local `material`. Surface uses its parameters, passes,
 shader, data and padding without invoking its bind hook recursively. This lets

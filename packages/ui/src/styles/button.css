@@ -1,0 +1,10 @@
+/* Adapted from UI SDK (Apache-2.0). OYN scopes its layout and provides the material. */
+@layer oyn-layout {
+  @scope (.oyn-ui, [data-oyn-popup]) {
+    /* Content marked with data-show="pending" or "idle" shows only in that state. */
+    [data-slot="button"]:not([data-pending]) [data-show="pending"],
+    [data-slot="button"][data-pending] [data-show="idle"] {
+      display: none;
+    }
+  }
+}

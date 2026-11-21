@@ -10,7 +10,7 @@
     "dev:mui": "npm run dev -w @oyn/example-mui",
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
     "build:all": "npm run build:packages && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
-    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic && npm run build -w @oyn/ui",
+    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic && npm run build -w @oyn/ui && npm run check:architecture",
     "test:ceramic-policy": "npm run build:packages && node tests/ceramic-policy.mjs",
     "test:ceramic": "npm run build:packages && node tests/ceramic-light.mjs && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",
@@ -37,9 +37,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:webgl-copy": "npm run build:packages && node tests/webgl-copy.mjs",
+    "check:architecture": "node tools/check-architecture.mjs",
     "check:webgl-shaders": "node tools/webgl/generate.mjs --check",
     "test:webgl-fallback": "npm run check:webgl-shaders && npm run build:packages && node tests/webgl-fallback.mjs",
-    "test:atelier-tabs": "npm run build && node tests/atelier-tabs.mjs"
+    "test:atelier-tabs": "npm run build && node tests/atelier-tabs.mjs",
+    "build:registry": "rm -rf examples/atelier/public/r && shadcn build registry.json -o examples/atelier/public/r",
+    "test:ui-control": "npm run build:packages && node tests/ui-control.mjs",
+    "test:ui": "npm run build && node tests/ui-control.mjs && node tests/ui-items.mjs && node tests/atelier-tabs.mjs && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
+    "test:ui-catalog": "npm run build && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -53,6 +58,7 @@
     "playwright": "1.61.1",
     "pngjs": "^7.0.0",
     "prettier": "3.10.1",
+    "shadcn": "4.23.0",
     "typescript": "^5.9.0",
     "vite": "^7.2.0"
   },

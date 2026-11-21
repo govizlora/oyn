@@ -1,14 +1,32 @@
-import { useLayoutEffect, useState } from "react";
+import { Button } from "@oyn/ui/button";
+import {
+  NavigationMenu,
+  NavigationMenuLink,
+  NavigationDisclosure,
+} from "@oyn/ui/navigation-menu";
+import { SurfaceProvider } from "@oyn/surface";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEventHandler,
+} from "react";
+import { StoryNavigation } from "./components/story-navigation";
+import type { Family, Example } from "./components/catalog";
 import "./projects.css";
 
-const projects = [
+const explorations = [
   ["Sculpted", "./"],
   ["Ripple field", "./flip.html"],
-  ["Tabs", "./?view=tabs"],
-  ["Card", "./?view=card"],
   ["Quiet", "./?study=1"],
   ["Object library", "./?view=library"],
   ["Native button", "./surface.html"],
+  ["Tabs", "./?view=tabs"],
+] as const;
+const projects = [
+  ["Component library", "./components.html"],
+  ["Card", "./?view=card"],
+  ...explorations,
 ] as const;
 
 export function currentProject(url = new URL(location.href)) {
@@ -17,7 +35,8 @@ export function currentProject(url = new URL(location.href)) {
     url.searchParams.set("view", "card");
   }
   return (
-    projects.slice(1).find(([, href]) => {
+    projects.find(([, href]) => {
+      if (href === "./") return false;
       const target = new URL(href, url);
       return (
         target.pathname === url.pathname.replace(/\/index\.html$/, "/") &&
@@ -25,13 +44,13 @@ export function currentProject(url = new URL(location.href)) {
           ([k, v]) => url.searchParams.get(k) === v,
         )
       );
-    }) ?? projects[0]
+    }) ?? explorations[0]
   );
 }
 
 const themeKey = "oyn.atelier.theme";
 type Theme = "dark" | "light";
-const brightnessKey = "oyn.atelier.brightness";
+const contrastKey = "oyn.atelier.contrast";
 function readSetting(key: string) {
   try {
     return localStorage.getItem(key);
@@ -46,29 +65,37 @@ function saveSetting(key: string, value: string) {
     /* Apply in memory. */
   }
 }
-function savedBrightness() {
-  const value = Number(readSetting(brightnessKey));
+function savedContrast() {
+  const value = Number(readSetting(contrastKey));
   return Number.isInteger(value) && Math.abs(value) <= 100 ? value : 0;
 }
 function savedTheme(): Theme | null {
   const value = readSetting(themeKey);
   return value === "dark" || value === "light" ? value : null;
 }
-export function ProjectSwitch() {
+export function ProjectSwitch({
+  family,
+  example,
+  onStoryClick,
+}: {
+  family?: Family;
+  example?: Example;
+  onStoryClick?: MouseEventHandler<HTMLElement>;
+}) {
   const [choice, setChoice] = useState(savedTheme);
-  const [brightness, setBrightness] = useState(savedBrightness);
-  function changeBrightness(next: number) {
-    setBrightness(next);
-    saveSetting(brightnessKey, String(next));
+  const [contrast, setContrast] = useState(savedContrast);
+  function changeContrast(next: number) {
+    setContrast(next);
+    saveSetting(contrastKey, String(next));
   }
   useLayoutEffect(() => {
     const root = document.documentElement.style;
-    root.setProperty("--preview-mix", Math.abs(brightness) + "%");
+    root.setProperty("--preview-mix", Math.abs(contrast) + "%");
     root.setProperty(
       "--preview-target",
-      brightness < 0 ? "light-dark(#bbb, #000)" : "light-dark(#fff, #444)",
+      contrast < 0 ? "light-dark(#fff, #000)" : "light-dark(#bbb, #444)",
     );
-  }, [brightness]);
+  }, [contrast]);
   const [systemDark, setSystemDark] = useState(
     () => matchMedia("(prefers-color-scheme: dark)").matches,
   );
@@ -80,8 +107,7 @@ export function ProjectSwitch() {
     const media = matchMedia("(prefers-color-scheme: dark)");
     const sync = () => setSystemDark(media.matches);
     const storage = (e: StorageEvent) => {
-      if (e.key === brightnessKey || e.key === null)
-        setBrightness(savedBrightness());
+      if (e.key === contrastKey || e.key === null) setContrast(savedContrast());
       if (e.key === themeKey || e.key === null) setChoice(savedTheme());
     };
     sync();
@@ -99,84 +125,114 @@ export function ProjectSwitch() {
   }
 
   const [expanded, setExpanded] = useState(false);
+  const menu = useRef<HTMLButtonElement>(null);
+  function closeMenu() {
+    setExpanded(false);
+    menu.current?.focus({ preventScroll: true });
+  }
   const current = currentProject();
+  const overview = current[0] === "Component library" && !family;
   return (
-    <aside className="project-sidebar">
-      <button
-        type="button"
-        className="project-menu"
-        aria-expanded={expanded}
-        aria-controls="project-navigation"
-        onClick={() => setExpanded(!expanded)}
+    <SurfaceProvider>
+      <aside
+        className="project-sidebar"
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && expanded) closeMenu();
+        }}
       >
-        {expanded ? "Close projects" : "Projects"} {expanded ? "×" : "☰"}
-      </button>
-      <nav
-        id="project-navigation"
-        className="project-switch"
-        aria-label="Projects"
-      >
-        <div>
-          {projects.map((project) => (
-            <a
-              key={project[1]}
-              href={project[1]}
-              aria-current={project === current ? "page" : undefined}
-            >
-              {project[0]}
-            </a>
-          ))}
-        </div>
-        <section className="preview-controls" aria-label="Preview settings">
-          <label htmlFor="preview-brightness">Background brightness</label>
-          <input
-            id="preview-brightness"
-            type="range"
-            min="-100"
-            max="100"
-            value={brightness}
-            aria-valuetext={brightness ? brightness + "%" : "Default"}
-            onChange={(e) => changeBrightness(e.currentTarget.valueAsNumber)}
-          />
-          <button
-            type="button"
-            aria-label="Reset background brightness"
-            disabled={!brightness}
-            onClick={() => changeBrightness(0)}
-          >
-            Reset
-          </button>
-        </section>
-        <button
+        <Button
           type="button"
-          className="theme-switch"
-          aria-label="Dark mode"
-          aria-pressed={dark}
-          title={dark ? "Switch to light mode" : "Switch to dark mode"}
-          onClick={toggle}
+          ref={menu}
+          className="project-menu"
+          aria-expanded={expanded}
+          aria-controls="project-navigation"
+          onClick={() => setExpanded(!expanded)}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="19"
-            height="19"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          {expanded ? "Close projects" : "Projects"} {expanded ? "×" : "☰"}
+        </Button>
+        <NavigationMenu
+          orientation="vertical"
+          id="project-navigation"
+          className="project-switch"
+          aria-label="Projects"
+          onClick={(event) => {
+            onStoryClick?.(event);
+            if (expanded && event.defaultPrevented) closeMenu();
+          }}
+        >
+          <StoryNavigation
+            family={family}
+            example={example}
+            overview={overview}
+            card={current[0] === "Card"}
+            menuOpen={expanded}
+          />
+          <details
+            className="project-group"
+            open={!family && !overview && current[0] !== "Card"}
           >
-            {dark ? (
-              <>
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
-              </>
-            ) : (
-              <path d="M20.5 14A8.6 8.6 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z" />
-            )}
-          </svg>
-        </button>
-      </nav>
-    </aside>
+            <NavigationDisclosure>Explorations</NavigationDisclosure>
+            {explorations.map((project) => (
+              <NavigationMenuLink
+                key={project[1]}
+                href={project[1]}
+                current={project === current}
+              >
+                {project[0] === "Tabs" ? "Tabs study" : project[0]}
+              </NavigationMenuLink>
+            ))}
+          </details>
+          <section className="preview-controls" aria-label="Preview settings">
+            <label htmlFor="preview-contrast">Background contrast</label>
+            <input
+              id="preview-contrast"
+              type="range"
+              min="-100"
+              max="100"
+              value={contrast}
+              aria-valuetext={contrast ? contrast + "%" : "Default"}
+              onChange={(e) => changeContrast(e.currentTarget.valueAsNumber)}
+            />
+            <Button
+              type="button"
+              aria-label="Reset background contrast"
+              disabled={!contrast}
+              onClick={() => changeContrast(0)}
+            >
+              Reset
+            </Button>
+          </section>
+          <Button
+            type="button"
+            className="theme-switch"
+            aria-label="Dark mode"
+            aria-pressed={dark}
+            title={dark ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={toggle}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="19"
+              height="19"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {dark ? (
+                <>
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+                </>
+              ) : (
+                <path d="M20.5 14A8.6 8.6 0 0 1 10 3.5 8.7 8.7 0 1 0 20.5 14Z" />
+              )}
+            </svg>
+          </Button>
+        </NavigationMenu>
+      </aside>
+    </SurfaceProvider>
   );
 }

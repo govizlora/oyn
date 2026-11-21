@@ -1,3 +1,4 @@
+import type { ColorScheme } from './environment.js';
 import { frameWGSL } from './effects/frame.js';
 import { geometryWGSL } from './effects/geometry.js';
 
@@ -5,7 +6,7 @@ import { geometryWGSL } from './effects/geometry.js';
 export const insetDefaults = Object.freeze({
   depth: 2.3, wallAngle: 50, curve: 2, highlightStrength: 1.2,
   highlightSharpness: 80.8, diffuseStrength: 0.15, diffuseFalloff: 2.14,
-  floorShadePerDepth: 0.006, maxFloorShade: 0.06,
+  floorContrastPerDepth: { light: 0.006, dark: 0.012 }, maxFloorContrast: 0.12,
   ambientShade: 0.05, directionalShade: 0.2, shadeFalloff: 0.8,
 });
 export const insetWGSL = /* wgsl */ `
@@ -35,10 +36,7 @@ ${geometryWGSL}
   let backlit = smoothstep(0, material.shade.z, -direction);
   let shade = band * clamp(material.shade.x + material.shade.y * backlit, 0, 1);
   let coverage = mask * (1 - exp(-material.wall.w));
-  // Equivalent to a subtle black overlay on the Ceramic base color.
-  // Coverage handles the near-flat fade; this alone controls floor darkening.
-  let floorShade = min(material.wall.w * material.floor.w, material.shade.w);
-  let floorColor = material.floor.xyz * (1.0f - floorShade);
+  let floorColor = mix(material.floor.xyz, vec3f(material.floor.w), material.shade.w);
   return over(vec4f(vec3f(highlight), highlight + shade * (1-highlight)), vec4f(floorColor * coverage, coverage));
 }
 `;
@@ -49,9 +47,9 @@ const angle = insetDefaults.wallAngle * Math.PI / 180;
 let slope = 0;
 for (let i = 0; i < 256; i++) slope += Math.tan(angle * ((i + 0.5) / 256) ** insetDefaults.curve) / 256;
 
-export function insetParameters(depth: number, color: readonly number[]) {
+export function insetParameters(depth: number, color: readonly number[], scheme: ColorScheme) {
   const s = insetDefaults;
-  return [...color, s.floorShadePerDepth, depth / slope, angle, s.curve, depth,
+  return [...color, scheme === "dark" ? 1 : 0, depth / slope, angle, s.curve, depth,
     s.highlightStrength, s.highlightSharpness, s.diffuseStrength, s.diffuseFalloff,
-    s.ambientShade, s.directionalShade, s.shadeFalloff, s.maxFloorShade];
+    s.ambientShade, s.directionalShade, s.shadeFalloff, Math.min(depth * s.floorContrastPerDepth[scheme], s.maxFloorContrast)];
 }

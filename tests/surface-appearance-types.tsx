@@ -13,6 +13,12 @@ function Check(){
  // @ts-expect-error Removed parallel base-color control.
  useSurface({appearance:ceramic,props:{lightSurface:192}});
  Generic(ceramic,{elevation:3} satisfies CeramicProps);
+ // @ts-expect-error Animation curves belong to the consumer, not Ceramic.
+ useSurface({appearance:ceramic,props:{elevation:8,transition:'spring'}});
+ // @ts-expect-error External MotionNumber values use bindMotion, not numeric props.
+ useSurface({appearance:ceramic,props:{elevation:{get:()=>8,on:()=>()=>{}}}});
+ // @ts-expect-error GPU failure handling is not a Provider callback API.
+ const errors = <SurfaceProvider onError={()=>{}}><div /></SurfaceProvider>;
  // @ts-expect-error Unknown Ceramic prop.
  useSurface({appearance:ceramic,props:{phase:1}});
  // @ts-expect-error Numeric elevation required.

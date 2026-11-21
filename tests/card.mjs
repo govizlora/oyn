@@ -38,31 +38,38 @@ try {
   });
   await page.goto(base);
   const nav = page.getByRole('navigation', { name: 'Projects' });
-  const pages = ['Sculpted', 'Ripple field', 'Tabs', 'Card', 'Quiet', 'Object library', 'Native button'];
+  const pages = ['Component library', 'Card', 'Sculpted', 'Ripple field', 'Quiet', 'Object library', 'Native button', 'Tabs study'];
   for (const name of pages) {
-    await nav.getByRole('link', { name, exact: true }).click();
+    const link = nav.getByRole('link', { name, exact: true });
+    if (!(await link.isVisible())) await nav.locator('summary').filter({ hasText: 'Explorations' }).click();
+    await link.click();
     assert.equal(await nav.locator('[aria-current="page"]').innerText(), name);
     await page.locator('main').first().waitFor();
   }
-  assert.deepEqual(await nav.getByRole('link').allTextContents(), pages);
+  assert.equal(await nav.locator('a[data-family]').count(), 55);
   await page.goto(`${base}/?view=card-comparison`);
   await page.getByRole('link', { name: 'Card', exact: true }).click();
   assert.equal(new URL(page.url()).searchParams.get('view'), 'card');
   await page.locator('.card-specimen canvas').waitFor();
-  const slider = page.getByRole('slider', { name: 'Background brightness' });
-  const background = () => page.locator('html').evaluate(el => getComputedStyle(el).backgroundColor);
+  const slider = page.getByRole('slider', { name: 'Background contrast' });
+  const background = () => page.locator('html').evaluate(el => {
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = getComputedStyle(el).backgroundColor;
+    ctx.fillRect(0, 0, 1, 1);
+    return ctx.getImageData(0, 0, 1, 1).data[0];
+  });
+  const toggle = page.getByRole('button', { name: 'Dark mode' });
   assert.equal(await slider.inputValue(), '0');
-  const initial = await background();
-  for (const extreme of ['-100', '100']) {
-    await slider.fill(extreme);
-    assert.notEqual(await background(), initial);
+  for (const dark of [false, true]) {
+    if (await toggle.getAttribute('aria-pressed') !== String(dark)) await toggle.click();
+    const initial = await background();
+    await slider.fill('100');
+    assert.equal(await background(), dark ? 68 : 187);
+    await slider.fill('-100');
+    assert.equal(await background(), dark ? 0 : 255);
+    await page.getByRole('button', { name: 'Reset background contrast' }).click();
+    assert.equal(await background(), initial);
   }
-  await page.getByRole('button', { name: 'Reset background brightness' }).click();
-  assert.equal(await background(), initial);
-  const scheme = () => page.locator('.card-specimen').evaluate(el => getComputedStyle(el).colorScheme);
-  const previous = await scheme();
-  await page.getByRole('button', { name: 'Dark mode' }).click();
-  assert.notEqual(await scheme(), previous);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(200);
   assert.ok(

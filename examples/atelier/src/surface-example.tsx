@@ -15,11 +15,11 @@ function Example() {
   return (
     <main ref={root} className="example">
       <header>
-        <a href="/">Atelier</a>
+        <a href="/">Atelier</a> · <a href="./?view=tabs">Compare Tabs →</a>
         <h1>One native button.</h1>
         <p>
-          No component library. No animation library. No extra synchronization
-          listeners.
+          Material example, not a registry component: a native HTML button uses
+          Ceramic directly through a Surface ref.
         </p>
       </header>
       <section aria-label="Native DOM experiments">

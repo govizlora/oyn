@@ -1,5 +1,9 @@
 # Surface Source Map
 
+[The root architecture contract](../../ARCHITECTURE.md) owns cross-package boundaries.
+This file only maps Surface internals. “Scheduler” below means GPU draw scheduling,
+not the consumer’s numeric animation clock.
+
 This refactor preserves the public API, lifecycle ordering, and rendering behavior. `index.ts` only exports public interfaces. Internal modules import implementations or types directly, never through the public entry point.
 
 ## Start with useSurface
@@ -26,7 +30,7 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 | `types/input.ts` | Input snapshot and subscription contracts |
 | `createInputs.ts` | Lazy shared browser event subscriptions |
 | `types/scene.ts` | Mesh type connecting DOM and Material |
-| `engine.ts` | Sole scheduling owner and runtime coordination |
+| `engine.ts` | Sole GPU draw scheduler and runtime coordination |
 | `presentation.ts` | DOM / canvas placement, measurement, and coordinate conversion |
 | `renderer.ts` | GPU target and draw submission lifecycle |
 | `gpu/Target.ts` | GPU target type |
@@ -59,7 +63,7 @@ The React adapter depends on the runtime; the runtime does not import React. GPU
 
 Independent entry points and factories with distinct responsibilities have their own files. Internal callbacks sharing one lifecycle closure (such as `draw` / `dispose`, `retain` / `drop`, and React effect cleanup) stay with their owner. This avoids exposing private state as mutable objects passed between files.
 
-GPU cache extraction only reorganizes renderer internals: the renderer still creates and owns the caches, and Engine remains the sole scheduler. No additional resource lifecycle or drawing control path is introduced.
+GPU cache extraction only reorganizes renderer internals: the renderer still creates and owns the caches, and Engine remains the sole GPU draw scheduler. No additional resource lifecycle or drawing control path is introduced.
 
 ## Type Organization
 
@@ -67,6 +71,6 @@ Cross-module contracts live in `src/types/`: Appearance, Material, input snapsho
 
 The hook keeps one memoized binding handle per appearance/engine pair. Creating this handle has no side effects. Its ref creates and registers the instance, and its cleanup releases it. One layout effect saves committed configuration and updates the active instance; configuration changes do not replace the ref. Reattachment starts with the last committed configuration, then the layout effect applies the current commit before the scheduled draw.
 
-Each Provider owns one stable Engine instance. Creating it has no browser side effects. The Provider starts/stops browser resources in layout effects; Strict Mode can restart resources without replacing the instance. Context exposes this instance directly, not a separate forwarding contract. `requestMeasure` schedules measurement and drawing; `requestDraw` schedules drawing only.
+Each Provider owns one stable Engine instance. Creating it has no browser side effects. The Provider starts/stops browser resources in effects; Strict Mode can restart resources without replacing the instance. Context exposes this instance directly, not a separate forwarding contract. `requestMeasure` schedules measurement and drawing; `requestDraw` schedules drawing only.
 
 Presentation owns `data-oyn-active` during GPU attachment. Engine failure latches the Engine as failed and disposes every presentation, restoring CSS before releasing its other resources, then logs the cause. Hooks do not create or update appearances after failure. There is no Provider error callback or React fallback state.

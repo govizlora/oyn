@@ -1,4 +1,4 @@
-import { createParameters, type Appearance } from "@oyn/surface";
+import { createParameters, type Material } from "@oyn/surface";
 import { frameWGSL } from "./effects/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
 import { parseColor } from "./color.js";
@@ -161,7 +161,7 @@ fn scene(deskXY:vec2f,cs:vec2f,key:vec3f,emitter:vec3f,px:f32)->vec4f {
 @fragment fn surface(in:VertexOut)->@location(0) vec4f {
   let size=min(in.card.z,in.card.w);
   let xy=(in.local-in.card.zw*.5)*vec2f(2,-2)/size;
-  let cs=vec2f(cos(frame.geometry.x),sin(frame.geometry.x));
+  let cs=vec2f(cos(m.front.w),sin(m.front.w));
   let delta=(frame.viewportLight.zw-in.card.xy-in.card.zw*.5)*vec2f(1,-1);
   // Swing the finite lamp from overhead toward the side of the socket.
   // At grazing angles the rolled edge compresses its image into a thin arc.
@@ -191,197 +191,105 @@ export type StoneProfile = Readonly<{
   lip: number;
   depth: number;
 }>;
-export type FlipDiscProps = {
+/** Optical configuration only. Consumers provide instantaneous pose numbers. */
+export type FlipDiscOptions = {
   profile: StoneProfile;
-  focusTarget?: HTMLElement | null;
+  lightTarget?: HTMLElement | null;
   contrast: number;
   sharpness: number;
   reflectionStrength: number;
   rimStrength: number;
   extension: number;
   lampHeight: number;
-  /** Maximum press travel as a fraction of the remaining socket clearance. */
-  stroke: number;
-  pose: (now: number, reduced: boolean) => { angle: number; active: boolean };
 };
-export const flipDisc: Appearance<FlipDiscProps> = {
-  create(initial) {
-    function stock(p: StoneProfile) {
-      if (
-        ![p.roll, p.crown, p.lip, p.gap, p.depth].every(Number.isFinite) ||
-        !(
-          p.roll > 0 &&
-          p.crown > 0 &&
-          p.crown < 1 - p.roll &&
-          p.lip > 0 &&
-          p.gap > Math.abs(p.depth)
-        )
-      )
-        throw new RangeError(
-          "Stone profile must have a rounded biconvex lens and clearance for a half-turn.",
-        );
-      const core = 1 - p.roll,
-        k = (core * core - p.crown * p.crown) / (2 * p.crown),
-        bore = 1 + p.gap;
-      return [
-        core,
-        k,
-        k + p.crown,
-        p.roll,
-        bore,
-        p.lip,
-        p.depth,
-        Math.sqrt(bore * bore + 2 * bore * p.lip),
-      ];
-    }
-    let previous = initial;
-    const parameters = createParameters([
-      ...stock(initial.profile),
-      ...parseColor("#F4F2E9"),
-      0,
-      ...parseColor("#FF6900"),
-      0,
-      initial.sharpness,
-      initial.reflectionStrength,
-      initial.rimStrength,
-      initial.contrast,
-      0,
-      0,
-      initial.extension,
-      initial.lampHeight,
-    ]);
-    return {
-      material: {
-        shader: flipDiscWGSL,
-        loadWebGL2,
-        parameters,
-        passes: ["surface"],
-        measurePadding: (w, h) => ({ x: w * 0.84, y: h * 0.84 }),
-        bind(ctx) {
-          const lighting = ceramicBinding()(ctx);
-          const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-          reduce.addEventListener("change", ctx.requestDraw, {
-            signal: ctx.signal,
-          });
-          // A single travel coordinate moves the pivot relative to the fixed
-          // socket. Even a tap shorter than a frame gets a short press stroke.
-          const el = ctx.element,
-            options = { signal: ctx.signal };
-          let hovering = false,
-            pressed = false,
-            holdUntil = 0,
-            travel = 0,
-            last = performance.now();
-          const begin = () => {
-            if (pressed) return;
-            pressed = true;
-            holdUntil = performance.now() + 75;
-            ctx.requestDraw();
-          };
-          const release = () => {
-            pressed = false;
-            ctx.requestDraw();
-          };
-          const leave = () => {
-            hovering = false;
-            pressed = false;
-            holdUntil = 0;
-            ctx.requestDraw();
-          };
-          el.addEventListener(
-            "pointerenter",
-            (e) => {
-              hovering = e.pointerType !== "touch";
-              ctx.requestDraw();
-            },
-            options,
-          );
-          el.addEventListener(
-            "pointerleave",
-            (e) => {
-              if (e.pointerType === "touch") {
-                hovering = false;
-                release();
-              } else leave();
-            },
-            options,
-          );
-          el.addEventListener(
-            "pointerdown",
-            (e) => {
-              if (e.isPrimary && e.button === 0) begin();
-            },
-            options,
-          );
-          el.addEventListener("pointerup", release, options);
-          el.addEventListener("pointercancel", leave, options);
-          el.addEventListener(
-            "keydown",
-            (e) => {
-              if (e.key === "Enter" || e.key === " ") begin();
-            },
-            options,
-          );
-          el.addEventListener(
-            "keyup",
-            (e) => {
-              if (e.key === "Enter" || e.key === " ") release();
-            },
-            options,
-          );
-          el.addEventListener("focus", ctx.requestDraw, options);
-          el.addEventListener("blur", leave, options);
-          window.addEventListener("blur", leave, options);
-          return {
-            frame(frame) {
-              const now = performance.now();
-              const target =
-                pressed || now < holdUntil ? 1 : hovering ? 0.46 : 0;
-              // Limit idle time on the first frame of a new stroke.
-              const dt = Math.min(now - last, 32);
-              last = now;
-              travel = reduce.matches
-                ? target
-                : target +
-                  (travel - target) *
-                    Math.exp(-dt / (target > travel ? 24 : 55));
-              if (Math.abs(target - travel) < 0.002) travel = target;
-              const { depth, gap } = previous.profile;
-              parameters.set(20, travel * previous.stroke * (gap - depth));
-              parameters.set(21, Number(el.matches(":focus-visible")));
-              const { angle, active } = previous.pose(now, reduce.matches);
-              if (active || travel !== target || now < holdUntil)
-                ctx.requestDraw();
-              if (previous.focusTarget) {
-                const box = previous.focusTarget.getBoundingClientRect();
-                const point = frame.toLocal({
-                  x: box.left + box.width / 2,
-                  y: box.top + box.height / 2,
-                });
-                return [point.x, point.y, angle];
-              }
-              const [x, y] = lighting.frame!(frame);
-              return [x, y, angle];
-            },
-          };
+
+function stock(p: StoneProfile) {
+  if (
+    ![p.roll, p.crown, p.lip, p.gap, p.depth].every(Number.isFinite) ||
+    !(
+      p.roll > 0 &&
+      p.crown > 0 &&
+      p.crown < 1 - p.roll &&
+      p.lip > 0 &&
+      p.gap > Math.abs(p.depth)
+    )
+  )
+    throw new RangeError(
+      "Stone profile must have a rounded biconvex lens and clearance for a half-turn.",
+    );
+  const core = 1 - p.roll,
+    k = (core * core - p.crown * p.crown) / (2 * p.crown),
+    bore = 1 + p.gap;
+  return [
+    core,
+    k,
+    k + p.crown,
+    p.roll,
+    bore,
+    p.lip,
+    p.depth,
+    Math.sqrt(bore * bore + 2 * bore * p.lip),
+  ];
+}
+
+/** No gesture listeners, clocks or easing. Numeric sources use bindMotion. */
+export function createFlipDiscMaterial(initial: FlipDiscOptions) {
+  let previous = initial;
+  const parameters = createParameters([
+    ...stock(initial.profile),
+    ...parseColor("#F4F2E9"),
+    0, // front.w stores the instantaneous angle
+    ...parseColor("#FF6900"),
+    0,
+    initial.sharpness,
+    initial.reflectionStrength,
+    initial.rimStrength,
+    initial.contrast,
+    0,
+    0,
+    initial.extension,
+    initial.lampHeight,
+  ]);
+  const material: Material = {
+    shader: flipDiscWGSL,
+    loadWebGL2,
+    parameters,
+    passes: ["surface"],
+    measurePadding: (w, h) => ({ x: w * 0.84, y: h * 0.84 }),
+    bind(context) {
+      const lighting = ceramicBinding()(context);
+      return {
+        ...lighting,
+        frame(frame) {
+          if (previous.lightTarget) {
+            const box = previous.lightTarget.getBoundingClientRect();
+            const point = frame.toLocal({
+              x: box.left + box.width / 2,
+              y: box.top + box.height / 2,
+            });
+            return [point.x, point.y, 0];
+          }
+          return lighting.frame!(frame);
         },
-      },
-      update(next) {
-        if (next.profile !== previous.profile)
-          stock(next.profile).forEach((v, i) => parameters.set(i, v));
-        parameters.set(16, next.sharpness);
-        parameters.set(17, next.reflectionStrength);
-        parameters.set(18, next.rimStrength);
-        parameters.set(19, next.contrast);
-        parameters.set(22, next.extension);
-        parameters.set(23, next.lampHeight);
-        const moved =
-          previous.focusTarget !== next.focusTarget ||
-          previous.pose !== next.pose ||
-          previous.stroke !== next.stroke;
-        previous = next;
-        if (moved) return "draw";
-      },
-    };
-  },
-};
+      };
+    },
+  };
+  return Object.assign(material, {
+    setAngle: (value: number) => parameters.set(11, value),
+    setTravel: (value: number) => parameters.set(20, value),
+    setGlow: (value: number) => parameters.set(21, value),
+    update(next: FlipDiscOptions) {
+      if (next.profile !== previous.profile)
+        stock(next.profile).forEach((v, i) => parameters.set(i, v));
+      parameters.set(16, next.sharpness);
+      parameters.set(17, next.reflectionStrength);
+      parameters.set(18, next.rimStrength);
+      parameters.set(19, next.contrast);
+      parameters.set(22, next.extension);
+      parameters.set(23, next.lampHeight);
+      const moved = previous.lightTarget !== next.lightTarget;
+      previous = next;
+      if (moved) return "draw" as const;
+    },
+  });
+}

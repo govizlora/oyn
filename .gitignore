@@ -13,3 +13,10 @@ playwright-report/
 .env
 .env.*
 !.env.example
+
+# Static registry generated from packages/ui/src
+/examples/atelier/public/r/
+
+# Materialized from the pinned UI SDK documentation at build time.
+examples/atelier/src/components/generated/
+examples/atelier/public/recipe-source/

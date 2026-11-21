@@ -25,7 +25,7 @@ const initialPadding = material.measurePadding(100, 40);
 const parameters = material.parameters;
 let updates = 0;
 parameters.subscribe(() => updates++);
-for (const elevation of [-2, -6, 0, 4, -2]) {
+for (const elevation of [-2, -6, 0, 4, -2, -24]) {
   material.setElevation(elevation);
   const fresh = createCeramicMaterial({ elevation, maxElevation: 16 });
   assert.equal(material.parameters, parameters, 'parameter subscription remains stable');
@@ -51,17 +51,20 @@ try {
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  await page.goto('http://127.0.0.1:5176');
+  await page.route('**/elevation-test', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><link rel="icon" href="data:,"><body></body>' }));
+  await page.goto(new URL('/elevation-test', process.env.BASE_URL ?? 'http://127.0.0.1:5176').href);
 
   await page.evaluate(async root => {
     const { createCeramicMaterial } = await import(root + 'packages/ceramic/dist/index.js');
     const { createEngine } = await import(root + 'packages/surface/dist/engine.js');
     const host = document.createElement('div');
     host.id = 'elevation-test';
-    host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:80px;border-radius:12px;background:#888';
+    host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:240px;border-radius:12px;background:#888';
     document.body.append(host);
     const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, colorScheme: 'light', maxElevation: 16 }) };
-    const engine = createEngine(new Map([[host, mesh]]));
+    const engine = createEngine();
+    engine.entries.set(host, mesh);
+    engine.start();
     window.elevationTest = { mesh, engine, createCeramicMaterial };
   }, '/@fs' + fileURLToPath(new URL('../', import.meta.url)));
   const canvas = page.locator('#elevation-test canvas');
@@ -71,10 +74,10 @@ try {
     await page.evaluate(colorScheme => {
       const { mesh, engine, createCeramicMaterial } = window.elevationTest;
       mesh.material = createCeramicMaterial({ colorScheme, elevation: 4, maxElevation: 16 });
-      engine.invalidate();
+      engine.requestMeasure();
     }, colorScheme);
     const images = [];
-    for (const elevation of [-2, -6, 0, 4, -2]) {
+    for (const elevation of [-2, -6, 0, 4, -2, -24]) {
       await page.evaluate(value => window.elevationTest.mesh.material.setElevation(value), elevation);
       await page.waitForTimeout(120);
       assert.ok(await canvas.evaluate(el => el === window.elevationTestCanvas), 'sign changes preserve canvas');
@@ -86,7 +89,9 @@ try {
         const depth = -elevation;
         const coverage = 1 - Math.exp(-depth);
         const base = colorScheme === 'light' ? 240 : 12;
-        const expected = base * (1 - Math.min(depth * 0.006, 0.06)) * coverage + 136 * (1 - coverage);
+        const target = colorScheme === 'light' ? 0 : 255;
+        const rate = colorScheme === 'light' ? 0.006 : 0.012;
+        const expected = (base + (target - base) * Math.min(depth * rate, 0.12)) * coverage + 136 * (1 - coverage);
         assert.ok(Math.abs(png.data[pixel] - expected) <= 2, `floor depth ${depth}: GPU ${png.data[pixel]}, expected ${expected}`);
       }
     }
@@ -96,7 +101,7 @@ try {
     else assert.ok(images[2].equals(images[3]), 'Dark raised surfaces have no elevation-dependent external shadow');
     assert.ok(images[0].equals(images[4]), 'returning to same depth restores exact pixels');
   }
-  await page.evaluate(() => window.elevationTest.engine.dispose());
+  await page.evaluate(() => window.elevationTest.engine.stop());
   assert.deepEqual(errors, []);
   console.log('PASS: signed elevation creation/updates, themes, validation, GPU program switching and stable canvas.');
 } finally { await browser.close(); }

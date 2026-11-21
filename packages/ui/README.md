@@ -1,15 +1,159 @@
-# @oyn/ui
+# Oyn UI
 
-Reusable React controls sit above Surface (rendering) and Ceramic (appearance).
-Atelier owns the component stories, not the implementation.
+[ARCHITECTURE.md](../../ARCHITECTURE.md) is the authoritative ownership contract.
+
+Oyn provides Ceramic parts for all 55 UI SDK React component families. The
+Atelier catalog has 506 interactive previews with source links. Each family
+has a workspace import such as `@oyn/ui/switch` and a source registry item
+such as `@oyn/ceramic-switch`.
+
+## Use a component
+
+Give an existing ancestor the `oyn-ui` class to scope the layout styles. Mount
+one SurfaceProvider per document. The component's SDK root owns its value,
+form participation, keyboard handling and accessible name.
+
+```tsx
+import { SurfaceProvider } from "@oyn/surface";
+import { Switch, SwitchThumb } from "@oyn/ui/switch";
+
+<SurfaceProvider>
+  <main className="oyn-ui">
+    <label data-slot="label">
+      Show guides
+      <Switch name="guides" defaultChecked>
+        <SwitchThumb />
+      </Switch>
+    </label>
+  </main>
+</SurfaceProvider>;
+```
+
+The material attaches to the SDK part's DOM ref. Native text inputs retain
+their ref, label and caret inside a recessed frame. Compound inputs share one
+frame. Calendar reads the SDK's day state to place a recessed strip across each
+week of a selected range, including the raised start and end dates. The paging
+buttons share corner centers with the surrounding calendar panel. Positive elevation gives buttons, cards, popup panels
+and moving thumbs their form. Text, focus rings and data marks use CSS.
+
+Open the [component catalog](http://127.0.0.1:5177/components.html) or
+[Calendar range](http://127.0.0.1:5177/components.html?component=calendar&example=range).
 
 ## Tabs
 
-Under a SurfaceProvider, import `Tabs`, `TabsList`, `TabsTrigger` and
-`TabsContent` from `@oyn/ui/tabs`. Match each trigger's `value` to its panel.
-The list accepts a pixel `radius` and `selectedTone="matching" | "inverse"`.
-The inverse option changes the pigment, not the surrounding lighting environment.
+Two implementations of the same Ceramic tabs share one Surface runtime. Use React 19 and mount
+`SurfaceProvider` from `@oyn/surface` above the controls.
 
-Radix owns selection, keyboard focus and panel relationships; controlled and
-uncontrolled usage use its normal API. One standard Ceramic indicator moves to
-the selected trigger; reduced-motion users see an immediate change.
+| Item | Interaction | Components to import in this workspace | Story |
+| --- | --- | --- | --- |
+| base-ui-ceramic-tabs-list | Base UI; no UI SDK or Tailwind | `CeramicTabsList` from `@oyn/ui/base-ui/tabs` | [Base UI Tabs](http://127.0.0.1:5177/?view=tabs&impl=base-ui) |
+| ceramic-tabs-list | UI SDK; no Base UI, Tailwind or global SDK stylesheet | `CeramicTabsList` from `@oyn/ui/tabs` | [UI SDK Tabs](http://127.0.0.1:5177/?view=tabs) |
+
+## Use the installed source
+
+For Base UI, keep the root, tabs and panels. Replace only the list:
+
+```tsx
+import { Tabs } from "@base-ui/react/tabs";
+import { CeramicTabsList } from "@/components/ui/base-ui-ceramic-tabs-list";
+
+<Tabs.Root defaultValue="design">
+  <CeramicTabsList aria-label="Workbench">
+    <Tabs.Tab value="design">Design</Tabs.Tab>
+    <Tabs.Tab value="code">Code</Tabs.Tab>
+  </CeramicTabsList>
+  <Tabs.Panel value="design">Preview</Tabs.Panel>
+  <Tabs.Panel value="code">Source</Tabs.Panel>
+</Tabs.Root>
+```
+
+For an existing UI SDK project, replace only its list:
+
+```tsx
+import { Tabs, TabsTab, TabsPanel } from "@ui-sdk/react/tabs";
+import { CeramicTabsList } from "@/components/ui/ceramic-tabs-list";
+
+<Tabs defaultValue="design">
+  <CeramicTabsList aria-label="Workbench" radius={16} selectedTone="inverse">
+    <TabsTab value="design">Design</TabsTab>
+    <TabsTab value="code">Code</TabsTab>
+  </CeramicTabsList>
+  <TabsPanel value="design">Preview</TabsPanel>
+  <TabsPanel value="code">Source</TabsPanel>
+</Tabs>
+```
+
+Your existing controlled Tabs root and routing can stay in place. The list
+adds only the recessed track and one moving indicator. UI SDK still owns
+the selected value and the indicator's measured bounds.
+
+Not using either interaction library? Attach the Ceramic material directly with
+`useSurface({ appearance: ceramic, props })` under a SurfaceProvider. The
+[native button demo](http://127.0.0.1:5177/surface.html) is a material example, not an installable UI item.
+
+## Source responsibilities
+
+Shared control bindings interpret transient pointer/focus/keyboard feedback without
+owning SDK actions or selection. The UI consumer computes a numeric spring source;
+`bindMotion` from `@oyn/surface/adapters/motion` is its only writer to
+`material.setElevation`. Ceramic receives instantaneous heights, not animation
+targets or curves. Surface observes parameter changes and schedules GPU work.
+Reduced motion, interruption and cancellation belong to this consumer source.
+While drawable, animation updates retain the material and canvas; selection only
+changes the resting height. Flat outline controls derive empty draw programs from
+the same numeric source, letting Surface release the canvas without a second ref
+lifecycle. CSS does not add press scaling or a second shadow to active Ceramic.
+
+Each list entry renders only its own library’s parts and forwards that library’s
+props. Selection, keyboard handling and indicator measurements stay with the
+library. `use-ceramic-tabs.ts` binds the two surfaces and maps the shared
+appearance props to DOM attributes and CSS variables. `ceramic-tabs-list.css`
+uses those attributes and the library’s measurements for layout and motion; it
+does not measure or track the active tab.
+
+## Local registry
+
+`npm run build:registry` builds static JSON from the root registry.json.
+Atelier runs this before dev/build. After editing item source, rerun it to
+refresh the installable JSON. Dev serves the catalog at `/r/registry.json`;
+a production build puts it in `dist/r/`. Generated JSON is not committed.
+
+For the full catalog, configure the Oyn namespace in your application's
+`components.json`. The CLI resolves the shared files and each component's
+dependencies using this URL.
+
+```json
+{
+  "registries": {
+    "@oyn": "http://127.0.0.1:5177/r/{name}.json"
+  }
+}
+```
+
+```sh
+npx shadcn add @oyn/ceramic-switch @oyn/ceramic-calendar
+```
+
+The installed family modules live under your UI directory in `oyn/`.
+The registry contains the same source used by the workspace imports.
+Component layouts and documentation recipes are adapted from Vercel Labs'
+UI SDK under Apache-2.0. The layout reference revision is
+`855bc7fd4df3d61aee33d9d975dc3e4f71debc6c`. The license ships with the
+shared files and is available in Atelier under `/recipe-source/LICENSE.txt`.
+
+With a configured shadcn project and resolvable Oyn runtimes:
+
+```sh
+npx shadcn add http://127.0.0.1:5177/r/base-ui-ceramic-tabs-list.json
+# Alternatively, for an existing UI SDK Tabs tree:
+npx shadcn add http://127.0.0.1:5177/r/ceramic-tabs-list.json
+```
+
+The files go into your configured UI directory. Only ceramic-tabs-list declares
+UI SDK. The CLI is a development tool, not a runtime dependency.
+
+**Release boundary:** the referenced Oyn runtime versions (0.0.0) are local
+workspace packages, not public npm releases. For an external local install,
+make the built Surface and Ceramic packages available as npm workspaces (or in
+a private registry) before running the commands. No public deployment or npm
+publication is performed by these builds.

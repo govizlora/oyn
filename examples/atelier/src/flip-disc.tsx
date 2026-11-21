@@ -3,7 +3,7 @@ import { ProjectSwitch } from "./projects";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { SurfaceProvider, useSurface } from "@oyn/surface";
-import { flipDisc, type FlipDiscProps } from "@oyn/ceramic/flip-disc";
+import { stoneAppearance, type StoneProps } from "./stone-appearance";
 import { atRest, lattice, sample, stones, strike } from "./ripple-field";
 import "./flip-disc.css";
 
@@ -34,10 +34,10 @@ function Stone({
   onStrike,
 }: {
   index: number;
-  props: FlipDiscProps;
+  props: StoneProps;
   onStrike: (index: number) => void;
 }) {
-  const ref = useSurface({ appearance: flipDisc, props });
+  const ref = useSurface({ appearance: stoneAppearance, props });
   const { x, y, row, col } = stones[index];
   return (
     <button
@@ -157,7 +157,7 @@ function Atelier() {
                   onStrike={tap}
                   props={{
                     profile,
-                    focusTarget,
+                    lightTarget: focusTarget,
                     sharpness,
                     contrast: values.contrast,
                     extension: values.extension,

@@ -8,10 +8,6 @@
     15px/1.5 system-ui,
     sans-serif;
 }
-.tabs-study small {
-  font: 11px/1.4 monospace;
-  letter-spacing: 0.1em;
-}
 .tabs-study h1 {
   margin: 8px 0;
   font-size: clamp(40px, 6vw, 72px);
@@ -19,17 +15,12 @@
   letter-spacing: -0.06em;
 }
 .tabs-workbench {
-  margin-top: 32px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 210px;
   border-block: 1px solid light-dark(#ccc, #444);
 }
 .tabs-preview {
-  padding: 32px 0;
-}
-.tabs-preview > small {
-  display: block;
-  margin-bottom: 28px;
+  padding: 24px 0;
 }
 .tabs-study h2 {
   font-size: 18px;
@@ -73,4 +64,28 @@
     border-inline: 0;
     border-top: 1px solid light-dark(#ccc, #444);
   }
+}
+
+.tabs-example-panel {
+  margin-top: 1.5rem;
+  max-width: 46ch;
+}
+.tabs-example-panel p {
+  margin: 0.35rem 0 0;
+}
+.tabs-orientation {
+  display: block;
+  margin-top: 1rem;
+}
+
+.tabs-implementation {
+  display: flex;
+  gap: 1.25rem;
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+}
+.tabs-implementation legend {
+  margin-bottom: 0.35rem;
+  font-weight: 600;
 }

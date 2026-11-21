@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5177 --strictPort",
-    "build": "tsc --noEmit && vite build"
+    "build": "tsc --noEmit && vite build",
+    "predev": "npm run build:registry --prefix ../.. && npm run prepare:stories",
+    "prebuild": "npm run build:registry --prefix ../.. && npm run prepare:stories",
+    "prepare:stories": "node scripts/prepare-stories.mjs"
   },
   "dependencies": {
     "@oyn/ceramic": "0.0.0",
     "@oyn/surface": "0.0.0",
+    "@oyn/ui": "0.0.0",
+    "@ui-sdk/core": "0.1.0-beta.13",
+    "@ui-sdk/react": "0.1.0-beta.13",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@oyn/ui": "0.0.0"
+    "@base-ui/react": "^1.9.0",
+    "lucide-react": "^1.73.0"
   }
 }

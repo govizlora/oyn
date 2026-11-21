@@ -1,0 +1,187 @@
+/* Adapted from UI SDK (Apache-2.0). OYN scopes its layout and provides the material. */
+@layer oyn-layout {
+  @scope (.oyn-ui, [data-oyn-popup]) {
+    [data-slot="radio-group"] {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+
+      &[data-disabled] [data-slot="label"] {
+        color: var(--line-disabled);
+      }
+
+      & > [data-slot="label"] {
+        font-weight: 400;
+      }
+
+      & > [data-slot="label"] > [data-slot="hint"] {
+        margin-inline-start: calc(var(--space-1) * -1);
+      }
+    }
+
+    [data-slot="field-description"] + [data-slot="radio-group"] {
+      margin-top: var(--space-1);
+    }
+
+    /* A choice card keeps its radio at the top end, in line with the title. */
+    [data-slot="card"] > [data-slot="radio"] {
+      margin-top: 2px;
+      margin-inline-start: auto;
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
+
+    [data-slot="card"]:has(> [data-slot="radio"]:focus-visible) {
+      outline: 3px solid var(--halo);
+      outline-offset: 2px;
+    }
+
+    /* A radio in a field of its own sits beside its label and description. */
+    [data-slot="field"]:has(> [data-slot="radio"]) {
+      flex-direction: row;
+      align-items: flex-start;
+      width: auto;
+
+      & > [data-slot="radio"] {
+        margin-top: 2px;
+      }
+
+      & > [data-slot="stack"] {
+        gap: var(--space-1);
+      }
+    }
+
+    [data-slot="radio-group"]:has(> [data-slot="field"]) {
+      gap: var(--space-3);
+    }
+
+    [data-slot="radio"] {
+      display: inline-grid;
+      flex-shrink: 0;
+      place-items: center;
+      box-sizing: border-box;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: var(--surface-1);
+      box-shadow: inset 0 0 0 1px var(--line);
+      color: var(--ink);
+      cursor: default;
+      transition: box-shadow var(--duration);
+
+      &:hover:not([data-disabled], [data-readonly], [data-checked]) {
+        box-shadow: inset 0 0 0 1px
+          color-mix(in oklab, var(--ink) 45%, var(--surface-1));
+      }
+
+      &[data-checked] {
+        background: var(--surface-1);
+        box-shadow: inset 0 0 0 1.5px var(--ink);
+      }
+
+      &:is([data-invalid], [aria-invalid="true"]) {
+        box-shadow: inset 0 0 0 1px var(--danger);
+      }
+
+      &[data-readonly]:not([data-checked]) {
+        background: var(--tint);
+      }
+
+      &[data-disabled] {
+        box-shadow: inset 0 0 0 1px var(--line-faint);
+      }
+
+      &[data-disabled][data-checked] {
+        box-shadow: inset 0 0 0 1.5px var(--line-disabled);
+      }
+    }
+
+    [data-slot="radio-indicator"] {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--ink);
+
+      &[data-unchecked] {
+        visibility: hidden;
+      }
+
+      [data-disabled] > & {
+        background: var(--line-disabled);
+      }
+    }
+
+    [data-slot="label"]:has(> [data-slot="radio"][data-disabled]) {
+      color: var(--line-disabled);
+    }
+
+    /* A radio with its own content is a choice card. */
+    [data-slot="radio"]:is(
+      [data-variant="card"],
+      :has(> :not([data-slot="radio-indicator"], [data-oyn-layer]))
+    ) {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      width: auto;
+      min-width: var(--size);
+      height: auto;
+      min-height: var(--size);
+      padding: var(--space-3);
+      border-radius: var(--radius-surface);
+      background: var(--surface-1);
+      box-shadow: inset 0 0 0 1px var(--line);
+      font: inherit;
+      text-align: start;
+
+      &:hover:not([data-disabled], [data-checked]) {
+        box-shadow: inset 0 0 0 1px
+          color-mix(in oklab, var(--ink) 45%, var(--surface-1));
+      }
+
+      &[data-checked] {
+        background: var(--tint);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
+
+      &[data-disabled] {
+        background: var(--surface-1);
+        box-shadow: inset 0 0 0 1px var(--line-faint);
+        color: var(--line-disabled);
+      }
+
+      & > [data-slot="stack"] {
+        flex: 1;
+        gap: var(--space-1);
+        font-weight: 500;
+      }
+
+      &:has(> [data-slot="stack"]) {
+        align-items: flex-start;
+      }
+
+      & > svg:nth-last-child(1 of :not([data-oyn-layer])):not(:first-child) {
+        margin-top: 2px;
+        margin-inline-start: auto;
+      }
+
+      [data-slot="radio-group"]:not([data-variant]) > & {
+        width: 100%;
+      }
+    }
+  }
+}
+@layer oyn-material {
+  [data-slot="radio"][data-oyn-face]:has([data-slot="radio-indicator"]) {
+    width: 22px;
+    height: 22px;
+  }
+  [data-slot="radio-indicator"][data-oyn-face] {
+    width: 12px;
+    height: 12px;
+  }
+}

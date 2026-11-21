@@ -8,3 +8,6 @@ playwright-report/
 .cache/
 package-lock.json
 packages/ceramic/src/generated/
+examples/atelier/public/r/
+examples/atelier/src/components/generated/
+examples/atelier/public/recipe-source/

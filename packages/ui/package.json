@@ -6,21 +6,311 @@
   "exports": {
     "./tabs": {
       "types": "./dist/tabs.d.ts",
-      "development": "./src/tabs.tsx",
+      "development": "./src/tabs.ts",
       "import": "./dist/tabs.js"
+    },
+    "./base-ui/tabs": {
+      "types": "./dist/base-ui-ceramic-tabs-list.d.ts",
+      "development": "./src/base-ui-ceramic-tabs-list.tsx",
+      "import": "./dist/base-ui-ceramic-tabs-list.js"
+    },
+    "./accordion": {
+      "types": "./dist/accordion.d.ts",
+      "development": "./src/accordion.tsx",
+      "import": "./dist/accordion.js"
+    },
+    "./alert-dialog": {
+      "types": "./dist/alert-dialog.d.ts",
+      "development": "./src/alert-dialog.tsx",
+      "import": "./dist/alert-dialog.js"
+    },
+    "./autocomplete": {
+      "types": "./dist/autocomplete.d.ts",
+      "development": "./src/autocomplete.tsx",
+      "import": "./dist/autocomplete.js"
+    },
+    "./avatar": {
+      "types": "./dist/avatar.d.ts",
+      "development": "./src/avatar.tsx",
+      "import": "./dist/avatar.js"
+    },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "development": "./src/button.tsx",
+      "import": "./dist/button.js"
+    },
+    "./calendar": {
+      "types": "./dist/calendar.d.ts",
+      "development": "./src/calendar.tsx",
+      "import": "./dist/calendar.js"
+    },
+    "./carousel": {
+      "types": "./dist/carousel.d.ts",
+      "development": "./src/carousel.tsx",
+      "import": "./dist/carousel.js"
+    },
+    "./checkbox": {
+      "types": "./dist/checkbox.d.ts",
+      "development": "./src/checkbox.tsx",
+      "import": "./dist/checkbox.js"
+    },
+    "./collapsible": {
+      "types": "./dist/collapsible.d.ts",
+      "development": "./src/collapsible.tsx",
+      "import": "./dist/collapsible.js"
+    },
+    "./color-picker": {
+      "types": "./dist/color-picker.d.ts",
+      "development": "./src/color-picker.tsx",
+      "import": "./dist/color-picker.js"
+    },
+    "./combobox": {
+      "types": "./dist/combobox.d.ts",
+      "development": "./src/combobox.tsx",
+      "import": "./dist/combobox.js"
+    },
+    "./command": {
+      "types": "./dist/command.d.ts",
+      "development": "./src/command.tsx",
+      "import": "./dist/command.js"
+    },
+    "./date-input": {
+      "types": "./dist/date-input.d.ts",
+      "development": "./src/date-input.tsx",
+      "import": "./dist/date-input.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker.d.ts",
+      "development": "./src/date-picker.tsx",
+      "import": "./dist/date-picker.js"
+    },
+    "./dialog": {
+      "types": "./dist/dialog.d.ts",
+      "development": "./src/dialog.tsx",
+      "import": "./dist/dialog.js"
+    },
+    "./drawer": {
+      "types": "./dist/drawer.d.ts",
+      "development": "./src/drawer.tsx",
+      "import": "./dist/drawer.js"
+    },
+    "./field": {
+      "types": "./dist/field.d.ts",
+      "development": "./src/field.tsx",
+      "import": "./dist/field.js"
+    },
+    "./file-input": {
+      "types": "./dist/file-input.d.ts",
+      "development": "./src/file-input.tsx",
+      "import": "./dist/file-input.js"
+    },
+    "./hover-card": {
+      "types": "./dist/hover-card.d.ts",
+      "development": "./src/hover-card.tsx",
+      "import": "./dist/hover-card.js"
+    },
+    "./image-cropper": {
+      "types": "./dist/image-cropper.d.ts",
+      "development": "./src/image-cropper.tsx",
+      "import": "./dist/image-cropper.js"
+    },
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "development": "./src/input.tsx",
+      "import": "./dist/input.js"
+    },
+    "./label": {
+      "types": "./dist/label.d.ts",
+      "development": "./src/label.tsx",
+      "import": "./dist/label.js"
+    },
+    "./listbox": {
+      "types": "./dist/listbox.d.ts",
+      "development": "./src/listbox.tsx",
+      "import": "./dist/listbox.js"
+    },
+    "./menu": {
+      "types": "./dist/menu.d.ts",
+      "development": "./src/menu.tsx",
+      "import": "./dist/menu.js"
+    },
+    "./menubar": {
+      "types": "./dist/menubar.d.ts",
+      "development": "./src/menubar.tsx",
+      "import": "./dist/menubar.js"
+    },
+    "./meter": {
+      "types": "./dist/meter.d.ts",
+      "development": "./src/meter.tsx",
+      "import": "./dist/meter.js"
+    },
+    "./navigation-menu": {
+      "types": "./dist/navigation-menu.d.ts",
+      "development": "./src/navigation-menu.tsx",
+      "import": "./dist/navigation-menu.js"
+    },
+    "./number-input": {
+      "types": "./dist/number-input.d.ts",
+      "development": "./src/number-input.tsx",
+      "import": "./dist/number-input.js"
+    },
+    "./otp-input": {
+      "types": "./dist/otp-input.d.ts",
+      "development": "./src/otp-input.tsx",
+      "import": "./dist/otp-input.js"
+    },
+    "./pagination": {
+      "types": "./dist/pagination.d.ts",
+      "development": "./src/pagination.tsx",
+      "import": "./dist/pagination.js"
+    },
+    "./password-input": {
+      "types": "./dist/password-input.d.ts",
+      "development": "./src/password-input.tsx",
+      "import": "./dist/password-input.js"
+    },
+    "./popover": {
+      "types": "./dist/popover.d.ts",
+      "development": "./src/popover.tsx",
+      "import": "./dist/popover.js"
+    },
+    "./preferences": {
+      "types": "./dist/preferences.d.ts",
+      "development": "./src/preferences.tsx",
+      "import": "./dist/preferences.js"
+    },
+    "./progress": {
+      "types": "./dist/progress.d.ts",
+      "development": "./src/progress.tsx",
+      "import": "./dist/progress.js"
+    },
+    "./radio": {
+      "types": "./dist/radio.d.ts",
+      "development": "./src/radio.tsx",
+      "import": "./dist/radio.js"
+    },
+    "./rating": {
+      "types": "./dist/rating.d.ts",
+      "development": "./src/rating.tsx",
+      "import": "./dist/rating.js"
+    },
+    "./resizable": {
+      "types": "./dist/resizable.d.ts",
+      "development": "./src/resizable.tsx",
+      "import": "./dist/resizable.js"
+    },
+    "./scroll-area": {
+      "types": "./dist/scroll-area.d.ts",
+      "development": "./src/scroll-area.tsx",
+      "import": "./dist/scroll-area.js"
+    },
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "development": "./src/segmented-control.tsx",
+      "import": "./dist/segmented-control.js"
+    },
+    "./select": {
+      "types": "./dist/select.d.ts",
+      "development": "./src/select.tsx",
+      "import": "./dist/select.js"
+    },
+    "./separator": {
+      "types": "./dist/separator.d.ts",
+      "development": "./src/separator.tsx",
+      "import": "./dist/separator.js"
+    },
+    "./slider": {
+      "types": "./dist/slider.d.ts",
+      "development": "./src/slider.tsx",
+      "import": "./dist/slider.js"
+    },
+    "./switch": {
+      "types": "./dist/switch.d.ts",
+      "development": "./src/switch.tsx",
+      "import": "./dist/switch.js"
+    },
+    "./textarea": {
+      "types": "./dist/textarea.d.ts",
+      "development": "./src/textarea.tsx",
+      "import": "./dist/textarea.js"
+    },
+    "./time-input": {
+      "types": "./dist/time-input.d.ts",
+      "development": "./src/time-input.tsx",
+      "import": "./dist/time-input.js"
+    },
+    "./timeline": {
+      "types": "./dist/timeline.d.ts",
+      "development": "./src/timeline.tsx",
+      "import": "./dist/timeline.js"
+    },
+    "./toast": {
+      "types": "./dist/toast.d.ts",
+      "development": "./src/toast.tsx",
+      "import": "./dist/toast.js"
+    },
+    "./toggle": {
+      "types": "./dist/toggle.d.ts",
+      "development": "./src/toggle.tsx",
+      "import": "./dist/toggle.js"
+    },
+    "./token-input": {
+      "types": "./dist/token-input.d.ts",
+      "development": "./src/token-input.tsx",
+      "import": "./dist/token-input.js"
+    },
+    "./toolbar": {
+      "types": "./dist/toolbar.d.ts",
+      "development": "./src/toolbar.tsx",
+      "import": "./dist/toolbar.js"
+    },
+    "./tooltip": {
+      "types": "./dist/tooltip.d.ts",
+      "development": "./src/tooltip.tsx",
+      "import": "./dist/tooltip.js"
+    },
+    "./tree": {
+      "types": "./dist/tree.d.ts",
+      "development": "./src/tree.tsx",
+      "import": "./dist/tree.js"
+    },
+    "./trigger-menu": {
+      "types": "./dist/trigger-menu.d.ts",
+      "development": "./src/trigger-menu.tsx",
+      "import": "./dist/trigger-menu.js"
+    },
+    "./waterfall": {
+      "types": "./dist/waterfall.d.ts",
+      "development": "./src/waterfall.tsx",
+      "import": "./dist/waterfall.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "development": "./src/card.tsx",
+      "import": "./dist/card.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && cp src/tabs.css dist/tabs.css"
-  },
-  "dependencies": {
-    "@radix-ui/react-tabs": "^1.2.1",
-    "@radix-ui/react-compose-refs": "^1.1.5"
+    "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/ && cp -R src/styles dist/"
   },
   "peerDependencies": {
     "@oyn/ceramic": "0.0.0",
     "@oyn/surface": "0.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@ui-sdk/core": "0.1.0-beta.13",
+    "@ui-sdk/react": "0.1.0-beta.13",
+    "@base-ui/react": "^1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@ui-sdk/core": {
+      "optional": true
+    },
+    "@ui-sdk/react": {
+      "optional": true
+    },
+    "@base-ui/react": {
+      "optional": true
+    }
   }
 }

@@ -45,8 +45,8 @@ try {
   await page.waitForTimeout(150);
   await page.setViewportSize({ width: 1600, height: 1100 });
   await page.waitForTimeout(150);
-  const selected = await tabs.nth(3).evaluate(el => ({ left: el.offsetLeft, width: el.offsetWidth }));
-  assert.deepEqual(await box(), selected, 'indicator recovers after mobile hidden layout');
+  assert.deepEqual(await indicator.boundingBox(), await tabs.nth(3).boundingBox(),
+    'indicator matches the rendered tab after mobile hidden layout');
   await page.getByRole('button', { name: 'Original', exact: true }).click();
   await page.waitForFunction(() => !document.querySelector('[data-oyn-canvas]'));
   assert.equal(await tabs.first().getAttribute('aria-selected'), 'true');

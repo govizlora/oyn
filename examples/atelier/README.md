@@ -30,8 +30,8 @@ npm run test:library        # full collection and selection workflow
 
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
-- `/?view=tabs`: shared `@oyn/ui/tabs` with live radius and matching/inverse controls.
-- `/?view=card`: native Ceramic card with theme-aware defaults and a background brightness control.
+- `/?view=tabs`: Compare Base UI and UI SDK implementations of the same Tabs. Switch without losing selection or preview settings. Deep link to Base UI with `/?view=tabs&impl=base-ui`. The separate DIY button material demo is at `/surface.html`.
+- `/?view=card`: native Ceramic card with theme-aware defaults and a background contrast control.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.
 - `/?view=library&room=hardware`: the five hardware objects, separately reusable.
@@ -39,7 +39,19 @@ npm run test:library        # full collection and selection workflow
   compositions, preserved intact with their calendars, to-do list, searchable
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
-The left sidebar (Projects menu on narrow screens) links all seven destinations directly, including Ripple field and Native button.
+The left sidebar groups stories under **UI Components** and **Explorations**.
+The [component library](http://127.0.0.1:5177/components.html) lists every component in the sidebar. Expand a component’s chevron to browse
+its examples. Search by component or example, or use the arrows beside **UI Components**
+to step through the components. Individual examples have direct links such as `/components.html?component=calendar&example=range`.
+Each example runs in its own document so modal focus, popups, global shortcuts
+and native form submission stay inside the preview. The page's theme and
+background contrast controls also apply to these previews.
+
+`prepare:stories` materializes the version-pinned React documentation examples
+for Vite and their source links. Seven supplementary recipes cover previews
+whose source is absent from the published Markdown. The production build
+loads the requested example on demand. Run `npm run test:ui-catalog` at the
+repository root to check rendering, registry source and headless interactions.
 One URL owner supports direct links and back/forward. Preview state intentionally
 resets when changing studies/rooms; only starred object IDs persist.
 
@@ -47,9 +59,8 @@ resets when changing studies/rooms; only starred object IDs persist.
 
 Run `npm run bake:geometry` after editing the homepage control profiles. Normal builds use the checked-in assets.
 
-See [the current architecture and next-chat handoff](../../HANDOFF.md) for
-ownership, asset formats, measured performance, limitations and migration plans.
-That document supersedes the separate runtime-CSG audit and geometry notes.
+Read [the architecture contract](../../ARCHITECTURE.md) for current ownership.
+[The historical handoff](../../HANDOFF.md) records asset formats and measured evidence.
 
 - `@oyn/ceramic/baked`: immutable geometry data, one shared baked adapter.
 - `@oyn/ceramic/card`: compact analytic card adapter; no CSG machinery.
@@ -57,7 +68,7 @@ That document supersedes the separate runtime-CSG audit and geometry notes.
 - `effects/ceramic-lighting.ts`: shared original Ceramic optical response.
 - `effects/shadow.ts`: shared light integration; each geometry supplies coverage.
 - Existing Surface renderer: static GPU data ownership and reference counting.
-- Surface engine: sole scheduler/canvas lifecycle; lazy shared input facts.
+- Surface engine: sole GPU draw scheduler/canvas lifecycle; lazy shared input facts.
 - Ceramic appearance binding: interprets pointer state as light and reads CSS radius.
 
 `npm run test:ceramic-compatibility` compares original and explicit card adapters
@@ -112,7 +123,7 @@ are involved. Dates/files/status meters in the archive are samples, not live dat
 One SurfaceProvider owns one GPU device, its pipeline cache and the existing draw
 scheduler. Every raised/recessed element is HTML bound to Ceramic; CSS lays out
 geometry and prints flat marks, never another bevel/shadow approximation. Numeric
-updates wake Surface's sole scheduler. The current homepage uses five pipelines (raised Ceramic, inset Ceramic and the
+updates wake Surface's sole GPU draw scheduler. The current homepage uses five pipelines (raised Ceramic, inset Ceramic and the
 baked adapter). Visiting other studies can cache additional instrument/phosphor
 programs; five is not a provider-wide maximum across every route.
 

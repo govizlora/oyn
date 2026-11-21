@@ -24,6 +24,15 @@ export function useSurface<P, T extends HTMLElement = HTMLElement>({
     return {
       ref(element: T | null) {
         if (!element || engine.failed) return;
+        if (engine.entries.has(element)) {
+          engine.fail(
+            new Error(
+              "Surface target already has an active binding; compose one material owner per element.",
+              { cause: element },
+            ),
+          );
+          return;
+        }
         let instance: AppearanceInstance<P>;
         try {
           instance = appearance.create(configuration);
