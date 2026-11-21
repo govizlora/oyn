@@ -36,7 +36,7 @@ ${ceramicShadowWGSL}
 }
 fn ceramicGeometry(in:VertexOut)->CeramicGeometry {
  let scale=sceneScale();let center=in.card.xy+in.card.zw*0.5;
- let g=roundedCeramicGeometry(in.local-in.card.zw*0.5,m.card.xy*scale,m.card.z*scale,max(1,m.ceramic.shape.z),center);
+ let g=roundedCeramicGeometry(in.local-in.card.zw*0.5,m.card.xy*scale,m.card.z*scale,max(1,m.ceramic.shape.z),1.0f,center);
  return g;
 }
 fn ceramicOptics()->CeramicOptics {return m.ceramic;}

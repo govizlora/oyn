@@ -26,7 +26,7 @@ fn geometryShadowDistance(p:vec2f)->f32{let b=frame.rect.zw*0.5;return roundedRe
 ${ceramicShadowForLayers(count)}
 @fragment fn shadow(in:VertexOut)->@location(0) vec4f{return ceramicShadow(in.local-in.card.zw*0.5,in.card.xy+in.card.zw*0.5-frame.viewportLight.zw,lab.optics.shape.y,lab.optics.shadow);}
 fn ceramicOptics()->CeramicOptics{return lab.optics;}
-fn ceramicGeometry(in:VertexOut)->CeramicGeometry{let b=in.card.zw*0.5;return roundedCeramicGeometry(in.local-b,b,min(frame.geometry.x,min(b.x,b.y)),max(1,lab.optics.shape.z),in.card.xy+b);}
+fn ceramicGeometry(in:VertexOut)->CeramicGeometry{let b=in.card.zw*0.5;return roundedCeramicGeometry(in.local-b,b,min(frame.geometry.x,min(b.x,b.y)),max(1,lab.optics.shape.z),1.0f,in.card.xy+b);}
 ${ceramicSurfaceWGSL}`);
 export function labMaterial(index:number,s:Settings):Material {
  const finish=ceramicFinish({colorScheme:'light',color:s.color,elevation:s.elevation,shadowLightHeight:s.lightHeight,shadowLightSize:s.lightSize,shadowStrength:s.strength,contactShadowStrength:s.contact,lightZ:s.surfaceLight,lightReflectionStrength:s.gloss});

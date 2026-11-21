@@ -10,8 +10,8 @@ import { createCeramicMaterial } from "@oyn/ceramic";
 import { bindMotion } from "@oyn/surface/adapters/motion";
 import { createControlMotion } from "./control-motion.js";
 
-// Stay on the concave branch at rest; effectively zero depth has no visible face.
-const flat = -0.000001;
+// Zero relief is exactly unpainted; there is no signed-program sentinel.
+const flat = 0;
 const unavailable =
   ":disabled,[aria-disabled=true],[data-disabled],[aria-busy=true],[data-pending]";
 const actionable =
@@ -28,8 +28,7 @@ const control: Appearance<number | null> = {
       maxElevation,
     });
     let respond: (() => void) | undefined;
-    // Inherit the live shader/parameters/padding getters. Only the DOM binding is
-    // extended; spreading a Material would freeze its signed-elevation program.
+    // Extend only the binding, preserving the source material's live contract.
     const material: Material = Object.create(source, {
       bind: {
         value(context: SurfaceBindingContext) {

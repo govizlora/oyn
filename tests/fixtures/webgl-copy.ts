@@ -1,14 +1,14 @@
 import { createCeramicMaterial } from "../../packages/ceramic/src/material.js";
 import { createRenderer } from "../../packages/surface/src/renderer.js";
 
-// Benchmark only: no fallback is installed in Surface. All GLSL is generated
+// Benchmark-only alternative copy strategies. All GLSL is generated
 // from the production WGSL by the Node runner, never independently authored.
 type GlslStage = {
   code: string;
   reflection: { uniforms: Record<string, { group: number; binding: number }> };
 };
 type Sources = Record<
-  "raised" | "inset",
+  "ceramic",
   {
     vertex: GlslStage;
     fragments: Record<string, GlslStage>;
@@ -193,7 +193,7 @@ async function setup(mode: Mode, sources: Sources) {
           ? null
           : item.canvas.getContext("2d", { alpha: true })!,
       programs: item.material.passes.map((pass) =>
-        programs.get(`${item.raised ? "raised" : "inset"}/${pass}`)!,
+        programs.get(`ceramic/${pass}`)!,
       ),
     }));
     for (const target of targets) {

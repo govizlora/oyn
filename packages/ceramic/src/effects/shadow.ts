@@ -1,4 +1,4 @@
-import { SHADOW } from '../optics.js';
+import { SHADOW, reliefWGSL } from "../optics.js";
 export const gaussianCoverageWGSL = /* wgsl */ `
 // Gaussian convolution of the actual rounded silhouette, not a distance-field ramp.
 // Integrate X analytically; the straight Y band is analytic too. Only circular
@@ -41,12 +41,17 @@ fn roundedCoverage(p:vec2f,b:vec2f,r:f32,blur:f32)->f32 {
 /** Optical integration is shared. Each geometry supplies slice coverage and
  * projected distance; the Gaussian/card solution remains analytic. */
 export function ceramicShadowForLayers(layers: number) {
-  if (!Number.isInteger(layers) || layers < 3 || layers > 6) throw Error('Ceramic shadow requires 3–6 uniform layers.');
+  if (!Number.isInteger(layers) || layers < 3 || layers > 6)
+    throw Error("Ceramic shadow requires 3–6 uniform layers.");
   // Keep the historical six-layer arithmetic exact. All counts share mean 7H/12.
-  const sampleHeight = layers === 6 ? 'height*f32(i+1)/6' : `height*(1.0f/12.0f+(f32(i)+0.5f)/${layers}.0f)`;
+  const sampleHeight =
+    layers === 6
+      ? "height*f32(i+1)/6"
+      : `height*(1.0f/12.0f+(f32(i)+0.5f)/${layers}.0f)`;
   return /* wgsl */ `
+${reliefWGSL}
 fn ceramicShadow(p:vec2f,delta:vec2f,height:f32,settings:vec4f)->vec4f {
-  if(height <= 0){return vec4f(0);}
+  if(height<=0 || (settings.z==0 && settings.w==0)){return vec4f(0);}
   let shadowDelta=delta*settings.x/length(vec3f(delta,settings.x));
   var blocked=0.0;
   for(var i=0;i<${layers};i++){
@@ -55,15 +60,16 @@ fn ceramicShadow(p:vec2f,delta:vec2f,height:f32,settings:vec4f)->vec4f {
     blocked+=geometryShadowCoverage(projected,scale,settings.y*ratio*0.5,h)/${layers}.0f;
   }
   let d=geometryShadowDistance(p);
-  let ao=exp(-max(d,0)/max(${SHADOW.minAoFalloff},height*${SHADOW.aoFalloff}))*settings.w*min(height,1);
+  // Physical AO reach shrinks with the gap; no fixed-width contact halo.
+  let ao=exp(-max(d,0)/max(0.0001,height*${SHADOW.aoFalloff}))*settings.w;
   // Contact darkening attenuates the light remaining at this pixel, not the
   // global shadow-strength setting. Unshadowed edges retain their contact cue.
   let projectedOpacity=blocked*settings.z;
-  return vec4f(0,0,0,projectedOpacity+ao*(1-projectedOpacity));
+  return vec4f(0,0,0,(projectedOpacity+ao*(1-projectedOpacity))*ceramicRelief(height));
 }
 `;
 }
-/** Approved production rule: uniform four layers, unchanged contact composition. */
+/** Four uniform height samples; contact attenuates remaining local light. */
 export const ceramicShadowWGSL = ceramicShadowForLayers(4);
 export const shadowWGSL = /* wgsl */ `
 ${gaussianCoverageWGSL}

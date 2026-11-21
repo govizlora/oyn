@@ -162,11 +162,33 @@ Surface 的 React 入口依赖 runtime，runtime 不反向依赖 React。
 `npm run test:ui` 检查交付的 registry、Tabs 和完整 catalog；`npm run test:flip-disc` 检查探索页的
 WebGPU/WebGL2、波传播、按压、键盘与参数更新。所有浏览器测试 headless。
 
+### 正负高度的光学连续性
+
+标准 analytic Ceramic 的 signed elevation 由**同一个 shader、固定的参数布局、一个 surface pass**处理。
+setter 只写高度；正负分支计算这一刻的凸面/凹面光学，不切换程序、不混合两张 canvas，
+不增加“过渡进度”或缓存上一帧。consumer 仍是动画曲线的唯一 owner。
+
+当前零高度语义是**融回承载面**：材质覆盖、高光、槽壁、投影和 AO 在零处都消失，
+不保留独立的有色涂层。覆盖率由 `abs(elevation)` 唯一推导，零点斜率也趋零；
+凸面的 rim 宽度和 AO 范围随高度收缩，不用固定宽度的晕圈掩盖断点。
+釉面法线的光学采样轮廓固定在 CSS 空间，可见凸缘带连续收缩；不把尖锐高光轮廓压进亚像素宽度，
+否则即使零点连续，中途也会因高光扫过像素中心而闪动。
+高光亮度先饱和，再乘几何覆盖率；不能让亮度饱和反过来把局部覆盖变成满覆盖。
+这会让高反差/有色表面在跨零时淡出再出现，是明确的 relief 语义，不是可配置的透明度动画。
+若未来需要零高度仍保留色面，必须先定义涂层与 relief 的独立职责，而不是在 consumer 叠补偿层。
+
+`npm run test:ceramic-elevation` 同时验证数值契约与浏览器像素：浅色、深色、反差色、有色背景，
+逐帧正负往返、零点和分段连接处、AO 收缩、canvas/管线/缓冲复用。
+逐帧图与测量在 `test-results/ceramic-continuity/after/`；
+`test:ceramic-compatibility` 检查常用凸面高度的既有质感，`test:ceramic-shadow` 检查阴影积分和组合。
+显式 card/baked 的几何由 caller/资产给定，不因改 shadow height 自动变成凹面；不要把这个保证泛化到它们。
+
 改动前回答：**哪个输出、谁写、谁触发更新、谁清理？旧路径是否已删除？**
 改动后至少验证：静止零调度；快速反向；拖出/取消；禁用/pending；键盘；浅/深色；窄屏；
 reduced motion 动态切换；解绑/remount；无 GPU 的可读性。不要把 build 成功当成视觉验收。
 
 当前明确限制：无任意 3D scene 或真正的跨元素投影；elevation 不改变 DOM 遮挡；
 axis-aligned target；没有通用逐帧 transform 跟踪、viewport culling 或 per-target dirty redraw。
-正负 elevation 的 shader 切换仍不保证光学连续，不能宣称物理无缝；按压曲线的数值连续不等于 shader 连续。
+标准 analytic Ceramic 已有跨零像素连续回归，但它仍是视觉近似，不是物理光传输求解器；
+数值连续、光学连续、DOM 位移连续是三项独立验收，不能相互替代。
 React Compiler 尚未认证。规范不是“已证明整个项目最优”的声明；新增需求必须有实际用例和验证证据。

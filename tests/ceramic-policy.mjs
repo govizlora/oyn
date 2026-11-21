@@ -15,7 +15,9 @@ import { cardCeramic } from "../packages/ceramic/dist/card.js";
 
 for (const scheme of ["light", "dark"]) {
   const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
-  const opposite = ceramicFinish({ colorScheme: scheme === "light" ? "dark" : "light" });
+  const opposite = ceramicFinish({
+    colorScheme: scheme === "light" ? "dark" : "light",
+  });
   assert.deepEqual(inverse.values.slice(4, 8), opposite.values.slice(4, 8));
   assert.equal(inverse.shadows, ceramicFinish({ colorScheme: scheme }).shadows);
 }
@@ -27,10 +29,7 @@ for (const value of [0, 160, 170, 176, 180, 191, 192, 193, 240, 255]) {
     assert.equal(f.lighting, value > 192 ? "soft" : "glossy");
     const m = createCeramicMaterial(options);
     assert.equal(m.parameters.get(8), Number(value <= 192));
-    assert.deepEqual(
-      m.passes,
-      colorScheme === "dark" ? ["surface"] : ["shadow", "surface"],
-    );
+    assert.deepEqual(m.passes, ["surface"]);
     if (colorScheme === "dark") {
       assert.equal(m.parameters.get(14), 0);
       assert.equal(m.parameters.get(15), 0);
@@ -98,7 +97,8 @@ for (const colorScheme of ["light", "dark"]) {
     assert.deepEqual(material.measurePadding(100, 60), { x: 0, y: 0 });
 }
 
-const fixtureUrl = "http://127.0.0.1:5199/tests/fixtures/surface-appearance.html";
+const fixtureUrl =
+  "http://127.0.0.1:5199/tests/fixtures/surface-appearance.html";
 const server = spawn(
   process.execPath,
   [
@@ -210,14 +210,14 @@ try {
   });
   assert.deepEqual(
     result.initial.map((s) => s.passes),
-    [["shadow", "surface"], ["surface"]],
+    [["surface"], ["surface"]],
   );
   assert.notDeepEqual(result.initial[0].color, result.initial[1].color);
   assert.deepEqual(result.elevations, [24, 24]);
   assert.ok(result.notified && result.sameParameters && result.cleanup);
   assert.deepEqual(result.manual.passes, ["surface"]);
-  assert.deepEqual(result.override.passes, ["shadow", "surface"]);
-  assert.deepEqual(result.both.passes, ["shadow", "surface"]);
+  assert.deepEqual(result.override.passes, ["surface"]);
+  assert.deepEqual(result.both.passes, ["surface"]);
   assert.deepEqual(result.isolated.passes, ["surface"]);
   console.log(
     "PASS Ceramic policy: threshold, chromatic luminance, overrides, shadows, inherited CSS, shared targets, setters, cleanup",

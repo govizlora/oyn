@@ -6,7 +6,6 @@ import {
 } from "./environment.js";
 import { createParameters, type Material } from "@oyn/surface";
 import { ceramicBinding } from "./interaction.js";
-import { insetWGSL, insetParameters } from "./inset.js";
 import { ceramicWGSL } from "./shaders.js";
 import { shadowBounds } from "./bounds.js";
 import {
@@ -62,7 +61,6 @@ function createResolvedMaterial(
 ): CeramicMaterial {
   const {
     values,
-    rgb,
     elevation: initialElevation,
     validateSignedElevation,
     shadows,
@@ -72,51 +70,24 @@ function createResolvedMaterial(
     reservedElevation ?? initialElevation,
     options.maxElevation ?? 0,
   );
-  let elevation = initialElevation;
   const parameters = createParameters(values);
   // Bounds and GPU consume the same f32 optical parameters.
-  const raised = parameters.snapshot();
-  const shadow = raised.slice(12, 16);
-  const raisedPasses = ["shadow", "surface"];
-  const insetPasses = ["surface"];
-  function updateElevation(value: number) {
-    validateSignedElevation(value);
-    const wasInset = elevation < 0;
-    if (value >= 0 && !wasInset) {
-      elevation = value;
-      parameters.set(1, value);
-      return;
-    }
-    const values =
-      value < 0
-        ? [
-            ...insetParameters(-value, rgb, options.colorScheme),
-            ...Array(12).fill(0),
-          ]
-        : Array.from(raised);
-    if (value >= 0) values[1] = value;
-    if (!values.every((v) => Number.isFinite(Math.fround(v))))
-      throw Error("Ceramic elevation exceeds optical parameter range.");
-    elevation = value;
-    values.forEach((v, i) => parameters.set(i, v));
-  }
-  updateElevation(elevation);
+  const shadow = parameters.snapshot().slice(12, 16);
   return {
     bind: ceramicBinding(options.light),
     loadWebGL2: loadCeramic,
-    get shader() {
-      return elevation < 0 ? insetWGSL : ceramicWGSL;
-    },
+    shader: ceramicWGSL,
     parameters,
-    get passes() {
-      return elevation < 0 || !shadows ? insetPasses : raisedPasses;
-    },
+    // The signed surface composites its own shadow, avoiding an empty draw pass
+    // below the plane and a pipeline change when crossing it.
+    passes: ["surface"],
     measurePadding: (width, height) =>
       shadows
         ? shadowBounds(width, height, paddingElevation, shadow)
         : { x: 0, y: 0 },
     setElevation(value: number) {
-      updateElevation(value);
+      validateSignedElevation(value);
+      parameters.set(1, value);
     },
   };
 }

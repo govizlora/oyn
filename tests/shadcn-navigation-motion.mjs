@@ -16,10 +16,9 @@ try {
         window.recessFrameMatches = window.recessTarget &&
           data[6] === window.recessTarget[0] && data[7] === window.recessTarget[1];
       }
-      // Observe actual inset uniform uploads, not a mirrored animation state.
-      if (window.recessFrameMatches && data instanceof Float32Array && data.length === 28 && data[6] === 2 &&
-          Math.abs(data[5] - 50 * Math.PI / 180) < 0.00001 &&
-          Math.abs(data[7] - 2.3) > 0.0001) window.recessDepths.push(data[7]);
+      // Signed height has one uniform lane on either side of the plane.
+      if (window.recessFrameMatches && data instanceof Float32Array && data.length === 28 &&
+          data[1] < 0 && Math.abs(data[1] + 2.3) > 0.0001) window.recessDepths.push(-data[1]);
       return write.call(this, buffer, offset, data, ...args);
     };
   });

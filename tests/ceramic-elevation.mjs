@@ -1,107 +1,67 @@
-import assert from 'node:assert/strict';
-import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
-import { chromium } from 'playwright';
-import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
+import assert from "node:assert/strict";
+import { createCeramicMaterial } from "../packages/ceramic/dist/index.js";
+import { shadowBounds } from "../packages/ceramic/dist/bounds.js";
 
-// Both programs share the one resolved Ceramic base color.
-for (const options of [
-  { colorScheme: 'light' }, { colorScheme: 'dark' },
-  { colorScheme: 'light', color: '#f5f5f5' }, { colorScheme: 'dark', color: '#181818' },
-  { colorScheme: 'light', color: '#aabbcc' },
-  { colorScheme: 'dark', color: '#223344' },
-]) {
-  const raised = createCeramicMaterial({ ...options, elevation: 4 });
-  const color = raised.parameters.snapshot().slice(4, 7);
-  for (const elevation of [-0.1, -1, -4, -6]) {
-    assert.deepEqual(createCeramicMaterial({ ...options, elevation }).parameters.snapshot().slice(0, 3), color);
-    raised.setElevation(elevation);
-    assert.deepEqual(raised.parameters.snapshot().slice(0, 3), color);
-  }
-}
-
-const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
-const initialPadding = material.measurePadding(100, 40);
-const parameters = material.parameters;
-let updates = 0;
-parameters.subscribe(() => updates++);
-for (const elevation of [-2, -6, 0, 4, -2, -24]) {
-  material.setElevation(elevation);
-  const fresh = createCeramicMaterial({ elevation, maxElevation: 16 });
-  assert.equal(material.parameters, parameters, 'parameter subscription remains stable');
-  assert.equal(material.shader, fresh.shader);
-  assert.deepEqual(material.parameters.snapshot(), fresh.parameters.snapshot());
-  assert.deepEqual(material.passes, elevation < 0 ? ['surface'] : ['shadow', 'surface']);
-}
-assert.ok(updates > 0);
-assert.deepEqual(material.measurePadding(100, 40), initialPadding, 'Animated elevation preserves material-owned padding');
-assert.deepEqual(createCeramicMaterial({ elevation: -2 }).measurePadding(100, 40), { x: 2, y: 2 });
-for (const elevation of [NaN, Infinity, -Infinity, -1e40, 480]) {
-  assert.throws(() => createCeramicMaterial({ elevation }));
-  assert.throws(() => material.setElevation(elevation));
-}
-assert.throws(() => createCeramicMaterial({ elevation: -2, maxElevation: -1 }));
-const late = createCeramicMaterial({ elevation: 4 });
-late.setElevation(-6);
-assert.deepEqual(late.parameters.snapshot(), createCeramicMaterial({ colorScheme: 'light', elevation: -6 }).parameters.snapshot());
-
-const browser = await chromium.launch({ channel: 'chrome', headless: true });
-try {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  const errors = [];
-  page.on('pageerror', e => errors.push(String(e)));
-  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  await page.route('**/elevation-test', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html><link rel="icon" href="data:,"><body></body>' }));
-  await page.goto(new URL('/elevation-test', process.env.BASE_URL ?? 'http://127.0.0.1:5176').href);
-
-  await page.evaluate(async root => {
-    const { createCeramicMaterial } = await import(root + 'packages/ceramic/dist/index.js');
-    const { createEngine } = await import(root + 'packages/surface/dist/engine.js');
-    const host = document.createElement('div');
-    host.id = 'elevation-test';
-    host.style.cssText = 'position:fixed;z-index:9999;left:100px;top:100px;width:200px;height:240px;border-radius:12px;background:#888';
-    document.body.append(host);
-    const mesh = { element: host, material: createCeramicMaterial({ elevation: 4, colorScheme: 'light', maxElevation: 16 }) };
-    const engine = createEngine();
-    engine.entries.set(host, mesh);
-    engine.start();
-    window.elevationTest = { mesh, engine, createCeramicMaterial };
-  }, '/@fs' + fileURLToPath(new URL('../', import.meta.url)));
-  const canvas = page.locator('#elevation-test canvas');
-  await canvas.waitFor();
-  await canvas.evaluate(el => { window.elevationTestCanvas = el; });
-  for (const colorScheme of ['light', 'dark']) {
-    await page.evaluate(colorScheme => {
-      const { mesh, engine, createCeramicMaterial } = window.elevationTest;
-      mesh.material = createCeramicMaterial({ colorScheme, elevation: 4, maxElevation: 16 });
-      engine.requestMeasure();
-    }, colorScheme);
-    const images = [];
-    for (const elevation of [-2, -6, 0, 4, -2, -24]) {
-      await page.evaluate(value => window.elevationTest.mesh.material.setElevation(value), elevation);
-      await page.waitForTimeout(120);
-      assert.ok(await canvas.evaluate(el => el === window.elevationTestCanvas), 'sign changes preserve canvas');
-      const screenshot = await canvas.screenshot();
-      images.push(screenshot);
-      if (elevation < 0) {
-        const png = PNG.sync.read(screenshot);
-        const pixel = (Math.floor(png.height / 2) * png.width + Math.floor(png.width / 2)) * 4;
-        const depth = -elevation;
-        const coverage = 1 - Math.exp(-depth);
-        const base = colorScheme === 'light' ? 240 : 12;
-        const target = colorScheme === 'light' ? 0 : 255;
-        const rate = colorScheme === 'light' ? 0.006 : 0.012;
-        const expected = (base + (target - base) * Math.min(depth * rate, 0.12)) * coverage + 136 * (1 - coverage);
-        assert.ok(Math.abs(png.data[pixel] - expected) <= 2, `floor depth ${depth}: GPU ${png.data[pixel]}, expected ${expected}`);
-      }
+// One signed height lane, one program and one immutable finish on both sides.
+for (const colorScheme of ["light", "dark"]) {
+  for (const color of [undefined, "#f5f5f5", "#181818", "#aabbcc", "#223344"]) {
+    const options = { colorScheme, color, maxElevation: 16 };
+    const material = createCeramicMaterial({ ...options, elevation: 8 });
+    const parameters = material.parameters,
+      shader = material.shader,
+      passes = material.passes;
+    const finish = parameters.snapshot();
+    let notices = 0;
+    const off = parameters.subscribe(() => notices++);
+    for (const elevation of [-24, -6, -2, -0.001, 0, 0.001, 4, 8, -2]) {
+      material.setElevation(elevation);
+      const fresh = createCeramicMaterial({ ...options, elevation });
+      assert.equal(material.parameters, parameters);
+      assert.equal(material.shader, shader);
+      assert.equal(material.passes, passes);
+      assert.deepEqual(passes, ["surface"]);
+      assert.deepEqual(parameters.snapshot(), fresh.parameters.snapshot());
+      assert.equal(parameters.get(1), Math.fround(elevation));
+      for (let i = 0; i < finish.length; i++)
+        if (i !== 1) assert.equal(parameters.get(i), finish[i]);
     }
-    assert.ok(!images[0].equals(images[1]), 'deeper recess changes GPU output');
-    assert.ok(!images[1].equals(images[2]), 'recess to flat changes GPU output');
-    if (colorScheme === 'light') assert.ok(!images[2].equals(images[3]), 'flat to raised changes the cast shadow');
-    else assert.ok(images[2].equals(images[3]), 'Dark raised surfaces have no elevation-dependent external shadow');
-    assert.ok(images[0].equals(images[4]), 'returning to same depth restores exact pixels');
+    assert.equal(
+      notices,
+      9,
+      "exactly one uniform notification per elevation update",
+    );
+    material.setElevation(-2);
+    assert.equal(notices, 9, "same height does not schedule another draw");
+    off();
+    for (const elevation of [NaN, Infinity, -Infinity, -1e40, -3e38, 480]) {
+      assert.throws(() => createCeramicMaterial({ ...options, elevation }));
+      assert.throws(() => material.setElevation(elevation));
+      assert.equal(
+        parameters.get(1),
+        -2,
+        "invalid updates leave the current material intact",
+      );
+    }
   }
-  await page.evaluate(() => window.elevationTest.engine.stop());
-  assert.deepEqual(errors, []);
-  console.log('PASS: signed elevation creation/updates, themes, validation, GPU program switching and stable canvas.');
-} finally { await browser.close(); }
+}
+const material = createCeramicMaterial({ elevation: 4, maxElevation: 16 });
+const padding = material.measurePadding(100, 40);
+for (const height of [-24, -2, 0, 8, -6]) {
+  material.setElevation(height);
+  assert.deepEqual(material.measurePadding(100, 40), padding);
+}
+assert.deepEqual(
+  createCeramicMaterial({ elevation: -2 }).measurePadding(100, 40),
+  { x: 2, y: 2 },
+);
+assert.throws(() => createCeramicMaterial({ elevation: -2, maxElevation: -1 }));
+// An unshadowed edge still has AO at cast strength 1. Padding must never remove
+// that budget based on a global strength rather than local projected coverage.
+for (const height of [0.001, 0.1, 0.5, 1, 2, 8, 32]) {
+  const aoOnly = shadowBounds(100, 40, height, [480, 0, 0, 1]);
+  const combined = shadowBounds(100, 40, height, [480, 0, 1, 1]);
+  assert.ok(combined.x >= aoOnly.x && combined.y >= aoOnly.y);
+}
+console.log(
+  "PASS: signed elevation, stable program/uniforms/passes, atomic validation and fixed padding budget.",
+);

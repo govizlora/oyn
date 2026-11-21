@@ -25,7 +25,7 @@ let browser;
 const report = {
   date: new Date().toISOString(),
   method:
-    "40 fully onscreen cards, production Ceramic WGSL and parameters, animated light and elevation every RAF, 60 draws/frame; existing WebGPU renderer versus generated GLSL ES 300. CPU is JS/API wall time (including possible stalls), NOT GPU time. Copy-call time excludes deferred work; RAF is not a compositor-present measurement. No GPU waits/readback in measured frames. Shader compilation and screenshots excluded. Shared canvas is a performance baseline, not a DOM-correct production backend.",
+    "40 fully onscreen cards, production Ceramic WGSL and parameters, animated light and elevation every RAF, 40 draws/frame; existing WebGPU renderer versus generated GLSL ES 300. CPU is JS/API wall time (including possible stalls), NOT GPU time. Copy-call time excludes deferred work; RAF is not a compositor-present measurement. No GPU waits/readback in measured frames. Shader compilation and screenshots excluded. Shared canvas is a performance baseline, not a DOM-correct production backend.",
   host: { platform: os.platform(), arch: os.arch(), cpu: os.cpus()[0]?.model },
   viewport,
   rounds,
@@ -49,8 +49,7 @@ try {
   await mkdir(out, { recursive: true });
   const sources = {};
   for (const [name, path, exportName, passes] of [
-    ["raised", "shaders", "ceramicWGSL", ["shadow", "surface"]],
-    ["inset", "inset", "insetWGSL", ["surface"]],
+    ["ceramic", "shaders", "ceramicWGSL", ["surface"]],
   ]) {
     const wgsl = (
       await server.ssrLoadModule(`/packages/ceramic/src/${path}.ts`)

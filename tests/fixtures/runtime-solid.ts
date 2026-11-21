@@ -208,7 +208,7 @@ ${ceramicShadowWGSL}
  let xy=(in.local-in.card.zw*0.5)/scale;
  if(analyticCard()) {
   let node=m.nodes[0];
-  let g=roundedCeramicGeometry((xy-node.center.yz)*scale,node.shape.xy*scale,node.reserved.x*scale,max(1,m.ceramic.shape.z),center+node.center.yz*scale);
+  let g=roundedCeramicGeometry((xy-node.center.yz)*scale,node.shape.xy*scale,node.reserved.x*scale,max(1,m.ceramic.shape.z),1.0f,center+node.center.yz*scale);
   return lightCeramic(m.ceramic,g,frame.viewportLight.zw);
  }
  let ro=vec3f(xy,m.scene.z+1.0);var t=0.0;var hit=false;

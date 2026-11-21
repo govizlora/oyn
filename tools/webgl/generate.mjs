@@ -9,10 +9,7 @@ const vite = await createServer({
 });
 try {
   for (const [file, entries] of Object.entries({
-    ceramic: [
-      ["shaders", "ceramicWGSL"],
-      ["inset", "insetWGSL"],
-    ],
+    ceramic: [["shaders", "ceramicWGSL"]],
     card: [["card", "cardWGSL"]],
     "flip-disc": [["flip-disc", "flipDiscWGSL"]],
   })) {

@@ -2,6 +2,7 @@ import type { CeramicLight } from "./interaction.js";
 import { preferredColorScheme, type ColorScheme } from "./environment.js";
 import { validateElevation } from "./bounds.js";
 import { parseColor } from "./color.js";
+import { insetWallSlope } from "./inset.js";
 import defaults from "./defaults.json" with { type: "json" };
 /** Surface lighting model, independent of the surrounding color scheme. */
 export type CeramicLighting = "soft" | "glossy";
@@ -12,7 +13,8 @@ export type CeramicLighting = "soft" | "glossy";
  */
 export type CeramicOptions = {
   /**
-   * Signed surface height. Negative values select the inset shader.
+   * Analytic relief: positive raised, negative recessed, zero unpainted.
+   * Explicit geometry adapters retain their authored shape and pigment.
    * @defaultValue 16
    */
   elevation?: number;
@@ -117,7 +119,7 @@ export type CeramicOptions = {
    * By default compare relative luminance of the resolved sRGB color against
    * #c0c0c0: strictly above -> soft; equal or below -> glossy.
    * Channels are decoded to linear sRGB before applying Rec.709 weights.
-   * Negative elevation uses the separate inset shader, unaffected by lighting.
+   * Negative elevation uses concave wall optics, unaffected by lighting.
    */
   lighting?: CeramicLighting;
   /**
@@ -186,6 +188,8 @@ export function ceramicFinish(options: CeramicOptions = {}) {
   const validateSignedElevation = (value: number) => {
     if (!Number.isFinite(value) || !Number.isFinite(Math.fround(value)))
       throw Error("Ceramic elevation must be a finite f32.");
+    if (value < 0 && !Number.isFinite(Math.fround(-value / insetWallSlope)))
+      throw Error("Ceramic elevation exceeds optical parameter range.");
     validateElevation(Math.max(0, value), lightHeight);
   };
   validateSignedElevation(settings.elevation);
@@ -206,8 +210,11 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     throw Error("Ceramic color must be a single string.");
   const environment = options.colorScheme ?? preferredColorScheme();
   const inverse = options.color === "inverse";
-  const defaultColor = (environment === "dark") !== inverse ? "#0c0c0c" : "#f0f0f0";
-  const rgb = parseColor(inverse ? defaultColor : options.color ?? defaultColor);
+  const defaultColor =
+    (environment === "dark") !== inverse ? "#0c0c0c" : "#f0f0f0";
+  const rgb = parseColor(
+    inverse ? defaultColor : (options.color ?? defaultColor),
+  );
   const lighting =
     options.lighting ??
     (relativeLuminance(rgb) > lightingThreshold ? "soft" : "glossy");
@@ -219,9 +226,9 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     throw Error("Invalid Ceramic rimReflectionStrength.");
   const values = [
     0,
-    Math.max(0, elevation),
+    elevation,
     glossy ? settings.rim : settings.lightRim,
-    0,
+    Number(environment === "dark"),
     ...rgb,
     0,
     Number(glossy),
@@ -245,5 +252,5 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     0,
     rimStrength,
   ];
-  return { values, rgb, elevation, validateSignedElevation, shadows, lighting };
+  return { values, elevation, validateSignedElevation, shadows, lighting };
 }

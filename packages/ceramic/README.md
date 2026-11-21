@@ -5,13 +5,14 @@ Environment-aware soft/glossy Ceramic optics for @oyn/surface's WebGPU renderer.
 Read [ARCHITECTURE.md](../../ARCHITECTURE.md) before changing animation or package boundaries.
 Ceramic consumes instantaneous values; it has no spring/transition or UI gesture policy.
 
-Raised analytic cards and baked controls now share the geometry/lighting contract
-and surface entry point. See [the historical handoff](../../HANDOFF.md) for
+Raised analytic cards and baked controls share the geometry/lighting contract.
+Signed analytic relief composites face and shadow in one surface pass; explicit
+card/baked geometry keeps its separate shadow and surface passes. See [the historical handoff](../../HANDOFF.md) for
 asset formats and benchmark evidence.
 `ceramic` is a stable `Appearance<CeramicProps>` definition. `./baked` also exports
 `baked` with `{ geometry, ...options }` props. `./card` remains an explicit low-level
-comparison adapter; `./sculpted` is deprecated and unused by Atelier. Inset Ceramic
-remains a distinct optical implementation within the same appearance.
+comparison adapter; `./sculpted` is deprecated and unused by Atelier. Concave optics
+are a branch of the same signed analytic program, not another material or pipeline.
 
 ```tsx
 const ref = useSurface({
@@ -85,8 +86,8 @@ encoded RGB averages or the linear luminance against 192/255.
 | light       | #c0c0c0    | glossy (exact boundary) | enabled          |
 
 Colored surfaces follow the same independent environment/lighting decisions.
-Negative elevation continues to use the separate inset shader, not soft/glossy
-lighting, and casts no external shadow.
+Negative analytic elevation uses concave floor/wall optics rather than soft/glossy
+raised lighting, and casts no external shadow.
 
 **Ownership:** Ceramic resolves this policy. Surface owns rendering and lifecycle
 and has no theme API. Each attached target receives its own resolved material,
@@ -105,15 +106,15 @@ No idle polling loop is installed.
 
 ## Geometry and numeric controls
 
-Options: `color` (single RGB/HEX string), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `lighting` (soft/glossy override), `rim` (glossy edges), `lightRim` (soft edges). Elevation may be negative (recess depth), zero (flat), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
+Options: `color` (single RGB/HEX string), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `lighting` (soft/glossy override), `rim` (glossy edges), `lightRim` (soft edges). Analytic elevation may be negative (recess depth), zero (unpainted receiving plane), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
 For upward springs, reserve space explicitly: `props: { elevation: 12, maxElevation: 18 }`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
 `bounds.ts` derives independent horizontal/vertical margins from element size and budget height, using the infinite-pointer-distance limit. The two shadow contributions are each bounded to 0.0005 alpha outside the estimated region; two CSS pixels cover anti-aliasing. This is a practical visibility bound, not an exact finite support. Elevation zero paints no ground shadow.
 
 Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` shared optical constants, `color.ts` color validation, `shaders.ts` analytic-card assembly, `finish.ts` optical normalization,
-`effects/ceramic-surface.ts` shared entry point, `effects/ceramic-lighting.ts` optical response,
-`effects/ceramic-geometry.ts` card geometry, `effects/geometry.ts`, `effects/shadow.ts`, `effects/dark-reflection.ts`. Light height and radius are shared between bounds and WGSL generation. No GLSL implementation remains in the package.
+`inset.ts` concave optics, `effects/ceramic-surface.ts` explicit-geometry entry point, `effects/ceramic-lighting.ts` raised optical response,
+`effects/ceramic-geometry.ts` card geometry, `effects/geometry.ts`, `effects/shadow.ts`, `effects/dark-reflection.ts`. Optical constants are shared between bounds and WGSL generation. WebGL2 shaders are generated mirrors, never a separately maintained implementation.
 
 ## Tuned defaults and overrides
 
@@ -143,32 +144,60 @@ shadows. Use `lighting: 'soft'` to override only its reflection model.
 The projected shadow convolves the rounded rectangle with a Gaussian area-light
 approximation. Straight bands use analytic Gaussian integrals; circular corner
 bands use bounded eight-point quadrature. Unlike a signed-distance opacity ramp,
-this accounts for reduced occlusion near corners. The existing elevation layers,
-pointer projection, contact shadow and strength settings remain unchanged.
+this accounts for reduced occlusion near corners. Four height samples and pointer
+projection supply the cast shadow. AO reach is `0.35 * elevation`, with no fixed
+contact-width floor; both shadow contributions use the same relief coverage below.
+The 0.35px minimum Gaussian sigma is raster filtering, not minimum physical AO reach.
 This is a soft-shadow approximation, not a full physical light-transport solver.
 Canvas padding uses a conservative Gaussian tail bound matching this kernel.
 
-With the Surface demo running on port 5176, `npm run test:ceramic-shadow` compares
+`npm run test:ceramic-shadow` starts an isolated headless fixture and compares
 the production GPU kernel against dense CPU integration for dialog, card, button,
 square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 
 ### Signed elevation
 
 `useSurface({ appearance: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
-floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised.
+floor/wall optics. `-6` is deeper, `0` leaves the receiver unchanged, and positive values are raised.
 Recess floors use the same resolved Ceramic base color,
-not a separate darker palette. Depth controls floor coverage via `1 - exp(-depth)`;
+not a separate darker palette. Both raised and recessed relief use coverage
+`1 - exp(-depth * smoothstep(0, 1, depth))`, where `depth = abs(elevation)` in CSS pixels.
+This has a common zero limit and zero slope at the receiving plane, and matches
+the former concave floor coverage above one pixel. Pigment also fades at zero,
+including contrasting colors: this is relief, not an independently painted flat layer.
+The raised rim narrows with height via `rim * smoothstep(0, rim, height)`;
+rim coverage is the difference of outer/inner coverage, so zero width leaves no AA halo.
+The calibrated glaze-normal profile stays anchored in CSS space while its exposed
+band shrinks. Rescaling that steep specular profile into a subpixel strip caused
+bright flashes during an otherwise numerically continuous height sweep.
+Glossy radiance is saturated before applying rim coverage, not after it: even a
+very bright lobe cannot turn a partially covered edge into a fully opaque highlight.
+For recesses,
 the floor mixes toward black at 0.6% per depth unit in light mode or toward white at 1.2% per unit in dark mode (both capped at 12%),
 while wall lighting supplies the edge shading. This bounded linear mapping is
 a visual approximation, not a physical light-transport model.
 All use the same material API and Surface binding; no nested wrapper is needed.
 The old standalone `inset()` entry point is removed.
 
-`setElevation()` follows the same sign selection and updates all attached target-local
-materials. Negative values use a surface-only program with no exterior shadow;
-nonnegative values use the raised program. The renderer switches cached programs
-without replacing the canvas. Cross-zero updates are supported, but cross-zero
-animations are not guaranteed visually continuous. Animate within one sign.
+`setElevation()` updates one signed f32 lane and all attached target-local materials.
+Both signs keep the same 28-float layout, shader and single surface pass; it
+composites the face over its own shadow. Negative/zero height returns no external
+shadow. No sign crossing reallocates a canvas, pipeline or parameter buffer.
+There is no previous-frame state or material-owned interpolation: consumer motion
+still feeds instantaneous numbers through `bindMotion`.
+
+`npm run test:ceramic-elevation` checks setter invariants and captures a 21-height
+sheet plus a 0.1px live sweep, subpixel joins, reversal and isolated AO on WebGPU
+(DPR 1/2) and WebGL2 (DPR 1.5). It checks visible premultiplied pixels, transparent
+zero, shrinking AO reach/energy and resource reuse; artifacts are in
+`test-results/ceramic-continuity/after/`. `test:ceramic-compatibility` compares raised
+finishes at 8/16/40px against frozen WGSL: interiors stay within 2/255 premultiplied
+readback tolerance; the intentional glossy AA correction only reduces localized
+legacy overshoot. A separate GPU probe verifies linear reflection coverage.
+
+This signed relief contract belongs to the standard analytic material. Explicit
+card/baked geometry keeps its authored shape; changing its shadow height does not
+flatten it, dissolve its pigment or turn it into a recess.
 
 `maxElevation` remains a nonnegative exterior shadow budget: reserve it when a
 surface initialized recessed or flat will later become raised. Negative depth
@@ -201,7 +230,9 @@ low-level card/baked adapters use the same pointer adapter with default hold pol
 CSS corner radius is read by the Ceramic binding at measurement time, not by core.
 
 Production shadows use four uniform heights (5,11,17,23)/24, weight 1/4 each.
-Contact opacity remains P + A*(1-P). This API migration does not change optical math.
+Contact opacity is `(P + A*(1-P)) * reliefCoverage`, where P is local projected
+opacity and A is contact opacity. Bounds conservatively budget both contributions;
+they must not reduce AO by global cast strength when an edge may be unshadowed.
 
 ## Minimal usage and defaults
 
