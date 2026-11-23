@@ -31,6 +31,7 @@ npm run test:library        # full collection and selection workflow
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
   Run `npm run test:sculpted` for production headless checks.
 - `/?view=tabs`: Compare Base UI and UI SDK implementations of the same Tabs. Switch without losing selection or preview settings. Deep link to Base UI with `/?view=tabs&impl=base-ui`. The separate DIY button material demo is at `/surface.html`.
+- `/?view=card-fantony`: **Card Fantony**. Tune the main Ceramic recipe in light and dark side by side. Hover or focus a control for its English description; copy the recipe to share a candidate without changing package defaults.
 - `/?view=card`: native Ceramic card with theme-aware defaults and a background contrast control.
 - `/?study=1`: **Quiet — Porcelain**. Finish swatches, circular pads, a large dial,
   radio segments, switches, slider and shortcut keys.

@@ -39,7 +39,7 @@ try {
   });
   await page.goto(base);
   const nav = page.getByRole('navigation', { name: 'Projects' });
-  const pages = ['Component library', 'Card', 'Sculpted', 'Ripple field', 'Quiet', 'Object library', 'Native button', 'Tabs study'];
+  const pages = ['Component library', 'Card', 'Sculpted', 'Ripple field', 'Quiet', 'Object library', 'Native button', 'Card Fantony', 'Tabs study'];
   for (const name of pages) {
     const link = nav.getByRole('link', { name, exact: true });
     if (!(await link.isVisible())) {
@@ -49,6 +49,19 @@ try {
     await link.click();
     assert.equal(await nav.locator('[aria-current="page"]').innerText(), name);
     await page.locator('main').first().waitFor();
+    if (name === 'Card Fantony') {
+      await page.locator('[data-fantony-card="dark"][data-oyn-active]').waitFor();
+      await page.locator('[data-fantony-card="light"][data-oyn-active]').waitFor();
+      const reach = page.getByRole('slider', { name: 'Backlight reach' });
+      await reach.focus();
+      assert.ok(await page.getByText('Outer reach per pixel', {exact:false}).isVisible());
+      await reach.fill('1.5');
+      await page.getByText('View recipe JSON').click();
+      const recipe = page.getByLabel('Recipe JSON');
+      assert.equal(JSON.parse(await recipe.inputValue()).material.frostSpread, 1.5);
+      await page.getByRole('button', { name: 'Reset controls' }).click();
+      assert.equal(JSON.parse(await recipe.inputValue()).material.frostSpread, 0.625);
+    }
   }
   assert.equal(await nav.locator('a[data-family]').count(), catalog.length);
   await page.goto(`${base}/?view=card-comparison`);

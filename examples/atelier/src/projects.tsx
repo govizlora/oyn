@@ -17,6 +17,7 @@ import "./projects.css";
 
 const explorations = [
   ["Sculpted", "./"],
+  ["Card Fantony", "./?view=card-fantony"],
   ["Ripple field", "./flip.html"],
   ["Quiet", "./?study=1"],
   ["Object library", "./?view=library"],

@@ -6,6 +6,7 @@ import { QuietStudy } from "./studies";
 import { ObjectLibrary, type LibraryLocation } from "./library";
 import { objects, rooms } from "./library/registry";
 import { TabsStudy } from "./tabs-study";
+import { CardFantony } from "./card-fantony";
 import { Card } from "./card";
 import { SculptedStudy } from "./sculpted-study";
 import "./style.css";
@@ -80,6 +81,8 @@ function App() {
             />
           ) : project === "Tabs" ? (
             <TabsStudy />
+          ) : project === "Card Fantony" ? (
+            <CardFantony />
           ) : project === "Card" ? (
             <Card />
           ) : (

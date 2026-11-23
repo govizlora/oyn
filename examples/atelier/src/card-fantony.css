@@ -1,0 +1,137 @@
+.atelier:has(.fantony) {
+  overflow: visible;
+}
+.fantony {
+  max-width: 1320px;
+  margin: auto;
+  padding: clamp(20px, 4vw, 64px);
+  color: var(--preview-ink);
+}
+.fantony header {
+  max-width: 64ch;
+  margin-bottom: 32px;
+}
+.fantony header > p:first-child,
+.fantony figcaption {
+  font:
+    11px/1.4 ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.fantony h1 {
+  font-size: clamp(32px, 4vw, 60px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  margin: 12px 0;
+}
+.fantony p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.fantony-workspace {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(300px, 1fr);
+  gap: clamp(20px, 3vw, 48px);
+  align-items: start;
+}
+.fantony-previews {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 10px;
+}
+.fantony figure {
+  margin: 0;
+  padding: 16px;
+  color: light-dark(#363636, #ddd);
+  background: light-dark(#e8e8e8, #101010);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.fantony-stage {
+  min-height: clamp(180px, 29vh, 320px);
+  display: grid;
+  place-items: center;
+}
+.fantony-stage > div {
+  max-width: 82%;
+}
+.fantony-controls section {
+  border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  padding: 16px 0 24px;
+}
+.fantony h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.fantony-controls p {
+  margin: 6px 0 12px;
+}
+.fantony-field {
+  position: relative;
+  display: grid;
+  align-items: center;
+  grid-template-columns: minmax(110px, 1fr) minmax(55px, 1fr) 48px;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 13px;
+  min-height: 34px;
+}
+.fantony-field > input[type="range"] {
+  min-width: 0;
+  width: 100%;
+}
+.fantony-field output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.fantony-field select {
+  grid-column: 2/-1;
+}
+.fantony-field small {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 1;
+  max-width: 36ch;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: CanvasText;
+  color: Canvas;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.fantony-field:hover small,
+.fantony-field:focus-within small {
+  display: block;
+}
+.fantony-controls button,
+.fantony-controls select {
+  font: inherit;
+  padding: 5px;
+}
+.fantony details {
+  margin-top: 14px;
+}
+.fantony textarea {
+  width: 100%;
+  height: 16rem;
+  font: 12px monospace;
+}
+@media (max-width: 920px) {
+  .fantony-workspace {
+    grid-template-columns: 1fr;
+  }
+  .fantony-previews {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fantony-stage {
+    min-height: 184px;
+  }
+  .fantony figure {
+    padding: 10px;
+  }
+}
