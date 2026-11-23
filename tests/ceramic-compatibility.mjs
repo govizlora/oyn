@@ -52,6 +52,7 @@ try {
           colorScheme,
           elevation,
           maxElevation: 40,
+          darkFrost: 0, // Compare the face, not the intentionally relocated ground light.
           shadowStrength: 0,
           contactShadowStrength: 0,
           light,

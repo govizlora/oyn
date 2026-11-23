@@ -1,3 +1,4 @@
+import { groundFrostWGSL } from "../optics.js";
 import { ceramicSurfaceWGSL } from "../effects/ceramic-surface.js";
 import { geometryWGSL } from "../effects/geometry.js";
 import { frameWGSL } from "../effects/frame.js";
@@ -48,9 +49,13 @@ fn geometryShadowDistance(p:vec2f)->f32 {
  return (field(q).z+length(max(abs(q)-vec2f(m.field.y*0.5),vec2f(0))))*scale;
 }
 ${ceramicShadowWGSL}
+${groundFrostWGSL}
 @fragment fn shadow(in:VertexOut)->@location(0) vec4f {
  let b=in.card.zw*0.5;
- return ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,m.pose.x*sceneScale(),m.ceramic.shadow);
+ let height=m.pose.x*sceneScale();let d=geometryShadowDistance(in.local-b);
+ let shadow=ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,height,m.ceramic.shadow);
+ let frost=groundFrost(in.local-b,d,height,m.ceramic.optics.x*m.ceramic.reflection.w,m.ceramic.optics.z)*(1-surfaceMask(d));
+ return over(vec4f(frost),shadow);
 }
 fn ceramicGeometry(in:VertexOut)->CeramicGeometry {
  let scale=sceneScale();let xy=(in.local-in.card.zw*0.5)/scale;

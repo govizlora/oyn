@@ -3,10 +3,10 @@ import { ceramic, createCeramicMaterial } from '../packages/ceramic/dist/index.j
 
 const light = { source: 'fixed', position: { x: 24, y: 36 } };
 const context = {
-  element: { ownerDocument: {} },
+  element: { ownerDocument: {}, matches: () => true },
   signal: new AbortController().signal,
   inputs: { pointer: {
-    subscribe() { throw Error('Fixed light must not subscribe'); },
+    subscribe() { return () => {}; },
     getSnapshot: () => ({ position: { x: 500, y: 500 } }),
   } },
 };
@@ -14,11 +14,11 @@ const frame = { toLocal: ({ x, y }) => ({ x: x - 4, y: y - 6 }) };
 const read = material => material.bind(context).frame(frame);
 const imperative = createCeramicMaterial({ light, colorScheme: 'light' });
 const appearance = ceramic.create({ light, colorScheme: 'light' });
-assert.deepEqual(read(imperative), [20, 30, 0]);
+assert.deepEqual(read(imperative), [20, 30, 0, 0]);
 assert.deepEqual(read(appearance.material), read(imperative));
 appearance.update({ colorScheme: 'light', light: { source: 'fixed', position: { x: 44, y: 56 } } });
-assert.deepEqual(read(appearance.material), [40, 50, 0]);
+assert.deepEqual(read(appearance.material), [40, 50, 0, 0]);
 assert.throws(() => createCeramicMaterial({ light: { source: 'invalid' } }), /light source/);
 assert.throws(() => appearance.update({ colorScheme: 'light', light: { source: 'invalid' } }), /light source/);
-assert.deepEqual(read(appearance.material), [40, 50, 0], 'Invalid update is atomic');
+assert.deepEqual(read(appearance.material), [40, 50, 0, 0], 'Invalid update is atomic');
 console.log('Ceramic light entry-point parity passed');

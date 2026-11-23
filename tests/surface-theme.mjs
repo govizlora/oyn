@@ -8,7 +8,7 @@ const dark = createCeramicMaterial({ colorScheme: 'dark' });
 assert.equal(light.parameters.get(8), 0);
 assert.equal(dark.parameters.get(8), 1);
 assert.deepEqual(dark.passes, ['surface']);
-assert.deepEqual(dark.measurePadding(100, 60), { x: 0, y: 0 });
+assert.ok(dark.measurePadding(100, 60).x > 0); // glow, not cast shadow
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {

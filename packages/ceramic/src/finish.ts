@@ -13,7 +13,7 @@ export type CeramicLighting = "soft" | "glossy";
  */
 export type CeramicOptions = {
   /**
-   * Analytic relief: positive raised, negative recessed, zero unpainted.
+   * Analytic relief: positive raised, negative recessed, zero flat.
    * Explicit geometry adapters retain their authored shape and pigment.
    * @defaultValue 16
    */
@@ -81,10 +81,12 @@ export type CeramicOptions = {
    */
   lightEdgeShade?: number;
   /**
-   * Glossy frosted-edge intensity.
-   * @defaultValue 0.1
+   * Glossy reflected light on the receiver outside a raised surface.
+   * @defaultValue 0.025
    */
   darkFrost?: number;
+  /** Outer glow reach in CSS pixels per pixel of positive elevation. */
+  frostSpread?: number;
   /**
    * Soft surface illumination in [0,1].
    * @defaultValue 0.2
@@ -100,6 +102,7 @@ export type CeramicOptions = {
   /**
    * One opaque sRGB base color (#RGB, #RRGGBB or numeric rgb()), or "inverse"
    * for the opposite default pigment without changing the lighting environment.
+   * The signed analytic material also accepts "transparent" for relief without pigment.
    * Theme palettes must be resolved by the caller.
    * @defaultValue #f0f0f0 in light environments; #0c0c0c in dark environments.
    */
@@ -119,7 +122,7 @@ export type CeramicOptions = {
    * By default compare relative luminance of the resolved sRGB color against
    * #c0c0c0: strictly above -> soft; equal or below -> glossy.
    * Channels are decoded to linear sRGB before applying Rec.709 weights.
-   * Negative elevation uses concave wall optics, unaffected by lighting.
+   * Negative elevation retains its concave wall shading without a ground glow.
    */
   lighting?: CeramicLighting;
   /**
@@ -154,7 +157,10 @@ export function relativeLuminance(rgb: readonly number[]): number {
   return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
 }
 const lightingThreshold = relativeLuminance([192 / 255, 192 / 255, 192 / 255]);
-export function ceramicFinish(options: CeramicOptions = {}) {
+export function ceramicFinish(
+  options: CeramicOptions = {},
+  geometry: "authored" | "analytic" = "authored",
+) {
   const settings = { ...defaults };
   for (const key of Object.keys(defaults) as (keyof typeof defaults)[]) {
     const value = options[key];
@@ -210,10 +216,11 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     throw Error("Ceramic color must be a single string.");
   const environment = options.colorScheme ?? preferredColorScheme();
   const inverse = options.color === "inverse";
+  const clear = geometry === "analytic" && options.color === "transparent";
   const defaultColor =
     (environment === "dark") !== inverse ? "#0c0c0c" : "#f0f0f0";
   const rgb = parseColor(
-    inverse ? defaultColor : (options.color ?? defaultColor),
+    inverse || clear ? defaultColor : (options.color ?? defaultColor),
   );
   const lighting =
     options.lighting ??
@@ -230,10 +237,10 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     glossy ? settings.rim : settings.lightRim,
     Number(environment === "dark"),
     ...rgb,
-    0,
+    Number(!clear),
     Number(glossy),
     Number(!glossy),
-    0,
+    settings.frostSpread,
     0,
     lightHeight,
     settings.shadowLightSize,
@@ -252,5 +259,12 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     0,
     rimStrength,
   ];
-  return { values, elevation, validateSignedElevation, shadows, lighting };
+  return {
+    values,
+    elevation,
+    validateSignedElevation,
+    shadows,
+    lighting,
+    frostReachPerHeight: glossy && settings.darkFrost > 0 ? settings.frostSpread : 0,
+  };
 }

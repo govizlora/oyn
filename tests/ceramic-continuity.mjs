@@ -21,7 +21,9 @@ function difference(a, b) {
     for (let c = 0; c < 4; c++) {
       const x = c === 3 ? a.data[i + c] : (a.data[i + c] * a.data[i + 3]) / 255;
       const y = c === 3 ? b.data[i + c] : (b.data[i + c] * b.data[i + 3]) / 255;
-      const delta = Math.abs(x - y);
+      // PNG stores unassociated RGB. Reconstruct the actual 8-bit compositing
+      // channels, not fractional values introduced by PNG unpremultiplication.
+      const delta = Math.abs(Math.round(x) - Math.round(y));
       total += delta;
       max = Math.max(max, delta);
     }
@@ -73,7 +75,7 @@ try {
       fullPage: true,
     });
     const captures = await page.evaluate(() => window.continuity.capture());
-    for (const name of ["light", "dark", "contrast", "color"]) {
+    for (const name of ["light", "dark", "contrast", "color", "clear"]) {
       const samples = captures
         .filter((c) => c.name === name)
         .map((c) => ({
@@ -93,12 +95,115 @@ try {
           nearZero.max <= 1,
           `${backend}/${name}: zero crossing ${JSON.stringify(nearZero)}`,
         );
-        assert.ok(
-          find(0).data.every((value) => value === 0),
-          "zero relief must leave its receiver unchanged",
-        );
+        const flat = find(0);
+        const center = (png) => {
+          const i =
+            4 *
+            (Math.floor(png.height / 2) * png.width +
+              Math.floor(png.width / 2));
+          return [...png.data.subarray(i, i + 4)];
+        };
+        if (name === "clear") {
+          assert.ok(
+            flat.data.every((v) => v === 0),
+            "no pigment or relief at zero",
+          );
+          for (const { image, elevation } of samples) {
+            assert.equal(
+              center(image)[3],
+              0,
+              `no fill or self-shadow inside clear relief at ${elevation}`,
+            );
+          }
+          for (const height of [-3.2, 8])
+            assert.ok(
+              find(height).data.some((v, i) => i % 4 === 3 && v > 0),
+              "clear relief still has edges",
+            );
+        } else {
+          const rgb = {
+            light: [240, 240, 240],
+            dark: [12, 12, 12],
+            contrast: [23, 23, 23],
+            color: [181, 99, 56],
+          }[name];
+          assert.deepEqual(
+            center(flat),
+            [...rgb, 255],
+            "flat face retains its pigment",
+          );
+          for (const { image } of samples)
+            assert.equal(
+              center(image)[3],
+              255,
+              "pigment never fades at any depth",
+            );
+        }
       }
     }
+    // Isolate the production ground light: no pigment, specular, Fresnel or shadows.
+    const glow = captures.filter((c) => c.name === "frost");
+    const alphaAt = (height, outside) => {
+      const c = glow.find((s) => s.elevation === height);
+      const png = PNG.sync.read(Buffer.from(c.png.split(",")[1], "base64"));
+      const x = Math.floor((c.pad - outside) * c.scale),
+        y = Math.floor(png.height / 2);
+      return png.data[4 * (y * png.width + x) + 3];
+    };
+    assert.equal(alphaAt(8, 1), 0, "no exterior glow before hover");
+    for (const h of [-3.2, 0, 2, 4, 8]) {
+      const host = page.locator(`[data-frost-height="${h}"]`);
+      await host.hover();
+      const hovered = await host.evaluate(async (el) => {
+        await new Promise((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(r)),
+        );
+        return window.continuity.capture(el)[0];
+      });
+      Object.assign(
+        glow.find((c) => c.elevation === h),
+        hovered,
+      );
+      if (h >= 0)
+        assert.equal(
+          alphaAt(h, -2),
+          0,
+          "ground light cannot leak into the face",
+        );
+      if (h <= 0)
+        assert.equal(
+          alphaAt(h, 2),
+          0,
+          "recessed/flat surfaces cannot light the ground",
+        );
+    }
+    assert.ok(
+      alphaAt(8, 1) > alphaAt(4, 1) && alphaAt(4, 1) > alphaAt(2, 1),
+      "lift brightens the receiver",
+    );
+    assert.ok(
+      alphaAt(8, 3) > alphaAt(4, 3) && alphaAt(4, 3) === 0,
+      "lift widens the footprint",
+    );
+    // The fixed main lamp in this fixture must not pin the independent backlight.
+    const raised = page.locator('[data-frost-height="8"]');
+    const box = await raised.boundingBox();
+    const sampleEntry = async (inset) => {
+      await page.mouse.move(box.x + inset, box.y + box.height / 2);
+      const current = await raised.evaluate(async el => {
+        await new Promise(r => requestAnimationFrame(()=>requestAnimationFrame(r)));
+        return window.continuity.capture(el)[0];
+      });
+      Object.assign(glow.find(c=>c.elevation===8), current);
+      return alphaAt(8, 1);
+    };
+    const entry = [];
+    for (const x of [-2, 0.5, 5, 12, box.width-12, 5, -2]) entry.push(await sampleEntry(x));
+    assert.equal(entry[0],0);
+    assert.ok(entry[1]<=1 && entry[1]<entry[2] && entry[2]<entry[3], `smooth edge entry: ${entry}`);
+    assert.ok(entry[4]<entry[3], `proximal ground receives more light: ${entry}`);
+    assert.equal(entry[5],entry[2], "same position gives the same light on exit");
+    assert.equal(entry[6],0);
     const ao = captures
       .filter((c) => c.name === "ao" && c.elevation > 0)
       .map((c) => {
@@ -186,7 +291,7 @@ try {
     }));
     if (!process.env.CAPTURE)
       assert.ok(
-        // Includes pigment coverage changes and AA quantization. The rescaled
+        // Includes wall lighting and AA quantization. The rescaled
         // specular-profile regression flashed by >90 levels per 0.1px step.
         sweep.every((s) => s.deltas.every((d) => d.max < 40)),
         `dense sweep discontinuity: ${JSON.stringify(

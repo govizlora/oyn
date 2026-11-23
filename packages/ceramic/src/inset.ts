@@ -20,7 +20,8 @@ fn insetCeramic(in:VertexOut,material:CeramicOptics)->vec4f {
   let edge=1-clamp(-d,0,rim)/max(rim,0.0001);
   let angle=${wallAngle}*pow(edge,${curve}.0f);
   let facing=-gradient(p,halfSize,radius);
-  let light=normalize(vec3f(frame.viewportLight.zw-(in.card.xy+in.local),material.reflection.x));
+  let toLight=frame.viewportLight.zw-(in.card.xy+in.local);
+  let light=normalize(vec3f(toLight,material.reflection.x));
   let halfVec=normalize(light+vec3f(0,0,1));
   let normal=vec3f(facing*sin(angle),cos(angle));
   let direction=dot(facing,light.xy);
@@ -30,8 +31,9 @@ fn insetCeramic(in:VertexOut,material:CeramicOptics)->vec4f {
   let highlight=clamp((0.15f*diffuse+specular)*band*1.2f,0,1);
   let backlit=smoothstep(0.0f,0.8f,-direction);
   let shade=band*(0.05f+0.2f*backlit);
-  let contrast=min(depth*mix(0.006f,0.012f,material.shape.w),0.12f);
+  let relief=ceramicRelief(depth);
+  let contrast=min(depth*mix(0.006f,0.012f,material.shape.w),0.12f)*relief;
   let floorColor=mix(material.colorMode.xyz,vec3f(material.shape.w),contrast);
-  return over(vec4f(vec3f(highlight),highlight+shade*(1-highlight)),vec4f(floorColor*mask,mask));
+  return over(vec4f(vec3f(highlight),highlight+shade*(1-highlight))*relief,vec4f(floorColor,1)*material.colorMode.w*mask);
 }
 `;

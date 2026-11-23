@@ -9,10 +9,8 @@ fn darkReflection(material:CeramicOptics,grad:vec2f,edge:f32,rimMask:f32,halfVec
   let attenuation=1/(1+lightLen*0.0035);
   let specAttenuation=1/(1+lightLen*0.009+lightLen*lightLen*0.00002);
   let borderBand=0.2+0.8*edgeCurve;
-  let wrap=pow(abs(dot(grad,toLightDir)),0.6);let edgeFrostBand=pow(edge,0.55);
-  let frostedEdge=edgeFrostBand*(0.04+(0.08+0.2*wrap)*attenuation)*material.reflection.w;
   let response=spec*specAttenuation*(0.35+0.65*facing)*(0.15+0.85*specCurve)*4.2*material.reflection.y+fresnel*(0.15+0.85*facing)*1.6*material.gradient.w;
-  let intensity=clamp(response*borderBand*attenuation*2.6+frostedEdge,0,1);
+  let intensity=clamp(response*borderBand*attenuation*2.6 + 0.004*pow(edge,6.0f)*material.gradient.w,0,1);
   // Coverage is not radiance. Apply it after saturation so a tiny exposed band
   // cannot become fully opaque merely because the specular response is bright.
   return vec4f(vec3f(intensity),intensity)*rimMask;

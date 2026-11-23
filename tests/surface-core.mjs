@@ -14,7 +14,7 @@ assert.equal('surfaceHeight' in ceramicDefaults, false);
 const appearance = ceramic.create({ elevation: 16, colorScheme: 'light' });
 const reservedPadding = appearance.material.measurePadding(120, 40);
 appearance.update({ elevation: 32, colorScheme: 'dark' });
-assert.deepEqual(appearance.material.measurePadding(120, 40), { x: 0, y: 0 });
+assert.deepEqual(appearance.material.measurePadding(120, 40), { x: 10, y: 10 }); // glow budget for the initial 16px height
 appearance.update({ elevation: 8, maxElevation: 40, colorScheme: 'light' });
 assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
 appearance.update({ elevation: 8, colorScheme: 'light' });
@@ -26,7 +26,7 @@ const tuned = createCeramicMaterial({ shadowLightHeight: 300, shadowLightSize: 4
   darkFrost: 0.3, lightReflectionStrength: 1, lightReflectionSpread: 0.5,
   lightEdgeShade: 0.1, lightSurfaceTop: 0.3, lightSurfaceShade: 0.02, lightRim: 5 });
 assert.deepEqual([...tuned.parameters.snapshot().slice(12)], [...new Float32Array([
-  300,400,0.2,0.04,40,2,2,0.3,1,0.5,0.1,0,0.3,0.02,0,0])]);
+  300,400,0.2,0.04,40,2,2,0.3,1,0.5,0.1,0,0.3,0.02,0,2])]);
 assert.equal(tuned.parameters.get(2), 5);
 assert.ok(tuned.measurePadding(320,100).x > createCeramicMaterial().measurePadding(320,100).x);
 assert.throws(() => createCeramicMaterial({ shadowLightHeight: 10 }));

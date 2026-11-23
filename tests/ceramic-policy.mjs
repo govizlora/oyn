@@ -33,7 +33,7 @@ for (const value of [0, 160, 170, 176, 180, 191, 192, 193, 240, 255]) {
     if (colorScheme === "dark") {
       assert.equal(m.parameters.get(14), 0);
       assert.equal(m.parameters.get(15), 0);
-      assert.deepEqual(m.measurePadding(100, 60), { x: 0, y: 0 });
+      assert.equal(m.measurePadding(100, 60).x > 0, f.lighting === "glossy");
     }
     for (const lighting of ["soft", "glossy"])
       assert.equal(ceramicFinish({ ...options, lighting }).lighting, lighting);
@@ -71,7 +71,7 @@ assert.deepEqual(
     elevation: 16,
     finish: { colorScheme: "dark" },
   }).passes,
-  ["surface"],
+  ["shadow", "surface"],
 );
 
 const bytes = await readFile("tests/fixtures/pocket-geometry.bin");

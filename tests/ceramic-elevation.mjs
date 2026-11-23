@@ -4,13 +4,21 @@ import { shadowBounds } from "../packages/ceramic/dist/bounds.js";
 
 // One signed height lane, one program and one immutable finish on both sides.
 for (const colorScheme of ["light", "dark"]) {
-  for (const color of [undefined, "#f5f5f5", "#181818", "#aabbcc", "#223344"]) {
+  for (const color of [
+    undefined,
+    "transparent",
+    "#f5f5f5",
+    "#181818",
+    "#aabbcc",
+    "#223344",
+  ]) {
     const options = { colorScheme, color, maxElevation: 16 };
     const material = createCeramicMaterial({ ...options, elevation: 8 });
     const parameters = material.parameters,
       shader = material.shader,
       passes = material.passes;
     const finish = parameters.snapshot();
+    assert.equal(finish[7], Number(color !== "transparent"));
     let notices = 0;
     const off = parameters.subscribe(() => notices++);
     for (const elevation of [-24, -6, -2, -0.001, 0, 0.001, 4, 8, -2]) {

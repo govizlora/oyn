@@ -6,7 +6,7 @@ import {
   snapshotCeramicOptions,
   type CeramicOptions,
 } from "../finish.js";
-import { shadowBounds } from "../bounds.js";
+import { receiverBounds } from "../bounds.js";
 import type { BakedGeometry } from "./geometry.js";
 import { bakedWGSL } from "./shader.js";
 
@@ -70,7 +70,7 @@ function resolvedBakedCeramic(
   let elevation = options.elevation ?? geometry.height,
     rotation = options.rotation ?? 0;
   const maxElevation = options.maxElevation ?? elevation;
-  const { values, validateSignedElevation, shadows } = ceramicFinish({
+  const { values, validateSignedElevation, shadows, frostReachPerHeight } = ceramicFinish({
     ...options,
     elevation,
     maxElevation,
@@ -128,17 +128,20 @@ function resolvedBakedCeramic(
       "Ceramic light exceeds the baked shadow blur budget. Re-bake with a larger shadow field.",
     );
   return {
-    bind: ceramicBinding(options.light),
+    bind: ceramicBinding(options.light, true),
     shader: bakedWGSL,
     parameters,
     data: geometry.data,
-    passes: shadows ? ["shadow", "surface"] : ["surface"],
+    passes:
+      shadows || (frostReachPerHeight > 0 && maxElevation > 0)
+        ? ["shadow", "surface"]
+        : ["surface"],
     measurePadding: (w, h) => {
       const height =
         maxElevation * Math.min(w / geometry.width, h / geometry.depth);
       if (height >= shadow[0])
         throw Error("Baked geometry exceeds Ceramic light height.");
-      return shadows ? shadowBounds(w, h, height, shadow) : { x: 0, y: 0 };
+      return receiverBounds(w, h, height, shadow, shadows, frostReachPerHeight);
     },
     setElevation(value: number) {
       validateHeight(value);

@@ -42,3 +42,17 @@ export function shadowBounds(
     );
   return { x: extent(width), y: extent(height) };
 }
+
+/** A single reservation for everything the material writes onto the receiver. */
+export function receiverBounds(
+  w: number,
+  h: number,
+  height: number,
+  shadow: ArrayLike<number>,
+  shadows: boolean,
+  frostReachPerHeight: number,
+) {
+  const pad = shadows ? shadowBounds(w, h, height, shadow) : { x: 0, y: 0 };
+  const reach = Math.ceil(height * frostReachPerHeight);
+  return { x: Math.max(pad.x, reach), y: Math.max(pad.y, reach) };
+}

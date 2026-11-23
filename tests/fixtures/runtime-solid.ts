@@ -209,7 +209,7 @@ ${ceramicShadowWGSL}
  if(analyticCard()) {
   let node=m.nodes[0];
   let g=roundedCeramicGeometry((xy-node.center.yz)*scale,node.shape.xy*scale,node.reserved.x*scale,max(1,m.ceramic.shape.z),1.0f,center+node.center.yz*scale);
-  return lightCeramic(m.ceramic,g,frame.viewportLight.zw);
+  return lightCeramic(m.ceramic,g,frame.viewportLight.zw,1.0f);
  }
  let ro=vec3f(xy,m.scene.z+1.0);var t=0.0;var hit=false;
  for(var i=0;i<100;i++) {
@@ -224,7 +224,7 @@ ${ceramicShadowWGSL}
  let light=normalize(vec3f(frame.viewportLight.zw-(in.card.xy+in.local),m.ceramic.reflection.x));
  let v=visibility(p+n*0.15,light);
  let g=CeramicGeometry(n,grad,band,1.0,select(0.0,1.0,band>0.0001),band,xy*scale,m.bounds.zw*scale*0.5,center,in.card.xy+in.local,v,n,n);
- return lightCeramic(m.ceramic,g,frame.viewportLight.zw);
+ return lightCeramic(m.ceramic,g,frame.viewportLight.zw,1.0f);
 }
 
 `;

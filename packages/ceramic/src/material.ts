@@ -7,7 +7,7 @@ import {
 import { createParameters, type Material } from "@oyn/surface";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicWGSL } from "./shaders.js";
-import { shadowBounds } from "./bounds.js";
+import { receiverBounds } from "./bounds.js";
 import {
   ceramicFinish,
   snapshotCeramicOptions,
@@ -64,7 +64,8 @@ function createResolvedMaterial(
     elevation: initialElevation,
     validateSignedElevation,
     shadows,
-  } = ceramicFinish(options);
+    frostReachPerHeight,
+  } = ceramicFinish(options, "analytic");
   const paddingElevation = Math.max(
     0,
     reservedElevation ?? initialElevation,
@@ -74,7 +75,7 @@ function createResolvedMaterial(
   // Bounds and GPU consume the same f32 optical parameters.
   const shadow = parameters.snapshot().slice(12, 16);
   return {
-    bind: ceramicBinding(options.light),
+    bind: ceramicBinding(options.light, true),
     loadWebGL2: loadCeramic,
     shader: ceramicWGSL,
     parameters,
@@ -82,9 +83,7 @@ function createResolvedMaterial(
     // below the plane and a pipeline change when crossing it.
     passes: ["surface"],
     measurePadding: (width, height) =>
-      shadows
-        ? shadowBounds(width, height, paddingElevation, shadow)
-        : { x: 0, y: 0 },
+      receiverBounds(width, height, paddingElevation, shadow, shadows, frostReachPerHeight),
     setElevation(value: number) {
       validateSignedElevation(value);
       parameters.set(1, value);

@@ -1,3 +1,4 @@
+import { groundFrostWGSL } from "./optics.js";
 import { insetSurfaceWGSL } from "./inset.js";
 import { frameWGSL } from "./effects/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
@@ -21,14 +22,16 @@ fn ceramicGeometry(in:VertexOut)->CeramicGeometry {
  return g;
 }
 ${insetSurfaceWGSL}
+${groundFrostWGSL}
 @fragment fn surface(in:VertexOut)->@location(0) vec4f {
- // One signed program, one parameter layout, one coverage rule. No crossfade
- // between two canvases/programs and no material-owned transition clock.
- var color:vec4f;
- if(material.shape.y<0){color=insetCeramic(in,material);}
- else {color=lightCeramic(material,ceramicGeometry(in),frame.viewportLight.zw);}
+ if(material.shape.y<0){return insetCeramic(in,material);}
+ let g=ceramicGeometry(in);
+ let face=lightCeramic(material,g,frame.viewportLight.zw,ceramicRelief(material.shape.y));
  let b=in.card.zw*0.5;
  let shadow=ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,material.shape.y,material.shadow);
- return over(color*ceramicRelief(material.shape.y),shadow);
+ // Only the receiver outside the silhouette can see this surface's shadow,
+ // even when the surface has no pigment of its own.
+ let frost=groundFrost(in.local-b,geometryShadowDistance(in.local-b),material.shape.y,material.optics.x*material.reflection.w,material.optics.z);
+ return face+over(vec4f(frost),shadow)*(1-max(g.coverage,face.a));
 }
 `;

@@ -1,3 +1,4 @@
+import { groundFrostWGSL } from "./optics.js";
 import { environmentBinding, preferredColorScheme } from "./environment.js";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicSurfaceWGSL } from "./effects/ceramic-surface.js";
@@ -8,7 +9,7 @@ import {
   snapshotCeramicOptions,
   type CeramicOptions,
 } from "./finish.js";
-import { shadowBounds } from "./bounds.js";
+import { receiverBounds } from "./bounds.js";
 import { geometryWGSL } from "./effects/geometry.js";
 import { ceramicLightingWGSL } from "./effects/ceramic-lighting.js";
 import { ceramicGeometryWGSL } from "./effects/ceramic-geometry.js";
@@ -30,9 +31,13 @@ fn geometryShadowDistance(p:vec2f)->f32 {
  let scale=sceneScale();return roundedRect(p,m.card.xy*scale,m.card.z*scale);
 }
 ${ceramicShadowWGSL}
+${groundFrostWGSL}
 @fragment fn shadow(in:VertexOut)->@location(0) vec4f {
  let b=in.card.zw*0.5;
- return ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,m.card.w*sceneScale(),m.ceramic.shadow);
+ let height=m.card.w*sceneScale();let d=geometryShadowDistance(in.local-b);
+ let shadow=ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,height,m.ceramic.shadow);
+ let frost=groundFrost(in.local-b,d,height,m.ceramic.optics.x*m.ceramic.reflection.w,m.ceramic.optics.z)*(1-surfaceMask(d));
+ return over(vec4f(frost),shadow);
 }
 fn ceramicGeometry(in:VertexOut)->CeramicGeometry {
  let scale=sceneScale();let center=in.card.xy+in.card.zw*0.5;
@@ -80,20 +85,23 @@ function resolvedCardCeramic(options: {
   ]);
   const shadow = new Float32Array(finish.values.slice(12, 16));
   const material: Material = {
-    bind: ceramicBinding(options.finish?.light),
+    bind: ceramicBinding(options.finish?.light, true),
     shader: cardWGSL,
     loadWebGL2: loadCard,
     parameters,
-    passes: finish.shadows ? ["shadow", "surface"] : ["surface"],
+    passes:
+      finish.shadows || (finish.frostReachPerHeight > 0 && maxElevation > 0)
+        ? ["shadow", "surface"]
+        : ["surface"],
     measurePadding: (w, h) =>
-      finish.shadows
-        ? shadowBounds(
-            w,
-            h,
-            maxElevation * Math.min(w / width, h / height),
-            shadow,
-          )
-        : { x: 0, y: 0 },
+      receiverBounds(
+        w,
+        h,
+        maxElevation * Math.min(w / width, h / height),
+        shadow,
+        finish.shadows,
+        finish.frostReachPerHeight,
+      ),
   };
   return {
     ...material,

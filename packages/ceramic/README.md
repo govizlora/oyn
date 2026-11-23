@@ -52,7 +52,9 @@ Elevation and light-source configuration remain independent of these inputs.
    subsequent CSS and browser-preference changes.
 2. **Base color:** use the supplied single color, otherwise #f0f0f0 for light
    environments or #0c0c0c for dark environments. Palette selection belongs to
-   the caller, not a second theme map inside the material.
+   the caller, not a second theme map inside the material. Signed analytic
+   surfaces also accept `color: "transparent"`: no pigment, with edge lighting
+   chosen for the environment. Interactive Button controls use this finish.
 3. **Surface lighting:** an explicit `lighting` overrides automatic selection.
    Otherwise compare the final base color's brightness against **#c0c0c0**:
    strictly brighter → `soft`; equal or darker → `glossy`.
@@ -74,7 +76,7 @@ encoded RGB averages or the linear luminance against 192/255.
 
 - `soft`: surface illumination/shading gradient, softer highlights and backlit
   edge darkening.
-- `glossy`: specular highlights, Fresnel edge reflection and frosted-edge response,
+- `glossy`: specular highlights, Fresnel edge reflection and reflected ground light,
   without the soft branch's surface gradient.
 
 | Environment | Base color | Automatic lighting      | External shadows |
@@ -106,7 +108,7 @@ No idle polling loop is installed.
 
 ## Geometry and numeric controls
 
-Options: `color` (single RGB/HEX string), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `lighting` (soft/glossy override), `rim` (glossy edges), `lightRim` (soft edges). Analytic elevation may be negative (recess depth), zero (unpainted receiving plane), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
+Options: `color` (single RGB/HEX string), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `lighting` (soft/glossy override), `rim` (glossy edges), `lightRim` (soft edges). Analytic elevation may be negative (recess depth), zero (flat, with unchanged pigment), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
 For upward springs, reserve space explicitly: `props: { elevation: 12, maxElevation: 18 }`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
@@ -120,7 +122,13 @@ Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` s
 
 `defaults.json` is the checked-in preset based on the GPU Surfaces story, with `surfaceHeight` renamed to `elevation` (no alias). `ceramicDefaults` exports this frozen preset. Cast/contact shadow strengths are tuned to 0.09 / 0.015 (25% lighter than the source story); geometry and light placement are unchanged. Only explicitly supplied values override it.
 
-All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update appearance props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
+All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `frostSpread`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update appearance props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
+Glossy frost (`darkFrost: 0.025`, `frostSpread: 0.625` by default) is reflected light on the ground,
+not a face tint. A live pointer supplies the virtual backlight independently of the main lamp. Its coupling ramps from zero with distance inside the silhouette, while diffuse transport favors the nearby ground; this is spatial rather than a timed hover fade. Its strength and reach increase with positive
+elevation; flat or recessed surfaces produce none. For example, a transparent
+Button using `hoverEffect="lift"` opens up a broader pool of light as it rises.
+Canvas padding reserves the larger of the shadow and glow footprints.
+
 
 ```ts
 useSurface({ appearance: ceramic, props: {} }); // elevation 16, automatic environment and lighting
@@ -146,7 +154,8 @@ approximation. Straight bands use analytic Gaussian integrals; circular corner
 bands use bounded eight-point quadrature. Unlike a signed-distance opacity ramp,
 this accounts for reduced occlusion near corners. Four height samples and pointer
 projection supply the cast shadow. AO reach is `0.35 * elevation`, with no fixed
-contact-width floor; both shadow contributions use the same relief coverage below.
+contact-width floor; both shadow contributions are scaled by
+`1 - exp(-h * smoothstep(0, 1, h))` for positive height `h`.
 The 0.35px minimum Gaussian sigma is raster filtering, not minimum physical AO reach.
 This is a soft-shadow approximation, not a full physical light-transport solver.
 Canvas padding uses a conservative Gaussian tail bound matching this kernel.
@@ -158,13 +167,11 @@ square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 ### Signed elevation
 
 `useSurface({ appearance: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
-floor/wall optics. `-6` is deeper, `0` leaves the receiver unchanged, and positive values are raised.
-Recess floors use the same resolved Ceramic base color,
-not a separate darker palette. Both raised and recessed relief use coverage
-`1 - exp(-depth * smoothstep(0, 1, depth))`, where `depth = abs(elevation)` in CSS pixels.
-This has a common zero limit and zero slope at the receiving plane, and matches
-the former concave floor coverage above one pixel. Pigment also fades at zero,
-including contrasting colors: this is relief, not an independently painted flat layer.
+floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised. Pigment is
+independent of elevation: the same color covers the face at every height.
+Only optical cues fade with relief. At zero a colored face is flat paint;
+a transparent face leaves the receiver unchanged. The projected shadow is
+occluded by the silhouette even without pigment, so it cannot darken the interior.
 The raised rim narrows with height via `rim * smoothstep(0, rim, height)`;
 rim coverage is the difference of outer/inner coverage, so zero width leaves no AA halo.
 The calibrated glaze-normal profile stays anchored in CSS space while its exposed
@@ -173,7 +180,7 @@ bright flashes during an otherwise numerically continuous height sweep.
 Glossy radiance is saturated before applying rim coverage, not after it: even a
 very bright lobe cannot turn a partially covered edge into a fully opaque highlight.
 For recesses,
-the floor mixes toward black at 0.6% per depth unit in light mode or toward white at 1.2% per unit in dark mode (both capped at 12%),
+the pigmented floor mixes toward black at 0.6% per depth unit in light mode or toward white at 1.2% per unit in dark mode (both capped at 12%, scaled by relief strength),
 while wall lighting supplies the edge shading. This bounded linear mapping is
 a visual approximation, not a physical light-transport model.
 All use the same material API and Surface binding; no nested wrapper is needed.
@@ -188,8 +195,8 @@ still feeds instantaneous numbers through `bindMotion`.
 
 `npm run test:ceramic-elevation` checks setter invariants and captures a 21-height
 sheet plus a 0.1px live sweep, subpixel joins, reversal and isolated AO on WebGPU
-(DPR 1/2) and WebGL2 (DPR 1.5). It checks visible premultiplied pixels, transparent
-zero, shrinking AO reach/energy and resource reuse; artifacts are in
+(DPR 1/2) and WebGL2 (DPR 1.5). It checks visible premultiplied pixels, persistent pigment, unpainted clear interiors,
+shrinking AO reach/energy and resource reuse; artifacts are in
 `test-results/ceramic-continuity/after/`. `test:ceramic-compatibility` compares raised
 finishes at 8/16/40px against frozen WGSL: interiors stay within 2/255 premultiplied
 readback tolerance; the intentional glossy AA correction only reduces localized
@@ -224,7 +231,7 @@ useSurface({
 `position` is a fallback/return position in viewport CSS pixels (default 100,100).
 Default source is pointer; leave/blur/hidden default to hold the last known position.
 `return` is immediate, not an animation. These three input facts stay independent.
-`source: 'fixed'` uses position without subscribing to pointer events. Surface only
+`source: 'fixed'` keeps the main lamp fixed. For surfaces with a receiver, crossing the host still updates the independent backlight gate. Surface only
 records facts and converts coordinates; Ceramic owns all light policy. The existing
 low-level card/baked adapters use the same pointer adapter with default hold policy.
 CSS corner radius is read by the Ceramic binding at measurement time, not by core.

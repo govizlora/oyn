@@ -12,7 +12,8 @@
   "lightReflectionStrength": 2.4,
   "lightReflectionSpread": 0.8,
   "lightEdgeShade": 0.025,
-  "darkFrost": 0.1,
+  "darkFrost": 0.025,
+  "frostSpread": 0.625,
   "lightSurfaceTop": 0.2,
   "lightSurfaceShade": 0.012
 }

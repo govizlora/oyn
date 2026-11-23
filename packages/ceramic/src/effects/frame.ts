@@ -1,5 +1,5 @@
 export const frameWGSL = /* wgsl */ `
-struct Frame { viewportLight: vec4f, rect: vec4f, geometry: vec4f }
+struct Frame { viewportLight: vec4f, rect: vec4f, geometry: vec4f, backlight: vec4f }
 @group(0) @binding(0) var<uniform> frame: Frame;
 struct VertexOut {
   @builtin(position) position: vec4f,

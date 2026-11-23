@@ -8,6 +8,20 @@ const elevations = [
 ];
 const cases: (CeramicOptions & { name: string; background: string })[] = [
   { name: "light", colorScheme: "light", background: "#e8e8e8" },
+  {
+    name: "clear",
+    colorScheme: "light",
+    color: "transparent",
+    background: "#b98477",
+  },
+  {
+    name: "frost",
+    darkFrost: 0.1, // Resolve the spatial profile above 8-bit readback noise.
+    colorScheme: "dark",
+    color: "transparent",
+    reflectionStrength: 0,
+    background: "#101010",
+  },
   { name: "dark", colorScheme: "dark", background: "#181818" },
   {
     name: "contrast",
@@ -47,6 +61,7 @@ const samples = cases
       label.textContent = `${name} · ${elevation > 0 ? "+" : ""}${elevation}`;
       const element = document.createElement("div");
       element.className = "host";
+      if (name === "frost") element.dataset.frostHeight = String(elevation);
       cell.append(element, label);
       row.append(cell);
       const rect = element.getBoundingClientRect();
@@ -80,16 +95,18 @@ Object.assign(window, {
     engine,
     ready: () =>
       samples.every(({ element }) => element.hasAttribute("data-oyn-active")),
-    capture: () =>
-      samples.map(({ name, elevation, element }) => {
-        const canvas = element.querySelector("canvas")!;
-        return {
-          name,
-          elevation,
-          png: canvas.toDataURL(),
-          pad: -parseFloat(canvas.style.left),
-          scale: canvas.width / parseFloat(canvas.style.width),
-        };
-      }),
+    capture: (only?: HTMLElement) =>
+      samples
+        .filter((s) => !only || s.element === only)
+        .map(({ name, elevation, element }) => {
+          const canvas = element.querySelector("canvas")!;
+          return {
+            name,
+            elevation,
+            png: canvas.toDataURL(),
+            pad: -parseFloat(canvas.style.left),
+            scale: canvas.width / parseFloat(canvas.style.width),
+          };
+        }),
   },
 });
