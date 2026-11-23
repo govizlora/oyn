@@ -12,7 +12,7 @@ import {
   type MouseEventHandler,
 } from "react";
 import { StoryNavigation } from "./components/story-navigation";
-import type { Family, Example } from "./components/catalog";
+import type { Family, Example, Group } from "./components/catalog";
 import "./projects.css";
 
 const explorations = [
@@ -74,10 +74,12 @@ function savedTheme(): Theme | null {
   return value === "dark" || value === "light" ? value : null;
 }
 export function ProjectSwitch({
+  overview,
   family,
   example,
   onStoryClick,
 }: {
+  overview?: Group;
   family?: Family;
   example?: Example;
   onStoryClick?: MouseEventHandler<HTMLElement>;
@@ -131,7 +133,6 @@ export function ProjectSwitch({
     menu.current?.focus({ preventScroll: true });
   }
   const current = currentProject();
-  const overview = current[0] === "Component library" && !family;
   return (
     <SurfaceProvider>
       <aside

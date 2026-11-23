@@ -11,3 +11,6 @@ packages/ceramic/src/generated/
 examples/atelier/public/r/
 examples/atelier/src/components/generated/
 examples/atelier/public/recipe-source/
+
+# Frozen UI source is restored deliberately, never maintained in bulk.
+archive/ui/

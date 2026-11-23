@@ -154,26 +154,6 @@
       ]
     },
     {
-      "name": "ceramic-autocomplete",
-      "type": "registry:ui",
-      "title": "Ceramic Autocomplete",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/autocomplete.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/autocomplete.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/autocomplete.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/autocomplete.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-avatar",
       "type": "registry:ui",
       "title": "Ceramic Avatar",
@@ -234,26 +214,6 @@
       ]
     },
     {
-      "name": "ceramic-carousel",
-      "type": "registry:ui",
-      "title": "Ceramic Carousel",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/carousel.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/carousel.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/carousel.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/carousel.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-checkbox",
       "type": "registry:ui",
       "title": "Ceramic Checkbox",
@@ -270,127 +230,6 @@
           "path": "packages/ui/src/styles/checkbox.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/checkbox.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-collapsible",
-      "type": "registry:ui",
-      "title": "Ceramic Collapsible",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/collapsible.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/collapsible.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/collapsible.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/collapsible.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-color-picker",
-      "type": "registry:ui",
-      "title": "Ceramic Color Picker",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/color-picker.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/color-picker.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/color-picker.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/color-picker.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-combobox",
-      "type": "registry:ui",
-      "title": "Ceramic Combobox",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/combobox.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/combobox.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/combobox.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/combobox.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-command",
-      "type": "registry:ui",
-      "title": "Ceramic Command",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/command.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/command.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/command.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/command.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-date-input",
-      "type": "registry:ui",
-      "title": "Ceramic Date Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/date-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/date-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/date-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/date-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-date-picker",
-      "type": "registry:ui",
-      "title": "Ceramic Date Picker",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation",
-        "@oyn/ceramic-calendar"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/date-picker.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/date-picker.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/date-picker.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/date-picker.css"
         }
       ]
     },
@@ -415,26 +254,6 @@
       ]
     },
     {
-      "name": "ceramic-drawer",
-      "type": "registry:ui",
-      "title": "Ceramic Drawer",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/drawer.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/drawer.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/drawer.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/drawer.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-field",
       "type": "registry:ui",
       "title": "Ceramic Field",
@@ -451,66 +270,6 @@
           "path": "packages/ui/src/styles/field.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/field.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-file-input",
-      "type": "registry:ui",
-      "title": "Ceramic File Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/file-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/file-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/file-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/file-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-hover-card",
-      "type": "registry:ui",
-      "title": "Ceramic Hover Card",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/hover-card.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/hover-card.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/hover-card.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/hover-card.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-image-cropper",
-      "type": "registry:ui",
-      "title": "Ceramic Image Cropper",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/image-cropper.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/image-cropper.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/image-cropper.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/image-cropper.css"
         }
       ]
     },
@@ -555,26 +314,6 @@
       ]
     },
     {
-      "name": "ceramic-listbox",
-      "type": "registry:ui",
-      "title": "Ceramic Listbox",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/listbox.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/listbox.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/listbox.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/listbox.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-menu",
       "type": "registry:ui",
       "title": "Ceramic Menu",
@@ -591,46 +330,6 @@
           "path": "packages/ui/src/styles/menu.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/menu.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-menubar",
-      "type": "registry:ui",
-      "title": "Ceramic Menubar",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/menubar.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/menubar.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/menubar.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/menubar.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-meter",
-      "type": "registry:ui",
-      "title": "Ceramic Meter",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/meter.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/meter.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/meter.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/meter.css"
         }
       ]
     },
@@ -655,86 +354,6 @@
       ]
     },
     {
-      "name": "ceramic-number-input",
-      "type": "registry:ui",
-      "title": "Ceramic Number Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/number-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/number-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/number-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/number-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-otp-input",
-      "type": "registry:ui",
-      "title": "Ceramic Otp Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/otp-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/otp-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/otp-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/otp-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-pagination",
-      "type": "registry:ui",
-      "title": "Ceramic Pagination",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/pagination.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/pagination.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/pagination.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/pagination.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-password-input",
-      "type": "registry:ui",
-      "title": "Ceramic Password Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/password-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/password-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/password-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/password-input.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-popover",
       "type": "registry:ui",
       "title": "Ceramic Popover",
@@ -751,26 +370,6 @@
           "path": "packages/ui/src/styles/popover.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/popover.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-preferences",
-      "type": "registry:ui",
-      "title": "Ceramic Preferences",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/preferences.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/preferences.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/preferences.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/preferences.css"
         }
       ]
     },
@@ -815,86 +414,6 @@
       ]
     },
     {
-      "name": "ceramic-rating",
-      "type": "registry:ui",
-      "title": "Ceramic Rating",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/rating.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/rating.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/rating.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/rating.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-resizable",
-      "type": "registry:ui",
-      "title": "Ceramic Resizable",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/resizable.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/resizable.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/resizable.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/resizable.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-scroll-area",
-      "type": "registry:ui",
-      "title": "Ceramic Scroll Area",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/scroll-area.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/scroll-area.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/scroll-area.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/scroll-area.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-segmented-control",
-      "type": "registry:ui",
-      "title": "Ceramic Segmented Control",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/segmented-control.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/segmented-control.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/segmented-control.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/segmented-control.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-select",
       "type": "registry:ui",
       "title": "Ceramic Select",
@@ -911,26 +430,6 @@
           "path": "packages/ui/src/styles/select.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/select.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-separator",
-      "type": "registry:ui",
-      "title": "Ceramic Separator",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/separator.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/separator.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/separator.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/separator.css"
         }
       ]
     },
@@ -995,47 +494,6 @@
       ]
     },
     {
-      "name": "ceramic-time-input",
-      "type": "registry:ui",
-      "title": "Ceramic Time Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation",
-        "@oyn/ceramic-date-input"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/time-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/time-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/time-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/time-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-timeline",
-      "type": "registry:ui",
-      "title": "Ceramic Timeline",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/timeline.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/timeline.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/timeline.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/timeline.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-toast",
       "type": "registry:ui",
       "title": "Ceramic Toast",
@@ -1076,46 +534,6 @@
       ]
     },
     {
-      "name": "ceramic-token-input",
-      "type": "registry:ui",
-      "title": "Ceramic Token Input",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/token-input.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/token-input.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/token-input.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/token-input.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-toolbar",
-      "type": "registry:ui",
-      "title": "Ceramic Toolbar",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/toolbar.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/toolbar.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/toolbar.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/toolbar.css"
-        }
-      ]
-    },
-    {
       "name": "ceramic-tooltip",
       "type": "registry:ui",
       "title": "Ceramic Tooltip",
@@ -1132,66 +550,6 @@
           "path": "packages/ui/src/styles/tooltip.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/tooltip.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-tree",
-      "type": "registry:ui",
-      "title": "Ceramic Tree",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/tree.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/tree.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/tree.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/tree.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-trigger-menu",
-      "type": "registry:ui",
-      "title": "Ceramic Trigger Menu",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/trigger-menu.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/trigger-menu.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/trigger-menu.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/trigger-menu.css"
-        }
-      ]
-    },
-    {
-      "name": "ceramic-waterfall",
-      "type": "registry:ui",
-      "title": "Ceramic Waterfall",
-      "registryDependencies": [
-        "@oyn/ceramic-ui-foundation"
-      ],
-      "files": [
-        {
-          "path": "packages/ui/src/waterfall.tsx",
-          "type": "registry:ui",
-          "target": "@ui/oyn/waterfall.tsx"
-        },
-        {
-          "path": "packages/ui/src/styles/waterfall.css",
-          "type": "registry:ui",
-          "target": "@ui/oyn/styles/waterfall.css"
         }
       ]
     },

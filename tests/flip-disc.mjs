@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { preview } from "vite";
 import { chromium } from "playwright";
 import { PNG } from "pngjs";
+import catalog from "../examples/atelier/src/components/catalog.json" with { type: "json" };
 
 const server = await preview({ preview: { host: "127.0.0.1", port: 0 } });
 const browser = await chromium.launch({ channel: "chrome", headless: true });
@@ -71,7 +72,7 @@ try {
         .getByRole("navigation", { name: "Projects" })
         .locator("a[data-family]")
         .count(),
-      55,
+      catalog.length,
     );
     assert.ok(
       await page

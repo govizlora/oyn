@@ -40,7 +40,7 @@ npm run test:library        # full collection and selection workflow
   table, dropdowns, tags and CRT code. Text-heavy work has moved here, not been deleted.
 
 The left sidebar groups stories under **UI Components** and **Explorations**.
-The [component library](http://127.0.0.1:5177/components.html) lists every component in the sidebar. Expand a component’s chevron to browse
+The [component library](http://127.0.0.1:5177/components.html) opens on **Ready**. Switch to **Not ready** to review the backlog. Both sidebar groups use the [Ready worklist](../../packages/ui/ready.json); search includes both, and previous/next stays within the current group. Expand a component’s chevron to browse
 its examples. Search by component or example, or use the arrows beside **UI Components**
 to step through the components. Individual examples have direct links such as `/components.html?component=calendar&example=range`.
 Each example runs in its own document so modal focus, popups, global shortcuts
@@ -48,8 +48,8 @@ and native form submission stay inside the preview. The page's theme and
 background contrast controls also apply to these previews.
 
 `prepare:stories` materializes the version-pinned React documentation examples
-for Vite and their source links. Seven supplementary recipes cover previews
-whose source is absent from the published Markdown. The production build
+listed in the active catalog for Vite and their source links. Local recipes
+supply missing or customized examples. The production build
 loads the requested example on demand. Run `npm run test:ui-catalog` at the
 repository root to check rendering, registry source and headless interactions.
 One URL owner supports direct links and back/forward. Preview state intentionally

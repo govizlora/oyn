@@ -11,6 +11,15 @@ try {
   const families = JSON.parse(
     await readFile("examples/atelier/src/components/catalog.json", "utf8"),
   );
+  const ui = JSON.parse(await readFile("packages/ui/package.json", "utf8"));
+  assert.deepEqual(
+    Object.keys(ui.exports).sort(),
+    [
+      "./card",
+      "./base-ui/tabs",
+      ...families.map((family) => "./" + family.id),
+    ].sort(),
+  );
   const expected = [
     "base-ui-ceramic-tabs-list",
     "ceramic-tabs-list",

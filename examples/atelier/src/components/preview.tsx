@@ -20,7 +20,6 @@ const modules = import.meta.glob<{ Example: ComponentType }>(
 );
 const load = modules[`./generated/${family}/${example}.tsx`];
 const Example = load && lazy(async () => ({ default: (await load()).Example }));
-const slot = (family === "time-input" ? "date-input" : family) + "/" + example;
 
 function Preview() {
   const [message, setMessage] = useState("");
@@ -33,7 +32,7 @@ function Preview() {
       <section
         className="oyn-ui specimen-content"
         aria-label="Component preview"
-        data-example={slot}
+        data-example={family + "/" + example}
       >
         <Suspense
           fallback={

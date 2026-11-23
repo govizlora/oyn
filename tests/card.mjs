@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import catalog from '../examples/atelier/src/components/catalog.json' with { type: 'json' };
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 const base = process.env.BASE_URL ?? 'http://127.0.0.1:5195';
@@ -41,12 +42,15 @@ try {
   const pages = ['Component library', 'Card', 'Sculpted', 'Ripple field', 'Quiet', 'Object library', 'Native button', 'Tabs study'];
   for (const name of pages) {
     const link = nav.getByRole('link', { name, exact: true });
-    if (!(await link.isVisible())) await nav.locator('summary').filter({ hasText: 'Explorations' }).click();
+    if (!(await link.isVisible())) {
+      const section = name === 'Card' ? 'Not ready' : 'Explorations';
+      await nav.locator('summary').filter({ hasText: section }).click();
+    }
     await link.click();
     assert.equal(await nav.locator('[aria-current="page"]').innerText(), name);
     await page.locator('main').first().waitFor();
   }
-  assert.equal(await nav.locator('a[data-family]').count(), 55);
+  assert.equal(await nav.locator('a[data-family]').count(), catalog.length);
   await page.goto(`${base}/?view=card-comparison`);
   await page.getByRole('link', { name: 'Card', exact: true }).click();
   assert.equal(new URL(page.url()).searchParams.get('view'), 'card');

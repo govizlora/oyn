@@ -43,6 +43,36 @@ textarea {
 .catalog-index > header p {
   margin: 0;
 }
+.readiness-nav,
+.component-index-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+.readiness-nav a,
+.component-index-links a {
+  color: inherit;
+  text-underline-offset: 4px;
+}
+.readiness-nav a {
+  padding-block: 4px;
+  text-decoration: none;
+}
+.readiness-nav a[aria-current] {
+  font-weight: 650;
+  border-bottom: 2px solid currentColor;
+}
+.component-index-links {
+  margin: 0 0 24px;
+}
+.readiness-label {
+  display: block;
+  margin-block-end: 6px;
+  font-size: 13px;
+}
 .featured-stories {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);

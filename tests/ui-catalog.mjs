@@ -6,6 +6,14 @@ import { preview } from "vite";
 const families = JSON.parse(
   await readFile("examples/atelier/src/components/catalog.json", "utf8"),
 );
+const readyIds = JSON.parse(await readFile("packages/ui/ready.json", "utf8"));
+const components = [...families, { id: "card", name: "Card" }];
+assert.equal(new Set(readyIds).size, readyIds.length, "No duplicate Ready IDs");
+for (const id of readyIds)
+  assert.ok(
+    components.some((item) => item.id === id),
+    "Unknown Ready ID: " + id,
+  );
 const server = await preview({ preview: { host: "127.0.0.1", port: 0 } });
 let browser;
 try {
@@ -42,10 +50,47 @@ try {
     );
     assert.ok(Math.abs(month[0] - (left[0] + right[0]) / 2) <= 0.5);
   }
-  await verifyMonthHeading(
-    page.locator('.featured-calendar [data-slot="calendar"]'),
-  );
   const rail = page.getByRole("navigation", { name: "Projects" });
+  const statusNav = page.getByRole("navigation", { name: "Component status" });
+  assert.match(
+    await statusNav.locator('[aria-current="page"]').innerText(),
+    /^Ready/,
+  );
+  for (const label of ["Ready", "Not ready"]) {
+    const inGroup = components.filter(
+      (item) => readyIds.includes(item.id) === (label === "Ready"),
+    );
+    await statusNav
+      .getByRole("link", { name: label + " " + inGroup.length, exact: true })
+      .click();
+    const panel = page.getByRole("region", { name: label, exact: true });
+    assert.deepEqual(
+      (await panel.locator("li a").allTextContents()).sort(),
+      inGroup.map((item) => item.name).sort(),
+    );
+    const disclosure = rail
+      .locator(".readiness-group")
+      .filter({
+        has: page.locator("summary", {
+          hasText: new RegExp("^" + label + " "),
+        }),
+      });
+    assert.equal(await disclosure.count(), 1);
+    assert.equal(
+      await disclosure.locator("a[data-family]").count(),
+      inGroup.filter((item) => item.id !== "card").length,
+    );
+    if (inGroup.some((item) => item.id === "calendar")) {
+      await verifyMonthHeading(
+        panel.locator('.featured-calendar [data-slot="calendar"]'),
+      );
+    }
+  }
+  await page.goBack();
+  await statusNav
+    .locator('[aria-current="page"]')
+    .filter({ hasText: /^Ready/ })
+    .waitFor();
   const links = rail.locator("a[data-family]");
   assert.equal(await links.count(), families.length);
   const search = rail.getByRole("searchbox");
@@ -56,8 +101,7 @@ try {
   const frame = page.frameLocator("iframe.specimen-stage");
   const demo = frame.locator(".specimen-content");
   const ready = (family, example) => {
-    const slot =
-      (family === "time-input" ? "date-input" : family) + "/" + example;
+    const slot = family + "/" + example;
     return frame
       .locator(
         '[data-example="' +
@@ -69,7 +113,17 @@ try {
   };
   let count = 0;
   for (const family of families) {
-    await rail.locator('a[data-family="' + family.id + '"]').click();
+    const link = rail.locator('a[data-family="' + family.id + '"]');
+    if (!(await link.isVisible()))
+      await link
+        .locator("xpath=ancestor::details")
+        .locator(":scope > summary")
+        .click();
+    await link.click();
+    assert.equal(
+      await page.locator(".readiness-label").innerText(),
+      readyIds.includes(family.id) ? "Ready" : "Not ready",
+    );
     const examples = rail.getByRole("list", {
       name: family.name + " examples",
       exact: true,
@@ -119,7 +173,7 @@ try {
   await button.locator("canvas").waitFor();
   assert.ok(await canvas.evaluate((node) => node.isConnected));
 
-  // Compare actual painted face bounds in the normal calendar and the portaled picker.
+  // Compare actual painted face bounds in the calendar.
   async function verifyCalendar(panel) {
     const { inset, radius, arrows, segments } = await panel.evaluate((host) => {
       const box = (el) => el.getBoundingClientRect();
@@ -197,13 +251,6 @@ try {
     await day(end).locator('[data-oyn-day="key"][data-oyn-active]').waitFor();
     await verifyCalendar(calendar);
   }
-  await visit("date-picker", "range");
-  await demo.getByRole("button", { name: /Choose dates/ }).click();
-  const popup = frame.locator('[data-slot="date-picker-content"]');
-  await popup.waitFor();
-  await verifyCalendar(popup);
-  await verifyMonthHeading(popup);
-
   await visit("accordion", "basic");
   const header = demo.getByRole("button", {
     name: "What is your return policy?",
@@ -236,29 +283,6 @@ try {
   );
   await page.keyboard.press("Escape");
   await frame.getByRole("alertdialog").waitFor({ state: "hidden" });
-
-  await visit("carousel", "basic");
-  const slides = demo.locator('[data-slot="carousel-item"]');
-  assert.equal(await slides.count(), 5);
-  await demo
-    .locator('[data-slot="carousel-item"][data-oyn-active]')
-    .last()
-    .waitFor();
-  assert.deepEqual(
-    await slides.evaluateAll((nodes) =>
-      nodes.map(
-        (node) =>
-          node.querySelectorAll(":scope > [data-oyn-layer] canvas").length,
-      ),
-    ),
-    [1, 1, 1, 1, 1],
-    errors.join("\n"),
-  );
-  await demo.getByRole("button", { name: "Next slide" }).click();
-  await demo
-    .locator('[data-slot="carousel-item"][data-active]')
-    .filter({ hasText: "2" })
-    .waitFor();
 
   await visit("dialog", "basic");
   await demo.locator('[data-slot="dialog-trigger"]').click();

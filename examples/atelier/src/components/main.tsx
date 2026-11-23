@@ -2,20 +2,13 @@ import { StrictMode, useEffect, useState, type MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { SurfaceProvider } from "@oyn/surface";
 import { ProjectSwitch } from "../projects";
-import { families, readStory, storyHref } from "./catalog";
+import { readStory } from "./catalog";
 import { Overview } from "./overview";
 import "./stories.css";
 
-const stories = families.flatMap((family) =>
-  family.examples.map((example) => ({
-    example,
-    href: storyHref(family.id, example.id),
-    label: family.name + " · " + example.title,
-  })),
-);
-
 function App() {
-  const [{ family, example }, setRoute] = useState(readStory);
+  const [{ family, example, group }, setRoute] = useState(readStory);
+  const { stories } = group;
   const index = stories.findIndex((entry) => entry.example === example);
   useEffect(() => {
     const update = () => setRoute(readStory());
@@ -52,6 +45,7 @@ function App() {
   return (
     <>
       <ProjectSwitch
+        overview={family ? undefined : group}
         family={family}
         example={example}
         onStoryClick={openStory}
@@ -60,6 +54,7 @@ function App() {
         {family && example ? (
           <article className="specimen">
             <header>
+              <span className="readiness-label">{group.label}</span>
               <h1>{family.name}</h1>
               <div className="specimen-toolbar">
                 <h2>{example.title}</h2>
@@ -125,7 +120,7 @@ function App() {
           </article>
         ) : (
           <SurfaceProvider>
-            <Overview />
+            <Overview group={group} />
           </SurfaceProvider>
         )}
       </main>

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { build } from "vite";
@@ -27,6 +27,18 @@ for (const family of families) {
   }
 }
 assert.equal(new Set(keys).size, keys.length);
+// A warm build must not bundle an old preview or publish an archived source link.
+for (const [dir, ext] of [
+  [directory + "/generated", ".tsx"],
+  ["dist/recipe-source", ".tsx.txt"],
+]) {
+  const files = await readdir(dir, { recursive: true });
+  assert.deepEqual(
+    files.filter((file) => file.endsWith(ext)).sort(),
+    keys.map((key) => path.join(...key.split("/")) + ext).sort(),
+    dir,
+  );
+}
 const out = path.resolve("test-results/catalog-ssr");
 await build({
   configFile: false,
@@ -46,8 +58,6 @@ await build({
           'import {createElement} from "react"',
           'import {renderToString} from "react-dom/server"',
           'import {SurfaceProvider} from "@oyn/surface"',
-          'import {DatePicker} from "@oyn/ui/date-picker"',
-          'export function renderPicker() { return renderToString(createElement(SurfaceProvider, null, createElement(DatePicker, { mode: "range", defaultOpen: true, months: 2, defaultValue: ["2026-10-12","2026-10-16"] }))) }',
           "const stories = [" + keys.map((_, i) => "E" + i).join(",") + "]",
           "export function render(i) { return renderToString(createElement(SurfaceProvider,null,createElement(stories[i]))) }",
         ].join("\n");
@@ -63,27 +73,18 @@ await build({
     },
   },
 });
-const { render, renderPicker } = await import(
-  pathToFileURL(path.join(out, "stories.mjs"))
-);
+const { render } = await import(pathToFileURL(path.join(out, "stories.mjs")));
 const html = new Map(keys.map((id, i) => [id, render(i)]));
 for (const [id, markup] of html) assert.ok(markup.length, id);
-const defaultPicker = renderPicker();
-assert.equal(
-  (defaultPicker.match(/data-slot="calendar-grid"/g) ?? []).length,
-  2,
-);
-for (const markup of [defaultPicker, html.get("calendar/range")]) {
-  const ends = [
-    ...markup.matchAll(
-      /<td\b[^>]*data-range-(?:start|end)=""[^>]*>([\s\S]*?)<\/td>/g,
-    ),
-  ];
-  assert.equal(ends.length, 2);
-  for (const [, cell] of ends) {
-    assert.match(cell, /data-oyn-day="range"/);
-    assert.match(cell, /data-oyn-day="key"/);
-  }
+const ends = [
+  ...html
+    .get("calendar/range")
+    .matchAll(/<td\b[^>]*data-range-(?:start|end)=""[^>]*>([\s\S]*?)<\/td>/g),
+];
+assert.equal(ends.length, 2);
+for (const [, cell] of ends) {
+  assert.match(cell, /data-oyn-day="range"/);
+  assert.match(cell, /data-oyn-day="key"/);
 }
 assert.match(html.get("switch/basic"), /data-oyn-face="well"/);
 assert.match(html.get("switch/basic"), /data-oyn-face="thumb"/);

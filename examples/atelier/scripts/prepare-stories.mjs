@@ -7,6 +7,7 @@ import {
   mkdir,
   copyFile,
   rename,
+  rm,
 } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -24,7 +25,18 @@ const docs = path.resolve(
 );
 
 const publicSources = path.resolve(root, "../../public/recipe-source");
-await mkdir(publicSources, { recursive: true });
+const generated = path.join(root, "generated");
+// Vite globs generated modules and publishes all public files, including leftovers
+// from previous builds. Keep both output trees in sync with the active catalog.
+async function prune(dir, expected) {
+  await mkdir(dir, { recursive: true });
+  for (const entry of await readdir(dir)) {
+    if (!expected.has(entry))
+      await rm(path.join(dir, entry), { recursive: true, force: true });
+  }
+}
+await prune(generated, families);
+await prune(publicSources, new Set([...families, "LICENSE.txt"]));
 await copyFile(
   path.resolve(docs, "../../LICENSE"),
   path.join(publicSources, "LICENSE.txt"),
@@ -123,10 +135,13 @@ for (const family of catalog) {
       (m) => [m[1], m[2]],
     ),
   );
-  const dir = path.join(root, "generated", family.id);
-  await mkdir(dir, { recursive: true });
+  const dir = path.join(generated, family.id);
+  await prune(dir, new Set(family.examples.map(({ id }) => id + ".tsx")));
   const sources = path.join(publicSources, family.id);
-  await mkdir(sources, { recursive: true });
+  await prune(
+    sources,
+    new Set(family.examples.map(({ id }) => id + ".tsx.txt")),
+  );
   const localDir = path.join(root, "recipes", family.id);
   const local = new Set(
     await readdir(localDir).catch((error) => {

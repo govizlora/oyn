@@ -3,14 +3,16 @@ import {
   NavigationDisclosure,
 } from "@oyn/ui/navigation-menu";
 import { useLayoutEffect, useRef, useState } from "react";
-import { families, storyHref, type Example, type Family } from "./catalog";
-
-const cardStory: Family = { id: "card", name: "Card", examples: [] };
-const components = [...families, cardStory].sort((a, b) =>
-  a.name.localeCompare(b.name),
-);
-const componentHref = (item: Family) =>
-  item === cardStory ? "./?view=card" : storyHref(item.id);
+import {
+  cardStory,
+  componentHref,
+  groups,
+  groupOf,
+  storyHref,
+  type Example,
+  type Group,
+  type Family,
+} from "./catalog";
 
 export function StoryNavigation({
   family,
@@ -21,26 +23,31 @@ export function StoryNavigation({
 }: {
   family?: Family;
   example?: Example;
-  overview: boolean;
+  overview?: Group;
   card: boolean;
   menuOpen: boolean;
 }) {
   const [query, setQuery] = useState("");
   const list = useRef<HTMLDivElement>(null);
   const current = card ? cardStory : family;
-  const position = current ? components.indexOf(current) : -1;
+  const currentGroup = current ? groupOf(current) : overview;
+  const siblings = currentGroup?.items ?? [];
+  const position = current ? siblings.indexOf(current) : -1;
   const term = query.trim().toLowerCase();
-  const matches = components.flatMap((item) => {
-    const wholeFamily = item.name.toLowerCase().includes(term);
-    const examples = wholeFamily
-      ? item.examples
-      : item.examples.filter((entry) =>
-          entry.title.toLowerCase().includes(term),
-        );
-    return wholeFamily || examples.length
-      ? [{ item, examples, showMatches: !wholeFamily }]
-      : [];
-  });
+  const matches = groups.map((group) => ({
+    group,
+    entries: group.items.flatMap((item) => {
+      const wholeFamily = item.name.toLowerCase().includes(term);
+      const examples = wholeFamily
+        ? item.examples
+        : item.examples.filter((entry) =>
+            entry.title.toLowerCase().includes(term),
+          );
+      return wholeFamily || examples.length
+        ? [{ item, examples, showMatches: !wholeFamily }]
+        : [];
+    }),
+  }));
   useLayoutEffect(() => {
     const container = list.current;
     const active = container?.querySelector('[aria-current="page"]');
@@ -63,7 +70,7 @@ export function StoryNavigation({
         <h2>UI Components</h2>
         {current &&
           [-1, 1].map((offset) => {
-            const other = components[position + offset];
+            const other = siblings[position + offset];
             if (!other) return null;
             const label =
               (offset < 0 ? "Previous component" : "Next component") +
@@ -97,33 +104,50 @@ export function StoryNavigation({
           <NavigationMenuLink
             data-story
             href="./components.html"
-            current={overview}
+            current={!!overview}
           >
             Component library
           </NavigationMenuLink>
         )}
-        {matches.map(({ item, examples, showMatches }) =>
-          item === cardStory ? (
-            <NavigationMenuLink
-              key={item.id}
-              href={componentHref(item)}
-              current={card}
-            >
-              Card
-            </NavigationMenuLink>
-          ) : (
-            <StoryFamily
-              key={item.id}
-              item={item}
-              examples={examples}
-              current={item === current}
-              example={example}
-              searching={!!term}
-              showMatches={showMatches}
-            />
-          ),
+        {matches.map(
+          ({ group, entries }) =>
+            (!term || entries.length > 0) && (
+              <details
+                key={group.label}
+                className="readiness-group"
+                open={group === groups[0] || !!term || group === currentGroup}
+              >
+                <NavigationDisclosure>
+                  {group.label} <small>{entries.length}</small>
+                </NavigationDisclosure>
+                {!entries.length && <p>No components yet.</p>}
+                {entries.map(({ item, examples, showMatches }) =>
+                  item === cardStory ? (
+                    <NavigationMenuLink
+                      key={item.id}
+                      href={componentHref(item)}
+                      current={card}
+                    >
+                      Card
+                    </NavigationMenuLink>
+                  ) : (
+                    <StoryFamily
+                      key={item.id}
+                      item={item}
+                      examples={examples}
+                      current={item === current}
+                      example={example}
+                      searching={!!term}
+                      showMatches={showMatches}
+                    />
+                  ),
+                )}
+              </details>
+            ),
         )}
-        {!matches.length && <p role="status">No matches.</p>}
+        {term && matches.every(({ entries }) => !entries.length) && (
+          <p role="status">No matches.</p>
+        )}
       </div>
     </section>
   );

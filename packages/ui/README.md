@@ -2,10 +2,20 @@
 
 [ARCHITECTURE.md](../../ARCHITECTURE.md) is the authoritative ownership contract.
 
-Oyn provides Ceramic parts for all 55 UI SDK React component families. The
-Atelier catalog has 506 interactive previews with source links. Each family
-has a workspace import such as `@oyn/ui/switch` and a source registry item
-such as `@oyn/ceramic-switch`.
+Oyn maintains a focused set of Ceramic controls for forms, navigation and
+feedback, plus the standalone Card. The [Atelier catalog](../../examples/atelier/src/components/catalog.json)
+lists the active SDK families and their previews. Each has a workspace import
+such as `@oyn/ui/switch` and a source registry item such as `@oyn/ceramic-switch`.
+Other families and their stories are [archived outside the build](../../archive/ui/README.md);
+they are not supported imports or installable items.
+
+## Ready / Not ready
+
+[Ready](ready.json) is the component worklist. To promote a family, add its catalog
+ID (for example `"button"`, or `"card"` for the standalone Card) to that JSON array.
+The entire family and its stories move together. Unlisted components default to
+Not ready; leave them unchanged during Ready work. This does not change package
+exports, registry items or existing preview URLs.
 
 ## Use a component
 
