@@ -134,10 +134,16 @@
       "types": "./dist/control-motion.d.ts",
       "development": "./src/control-motion.ts",
       "import": "./dist/control-motion.js"
-    }
+    },
+    "./relief-logo": {
+      "types": "./dist/relief-logo.d.ts",
+      "development": "./src/relief-logo.tsx",
+      "import": "./dist/relief-logo.js"
+    },
+    "./relief-logo.svg": "./src/relief/oyn-relief.svg"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/ && cp -R src/styles dist/"
+    "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/ && cp -R src/styles dist/ && cp src/relief/oyn-relief.svg dist/relief/"
   },
   "peerDependencies": {
     "@oyn/ceramic": "0.0.0",

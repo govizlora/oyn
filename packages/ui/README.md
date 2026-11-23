@@ -174,3 +174,25 @@ workspace packages, not public npm releases. For an external local install,
 make the built Surface and Ceramic packages available as npm workspaces (or in
 a private registry) before running the commands. No public deployment or npm
 publication is performed by these builds.
+
+## Relief logo
+
+`@oyn/ui/relief-logo` is a brand graphic, not an interactive control. Place it
+inside an existing `SurfaceProvider`; its width follows its container. Give it
+a name with `aria-label`, or use `aria-hidden` when it is decorative. For a
+static image, use the exported `@oyn/ui/relief-logo.svg` without React or a GPU.
+
+```tsx
+import { ReliefLogo } from "@oyn/ui/relief-logo";
+
+<ReliefLogo lightAngle={0} style={{ width: 320 }} />
+```
+
+`lightAngle` (degrees) rotates only the gradient lighting, without deforming
+or animating the mark. Each instance has one Surface binding; when the GPU is
+unavailable, it displays the SVG with a fixed light direction.
+
+In Atelier, open `/relief-logo.html` to compare light directions and download the
+vector artwork. After editing the contours or gradients in
+`tools/brand/relief.mjs`, run `node tools/brand/relief.mjs` to regenerate the SVG,
+WGSL and WebGL2 mirrors together. Use `--check` to verify they match.

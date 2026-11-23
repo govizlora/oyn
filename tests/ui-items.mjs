@@ -19,6 +19,8 @@ try {
       "./base-ui/tabs",
       "./control-motion",
       "./motion.css",
+      "./relief-logo",
+      "./relief-logo.svg",
       ...families.map((family) => "./" + family.id),
     ].sort(),
   );

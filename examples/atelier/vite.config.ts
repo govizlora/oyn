@@ -71,6 +71,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        reliefLogo: new URL("./relief-logo.html", import.meta.url).pathname,
         componentPreview: new URL("./component-preview.html", import.meta.url).pathname,
         components: new URL("./components.html", import.meta.url).pathname,
         main: new URL("./index.html", import.meta.url).pathname,

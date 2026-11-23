@@ -1,0 +1,3 @@
+.oyn-relief-logo { display: inline-block; vertical-align: middle; width: 100%; aspect-ratio: 880 / 356; }
+.oyn-relief-logo > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.oyn-relief-logo[data-oyn-active] > img { visibility: hidden; }

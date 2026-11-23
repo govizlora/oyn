@@ -23,6 +23,7 @@ const explorations = [
   ["Object library", "./?view=library"],
   ["Native button", "./surface.html"],
   ["Tabs", "./?view=tabs"],
+  ["Relief logo", "./relief-logo.html"],
 ] as const;
 const projects = [
   ["Component library", "./components.html"],
