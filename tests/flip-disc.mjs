@@ -205,7 +205,7 @@ try {
         "live material/cut changes",
       );
     }
-    await page.getByRole("button", { name: "恢复默认" }).press("Enter");
+    await page.getByRole("button", { name: "Reset defaults" }).press("Enter");
     assert.deepEqual(
       await sliders.evaluateAll((ns) => ns.map((n) => n.value)),
       initial,
@@ -229,7 +229,7 @@ try {
     await tick(6000);
     assert.ok(difference(beforeFar, await shot(far)) > 8);
     // Same pointer/light and face throughout: only the pivot stroke changes.
-    await page.getByRole("button", { name: "恢复默认" }).focus();
+    await page.getByRole("button", { name: "Reset defaults" }).focus();
     await near.hover();
     await tick(0);
     const radiusPixels = (png) => {
@@ -284,7 +284,7 @@ try {
         maxY - minY > 2 * (maxX - minX + 1),
       "long tangential lamp image at the rim",
     );
-    await page.getByRole("button", { name: "恢复默认" }).press("Enter");
+    await page.getByRole("button", { name: "Reset defaults" }).press("Enter");
     for (const face of ["orange", "white"]) {
       await near.hover();
       if (face === "white") await near.click();
@@ -304,7 +304,7 @@ try {
         Math.abs(on.data[shoulder + 2] - off.data[shoulder + 2]) < 2,
         face + " has no frosted halo around the lamp image",
       );
-      await page.getByRole("button", { name: "恢复默认" }).press("Enter");
+      await page.getByRole("button", { name: "Reset defaults" }).press("Enter");
     }
     await page.setViewportSize({ width: 360, height: 740 });
     assert.ok(

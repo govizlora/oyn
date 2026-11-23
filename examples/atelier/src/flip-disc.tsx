@@ -46,7 +46,7 @@ function Stone({
       type="button"
       className="stone"
       data-index={index}
-      aria-label={`从第 ${row + 1} 行第 ${col + 1} 列发出波纹`}
+      aria-label={`Start a ripple at row ${row + 1}, column ${col + 1}`}
       style={{
         left: (100 * x) / lattice.width + "%",
         top: (100 * y) / lattice.height + "%",
@@ -67,16 +67,16 @@ function Atelier() {
   }, [values]);
   const [saveStatus, setSaveStatus] = useState("");
   async function saveProject() {
-    setSaveStatus("正在保存…");
+    setSaveStatus("Saving…");
     try {
       const response = await fetch("/__atelier/ripple-defaults", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-      setSaveStatus(response.ok ? "已保存到项目" : "未能写入项目，请重试");
+      setSaveStatus(response.ok ? "Saved to the project." : "Could not save to the project. Try again.");
     } catch {
-      setSaveStatus("未能连接本地开发服务");
+      setSaveStatus("Could not reach the local development server.");
     }
   }
   const [focusTarget, setFocusTarget] = useState<HTMLButtonElement | null>(
@@ -134,9 +134,9 @@ function Atelier() {
     <SurfaceProvider hdr={values.hdr}>
       <main className="ripple-page">
         <h1>Ripple field</h1>
-        <p>悬停轻沉，按下再沉一档。点中棋子，波纹从这里散开。</p>
+        <p>Hover over a disc to lower it slightly; press to sink it deeper. Activate a disc to send a ripple outward.</p>
         <div className="workspace">
-          <section className="bench" aria-label="波纹场">
+          <section className="bench" aria-label="Ripple field">
             <div
               className="wave-grid"
               onFocus={(e) =>
@@ -171,12 +171,12 @@ function Atelier() {
               ))}
             </div>
           </section>
-          <aside className="tuning" aria-label="波纹设置">
+          <aside className="tuning" aria-label="Ripple settings">
             <header className="tuning-head">
               <div className="panel-head">
-                <h2>调校</h2>
+                <h2>Tuning</h2>
                 <small>
-                  {canSave ? "自动保存在此浏览器" : "当前浏览器无法保存调校"}
+                  {canSave ? "Autosaved in this browser" : "Browser storage unavailable"}
                 </small>
                 <button
                   type="button"
@@ -186,19 +186,19 @@ function Atelier() {
                     setSaveStatus("");
                   }}
                 >
-                  恢复默认
+                  Reset defaults
                 </button>
               </div>
-              <small>R = 圆盘半径</small>
+              <small>R = disc radius</small>
               {import.meta.env.DEV && (
                 <div>
                   <button
                     type="button"
                     className="reset"
-                    disabled={saveStatus === "正在保存…"}
+                    disabled={saveStatus === "Saving…"}
                     onClick={saveProject}
                   >
-                    保存为项目默认值
+                    Save as project defaults
                   </button>{" "}
                   <small role="status">{saveStatus}</small>
                 </div>
@@ -206,18 +206,16 @@ function Atelier() {
             </header>
             {controls.map((g) => (
               <fieldset key={g.name}>
-                <legend>
-                  {g.label} <small>/ {g.name}</small>
-                </legend>
+                <legend>{g.name}</legend>
                 {g.name === "Glaze" && (
                   <label>
                     <span>
-                      HDR 高光 <small>（支持时启用）</small>
+                      HDR highlights <small>(when supported)</small>
                     </span>
                     <input
                       type="checkbox"
                       role="switch"
-                      aria-label="HDR 高光"
+                      aria-label="HDR highlights"
                       checked={values.hdr}
                       onChange={(event) => {
                         const hdr = event.currentTarget.checked;
@@ -238,7 +236,7 @@ function Atelier() {
                       aria-label={c.label}
                       title={
                         c.key === "stroke"
-                          ? "从静止到按到底。100% 是竖起翻转的安全余隙；超过后可能与槽壁相交。"
+                          ? "Travel from rest to full press. At 100%, an upright disc just clears the socket wall. Beyond that, it may intersect the wall."
                           : undefined
                       }
                       type="range"

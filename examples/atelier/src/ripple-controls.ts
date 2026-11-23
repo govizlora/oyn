@@ -1,11 +1,10 @@
 export const controls = [
   {
-    label: "釉面",
     name: "Glaze",
     items: [
       {
         key: "contrast",
-        label: "环境光明暗差",
+        label: "Ambient contrast",
         min: 0,
         max: 0.95,
         step: 0.01,
@@ -13,7 +12,7 @@ export const controls = [
       },
       {
         key: "sharpness",
-        label: "高光锐度",
+        label: "Highlight sharpness",
         min: 0.1,
         max: 24,
         step: 0.1,
@@ -21,7 +20,7 @@ export const controls = [
       },
       {
         key: "extension",
-        label: "沿弧延伸",
+        label: "Highlight arc length",
         min: 0,
         max: 32,
         step: 0.25,
@@ -29,7 +28,7 @@ export const controls = [
       },
       {
         key: "lampHeight",
-        label: "镜面光源高度",
+        label: "Specular light height",
         min: 0.25,
         max: 4,
         step: 0.05,
@@ -37,7 +36,7 @@ export const controls = [
       },
       {
         key: "reflectionStrength",
-        label: "盘面镜面高光",
+        label: "Disc highlight strength",
         min: 0,
         max: 32,
         step: 0.05,
@@ -45,7 +44,7 @@ export const controls = [
       },
       {
         key: "rimStrength",
-        label: "外缘反光",
+        label: "Rim reflection",
         min: 0,
         max: 12,
         step: 0.05,
@@ -54,12 +53,11 @@ export const controls = [
     ],
   },
   {
-    label: "盘体与槽",
-    name: "Section",
+    name: "Disc and socket",
     items: [
       {
         key: "crown",
-        label: "盘面拱高",
+        label: "Crown height",
         min: 2,
         max: 60,
         step: 0.5,
@@ -67,7 +65,7 @@ export const controls = [
       },
       {
         key: "roll",
-        label: "盘边圆弧",
+        label: "Edge rounding",
         min: 1,
         max: 38,
         step: 0.5,
@@ -75,7 +73,7 @@ export const controls = [
       },
       {
         key: "gap",
-        label: "盘槽间隙",
+        label: "Socket clearance",
         min: 1,
         max: 50,
         step: 0.5,
@@ -83,7 +81,7 @@ export const controls = [
       },
       {
         key: "lip",
-        label: "槽口倒角",
+        label: "Socket bevel",
         min: 0.5,
         max: 16,
         step: 0.1,
@@ -91,7 +89,7 @@ export const controls = [
       },
       {
         key: "depth",
-        label: "盘体沉入深度",
+        label: "Disc inset depth",
         min: 0,
         max: 40,
         step: 0.25,
@@ -100,20 +98,19 @@ export const controls = [
     ],
   },
   {
-    label: "翻转与传播",
-    name: "Motion",
+    name: "Flip and propagation",
     items: [
       {
         key: "stroke",
-        label: "按压总行程",
+        label: "Press travel",
         min: 0,
         max: 200,
         step: 1,
-        unit: "% 余隙",
+        unit: "% clearance",
       },
       {
         key: "duration",
-        label: "单枚翻转时长",
+        label: "Flip duration",
         min: 80,
         max: 6000,
         step: 10,
@@ -121,7 +118,7 @@ export const controls = [
       },
       {
         key: "damping",
-        label: "落位阻尼",
+        label: "Settling damping ratio",
         min: 0.1,
         max: 0.99,
         step: 0.01,
@@ -129,7 +126,7 @@ export const controls = [
       },
       {
         key: "interval",
-        label: "每格传播时间",
+        label: "Delay per cell",
         min: 0,
         max: 750,
         step: 5,
