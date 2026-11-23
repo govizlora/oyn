@@ -1,41 +1,37 @@
 import type { MotionNumber } from "@oyn/surface/adapters/motion";
 
+/** Sample a 150 ms cubic ease-out, independent of travel distance or frame rate. */
+export function sampleControlMotion(
+  origin: number,
+  target: number,
+  elapsed: number,
+) {
+  if (elapsed <= 0) return origin;
+  if (elapsed >= 150) return target;
+  return target + (origin - target) * (1 - elapsed / 150) ** 3;
+}
+
 /** Consumer-owned number source. No material writes or rendering work here. */
 export function createControlMotion(view: Window, initial: number) {
   const reduced = view.matchMedia("(prefers-reduced-motion: reduce)");
   const listeners = new Set<(value: number) => void>();
   let position = initial,
     destination = initial,
-    velocity = 0,
-    last = view.performance.now(),
+    origin = initial,
+    started = 0,
     frame = 0;
 
   function advance(time: number) {
-    const dt = Math.max(0, (time - last) / 1000);
-    last = time;
-    if (position === destination && velocity === 0) return;
     const previous = position;
-    // Closed-form critical damping preserves position and velocity on reversal.
-    const frequency = 30;
-    const offset = position - destination;
-    const momentum = velocity + frequency * offset;
-    const decay = Math.exp(-frequency * dt);
-    position = destination + (offset + momentum * dt) * decay;
-    velocity = (velocity - frequency * momentum * dt) * decay;
-    if (
-      reduced.matches ||
-      (Math.abs(position - destination) < 0.008 && Math.abs(velocity) < 0.14)
-    ) {
-      position = destination;
-      velocity = 0;
-    }
+    position = reduced.matches
+      ? destination
+      : sampleControlMotion(origin, destination, time - started);
     if (position !== previous) listeners.forEach((notify) => notify(position));
   }
   function tick(time: number) {
     frame = 0;
     advance(time);
-    if (position !== destination || velocity !== 0)
-      frame = view.requestAnimationFrame(tick);
+    if (position !== destination) frame = view.requestAnimationFrame(tick);
   }
   function snapIfReduced() {
     if (!reduced.matches) return;
@@ -54,7 +50,10 @@ export function createControlMotion(view: Window, initial: number) {
     },
     setTarget(value: number) {
       if (value === destination) return;
-      advance(view.performance.now());
+      const now = view.performance.now();
+      if (frame) advance(now);
+      origin = position;
+      started = now;
       destination = value;
       if (reduced.matches) snapIfReduced();
       else if (!frame) frame = view.requestAnimationFrame(tick);

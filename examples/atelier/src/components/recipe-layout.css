@@ -67,9 +67,9 @@
     :scope[data-example="alert-dialog/animation"]
       [data-slot="alert-dialog-content"] {
       transition:
-        opacity 0.2s,
-        translate 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-        scale 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 0.2s var(--oyn-ease-out),
+        translate 0.25s var(--oyn-ease-out),
+        scale 0.25s var(--oyn-ease-out);
 
       &:is([data-starting-style], [data-ending-style]) {
         opacity: 0;
@@ -85,8 +85,8 @@
     /* checkbox.css */
     :scope[data-example="checkbox/indicator"] [data-slot="checkbox-indicator"] {
       transition:
-        opacity 0.15s,
-        scale 0.15s;
+        opacity 0.15s var(--oyn-ease-out),
+        scale 0.15s var(--oyn-ease-out);
 
       &:is([data-starting-style], [data-ending-style]) {
         opacity: 0;
@@ -99,9 +99,9 @@
     :scope[data-example="dialog/animation"] {
       & [data-slot="dialog-content"] {
         transition:
-          opacity var(--duration),
-          translate var(--duration),
-          scale var(--duration);
+          opacity var(--duration) var(--oyn-ease-out),
+          translate var(--duration) var(--oyn-ease-out),
+          scale var(--duration) var(--oyn-ease-out);
 
         &:is([data-starting-style], [data-ending-style]) {
           opacity: 0;
@@ -125,7 +125,7 @@
         [data-slot="alert-dialog-backdrop"],
         [data-slot="dialog-backdrop"]
       ) {
-      transition: opacity var(--duration);
+      transition: opacity var(--duration) var(--oyn-ease-out);
 
       &:is([data-starting-style], [data-ending-style]) {
         opacity: 0;
@@ -155,7 +155,7 @@
         [data-slot="menu-content"][data-presentation="sheet"]
         [data-slot="menu-trigger"]
         > svg:last-child {
-        transition: rotate var(--duration);
+        transition: rotate var(--duration) var(--oyn-ease-out);
       }
     }
 
@@ -177,7 +177,7 @@
     /* Only this demo animates; the slide between panels is what it shows. */
     :scope[data-example="navigation-menu/animation"] {
       & [data-slot="navigation-menu-trigger"] > svg {
-        transition: rotate var(--duration);
+        transition: rotate var(--duration) var(--oyn-ease-out);
       }
 
       &
@@ -185,7 +185,7 @@
           [data-slot="navigation-menu-viewport"],
           [data-slot="navigation-menu-content"]
         ) {
-        transition: opacity var(--duration);
+        transition: opacity var(--duration) var(--oyn-ease-out);
 
         &:is([data-starting-style], [data-ending-style]) {
           opacity: 0;
@@ -195,10 +195,12 @@
       & [data-slot="navigation-menu-viewport"][data-variant="slide"] {
         transition-property: opacity, width, height;
         transition-duration: calc(var(--duration) * 3);
+        transition-timing-function: var(--oyn-ease-out);
 
         & [data-slot="navigation-menu-content"] {
           transition-property: opacity, translate;
           transition-duration: calc(var(--duration) * 3);
+          transition-timing-function: var(--oyn-ease-out);
 
           &:is(
             [data-motion="from-end"][data-starting-style],
@@ -349,8 +351,8 @@
     /* The indicator scales in and out, and a hovered option previews its dot. */
     :scope[data-example="radio/indicator"] [data-slot="radio-indicator"] {
       transition:
-        opacity 0.15s,
-        scale 0.15s;
+        opacity 0.15s var(--oyn-ease-out),
+        scale 0.15s var(--oyn-ease-out);
 
       &[data-unchecked] {
         visibility: visible;
@@ -519,6 +521,7 @@
       & [data-slot="tabs-indicator"] {
         transition-property: top, left, width, height;
         transition-duration: calc(var(--duration) * 2);
+        transition-timing-function: var(--oyn-ease-out);
 
         &[data-activation-direction="none"] {
           transition: none;
@@ -532,8 +535,8 @@
     :scope[data-example="tabs/animation"] {
       & [data-slot="stack"] > [data-slot="tabs-panel"] {
         transition:
-          opacity var(--duration),
-          translate var(--duration);
+          opacity var(--duration) var(--oyn-ease-out),
+          translate var(--duration) var(--oyn-ease-out);
 
         &:is([data-starting-style], [data-ending-style]) {
           opacity: 0;

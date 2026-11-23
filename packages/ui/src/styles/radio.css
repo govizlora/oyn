@@ -71,7 +71,7 @@
       box-shadow: inset 0 0 0 1px var(--line);
       color: var(--ink);
       cursor: default;
-      transition: box-shadow var(--duration);
+      transition: box-shadow var(--duration) var(--oyn-ease-out);
 
       &:hover:not([data-disabled], [data-readonly], [data-checked]) {
         box-shadow: inset 0 0 0 1px

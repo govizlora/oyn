@@ -1,3 +1,4 @@
+@import "@oyn/ui/motion.css";
 :root {
   color-scheme: light dark;
   --preview-ink: light-dark(#151515, #eee);
@@ -243,7 +244,7 @@
 .story-family summary::after,
 .project-group summary::after {
   flex: none;
-  transition: transform 180ms ease-out;
+  transition: transform 180ms var(--oyn-ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
   .story-family summary::after,

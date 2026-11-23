@@ -1,3 +1,4 @@
+@import "@oyn/ui/motion.css";
 * {
   box-sizing: border-box;
 }
@@ -71,13 +72,13 @@ a {
   text-align: center;
   padding-bottom: 140px;
   transform: translateX(0);
-  transition: transform 600ms ease;
+  transition: transform 600ms var(--oyn-ease-out);
 }
 .button-host.shifted {
   transform: translateX(24px);
 }
 .button-host.animated {
-  animation: travel 900ms ease;
+  animation: travel 900ms var(--oyn-ease-out);
 }
 @keyframes travel {
   50% {

@@ -173,6 +173,28 @@ try {
   await button.locator("canvas").waitFor();
   assert.ok(await canvas.evaluate((node) => node.isConnected));
 
+  await visit("button", "hover-effects");
+  const hoverButtons = demo.getByRole("button");
+  assert.deepEqual(await hoverButtons.allTextContents(), [
+    "Recess",
+    "Lower slightly",
+    "Lift slightly",
+  ]);
+  for (const previewButton of await hoverButtons.all()) {
+    const face = previewButton.locator("canvas");
+    const originalCanvas = await face.elementHandle();
+    const bounds = await previewButton.boundingBox();
+    await previewButton.hover();
+    assert.deepEqual(await previewButton.boundingBox(), bounds);
+    await page.mouse.down();
+    assert.deepEqual(await previewButton.boundingBox(), bounds);
+    await page.mouse.up();
+    assert.ok(await originalCanvas.evaluate((node) => node.isConnected));
+  }
+  await demo.getByRole("button", { name: "Lift slightly" }).focus();
+  await page.keyboard.press("Space");
+  assert.equal(await frame.locator("output").textContent(), "Lift pressed");
+
   // Compare actual painted face bounds in the calendar.
   async function verifyCalendar(panel) {
     const { inset, radius, arrows, segments } = await panel.evaluate((host) => {

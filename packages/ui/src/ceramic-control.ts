@@ -10,7 +10,7 @@ import { createCeramicMaterial } from "@oyn/ceramic";
 import { bindMotion } from "@oyn/surface/adapters/motion";
 import { createControlMotion } from "./control-motion.js";
 
-// Zero relief is exactly unpainted; there is no signed-program sentinel.
+// Unpigmented controls have nothing to draw at zero relief.
 const flat = 0;
 const unavailable =
   ":disabled,[aria-disabled=true],[data-disabled],[aria-busy=true],[data-pending]";
@@ -18,12 +18,19 @@ const actionable =
   "button,a[href],summary,[role=button],[role=switch],[role=tab]";
 
 /** UI owns gestures and animation values; Surface only binds and renders them. */
-const control: Appearance<number | null> = {
+type ControlState = {
+  rest: number | null;
+  hoverOffset?: number;
+  maxElevation?: number;
+};
+
+const control: Appearance<ControlState> = {
   create(initial) {
-    let rest = initial;
+    let { rest, hoverOffset } = initial;
     // Selected keys may start recessed and become raised without a new canvas.
-    const maxElevation = Math.max(8, initial ?? 0);
+    const maxElevation = Math.max(8, rest ?? flat, initial.maxElevation ?? 0);
     const source = createCeramicMaterial({
+      color: "transparent",
       elevation: rest ?? flat,
       maxElevation,
     });
@@ -74,9 +81,11 @@ const control: Appearance<number | null> = {
               ? idle
               : pressed
                 ? Math.min(-6, idle - 4)
-                : hovered || focused
-                  ? Math.min(-2.8, idle - 1.6)
-                  : idle;
+                : hovered && hoverOffset !== undefined
+                  ? idle + hoverOffset
+                  : hovered || focused
+                    ? Math.min(-2.8, idle - 1.6)
+                    : idle;
             motion.setTarget(target);
           }
           function endPointer(event: PointerEvent) {
@@ -246,8 +255,8 @@ const control: Appearance<number | null> = {
     return {
       material,
       update(next) {
-        if (rest === next) return;
-        rest = next;
+        if (rest === next.rest && hoverOffset === next.hoverOffset) return;
+        ({ rest, hoverOffset } = next);
         if (respond) respond();
         return "draw";
       },
@@ -255,8 +264,12 @@ const control: Appearance<number | null> = {
   },
 };
 
-export function useCeramicControl(rest: number | null, ref?: Ref<HTMLElement>) {
-  const bind = useSurface({ appearance: control, props: rest });
+export function useCeramicControl(
+  rest: number | null,
+  ref?: Ref<HTMLElement>,
+  options?: Pick<ControlState, "hoverOffset" | "maxElevation">,
+) {
+  const bind = useSurface({ appearance: control, props: { rest, ...options } });
   return {
     ...useMemo(() => mergeProps({ ref: bind }, { ref }), [bind, ref]),
     "data-oyn-control": "",

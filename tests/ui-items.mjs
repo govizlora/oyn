@@ -17,6 +17,8 @@ try {
     [
       "./card",
       "./base-ui/tabs",
+      "./control-motion",
+      "./motion.css",
       ...families.map((family) => "./" + family.id),
     ].sort(),
   );

@@ -43,7 +43,7 @@
         margin-inline-start: auto;
         color: var(--muted);
         rotate: -90deg;
-        transition: rotate var(--accordion-turn) cubic-bezier(0.22, 1, 0.36, 1);
+        transition: rotate var(--accordion-turn) var(--oyn-ease-out);
       }
       &[data-open] > svg:last-of-type {
         rotate: 0deg;
@@ -58,7 +58,7 @@
         border: solid var(--muted);
         border-width: 0 1.5px 1.5px 0;
         rotate: -45deg;
-        transition: rotate var(--accordion-turn) cubic-bezier(0.22, 1, 0.36, 1);
+        transition: rotate var(--accordion-turn) var(--oyn-ease-out);
       }
       &[data-open]:not(:has(> svg))::after {
         rotate: 45deg;
@@ -87,7 +87,7 @@
       color: var(--muted);
       font-size: var(--text-md);
       line-height: 1.55;
-      transition: height var(--accordion-travel) cubic-bezier(0.22, 1, 0.36, 1);
+      transition: height var(--accordion-travel) var(--oyn-ease-out);
       &::after {
         display: block;
         height: 12px;

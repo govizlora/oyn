@@ -13,9 +13,10 @@
     outline: 1px solid color-mix(in srgb, currentColor 18%, transparent);
     outline-offset: -1px;
   }
-  [data-oyn-face="well"]:not([data-oyn-active]) {
+  [data-oyn-face="well"]:not([data-oyn-active], [data-oyn-control]) {
     background-color: light-dark(#e8e8e8, #202020);
   }
+  [data-oyn-control],
   [data-oyn-face][data-oyn-active] {
     background: transparent;
   }
@@ -104,7 +105,6 @@
 
 @layer oyn-material {
   [data-oyn-face="outline"]:not([data-oyn-active]) {
-    background: transparent;
     box-shadow: none;
     outline: none;
   }
@@ -117,9 +117,10 @@
       [aria-busy="true"],
       [data-pending]
     ):is(:hover, :active) {
-    background: color-mix(in srgb, currentColor 4%, transparent);
-    box-shadow: inset 0 1px 3px
-      color-mix(in srgb, currentColor 23%, transparent);
+    box-shadow: var(
+      --oyn-control-hover-shadow,
+      inset 0 1px 3px color-mix(in srgb, currentColor 23%, transparent)
+    );
   }
   [data-oyn-control]:not(
       [data-oyn-active],

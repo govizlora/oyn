@@ -1,3 +1,4 @@
+@import "../motion.css";
 /* Adapted from UI SDK (Apache-2.0). OYN scopes its layout and provides the material. */
 @layer oyn-layout {
   @scope (.oyn-ui, [data-oyn-popup]) {

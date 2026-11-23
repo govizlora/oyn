@@ -54,7 +54,7 @@
       scale: calc(1 - var(--toast-index) * 0.05);
       transition-property: translate, scale, opacity, height, box-shadow;
       transition-duration: calc(var(--duration) * 8 / 3);
-      transition-timing-function: ease;
+      transition-timing-function: var(--oyn-ease-out);
       -webkit-user-select: none;
       user-select: none;
 
@@ -92,7 +92,6 @@
         );
         scale: 1;
         transition-duration: calc(var(--duration) * 4 / 3);
-        transition-timing-function: ease-out;
       }
 
       /* The newest toast slides in from the edge; the ones behind it fade in where they are. */
@@ -112,7 +111,6 @@
       &[data-ending-style] {
         opacity: 0;
         transition-duration: calc(var(--duration) * 4 / 3);
-        transition-timing-function: ease-out;
 
         @media (prefers-reduced-motion: no-preference) {
           --exit-y: calc(var(--dir) * -100%);

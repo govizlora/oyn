@@ -1038,8 +1038,8 @@
       user-select: none;
       cursor: default;
       transition:
-        box-shadow calc(var(--duration) * 2 / 3) ease-out,
-        background-color calc(var(--duration) * 0.8);
+        box-shadow calc(var(--duration) * 2 / 3) var(--oyn-ease-out),
+        background-color calc(var(--duration) * 0.8) var(--oyn-ease-out);
 
       &:is([aria-label], [aria-labelledby]):has(
           > svg:first-child:nth-last-child(1 of :not([data-oyn-layer]))
@@ -1292,7 +1292,7 @@
       [data-slot="command-list"],
       [data-slot="trigger-menu-list"]
     ) {
-      transition: opacity var(--duration);
+      transition: opacity var(--duration) var(--oyn-ease-out);
 
       &[aria-busy="true"] {
         opacity: 0.6;

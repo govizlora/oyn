@@ -49,6 +49,13 @@ and moving thumbs their form. Text, focus rings and data marks use CSS.
 Open the [component catalog](http://127.0.0.1:5177/components.html) or
 [Calendar range](http://127.0.0.1:5177/components.html?component=calendar&example=range).
 
+The [Button hover comparison](http://127.0.0.1:5177/components.html?component=button&example=hover-effects)
+shows the default recess, `hoverEffect="lower"` (8 → 2), and
+`hoverEffect="lift"` (8 → 24). From each hover height, pressing travels to −6 in 150 ms. Lift covers more distance, not more time: all three move fastest at the start and settle without overshoot.
+The moving Ceramic surface supplies only relief; the button has no default fill.
+Use a native background, e.g. `<Button style={{ backgroundColor: "#b56338" }}>Save</Button>`,
+to keep its color when raised, flat or pressed, including without a GPU.
+
 ## Tabs
 
 Two implementations of the same Ceramic tabs share one Surface runtime. Use React 19 and mount
@@ -104,7 +111,7 @@ Not using either interaction library? Attach the Ceramic material directly with
 ## Source responsibilities
 
 Shared control bindings interpret transient pointer/focus/keyboard feedback without
-owning SDK actions or selection. The UI consumer computes a numeric spring source;
+owning SDK actions or selection. The UI consumer computes a fixed-duration cubic ease-out;
 `bindMotion` from `@oyn/surface/adapters/motion` is its only writer to
 `material.setElevation`. Ceramic receives instantaneous heights, not animation
 targets or curves. Surface observes parameter changes and schedules GPU work.

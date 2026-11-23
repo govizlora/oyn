@@ -8,3 +8,13 @@
     }
   }
 }
+
+@layer oyn-material {
+  [data-oyn-hover-effect="lower"] {
+    --oyn-control-hover-shadow: none;
+  }
+  [data-oyn-hover-effect="lift"] {
+    --oyn-control-hover-shadow: 0 3px 7px
+      color-mix(in srgb, #000 24%, transparent);
+  }
+}

@@ -1,3 +1,4 @@
+@import "./motion.css";
 [data-oyn-tabs] {
   position: relative;
   display: inline-flex;
@@ -32,7 +33,7 @@
   [data-oyn-tabs] > [data-slot="tabs-indicator"] {
     transition-property: left, top, width, height;
     transition-duration: 300ms;
-    transition-timing-function: cubic-bezier(0.16, 0.8, 0.32, 1);
+    transition-timing-function: var(--oyn-ease-out);
   }
 }
 [data-oyn-tabs] > [role="tab"] {

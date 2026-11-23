@@ -128,6 +128,12 @@
       "types": "./dist/card.d.ts",
       "development": "./src/card.tsx",
       "import": "./dist/card.js"
+    },
+    "./motion.css": "./src/motion.css",
+    "./control-motion": {
+      "types": "./dist/control-motion.d.ts",
+      "development": "./src/control-motion.ts",
+      "import": "./dist/control-motion.js"
     }
   },
   "scripts": {

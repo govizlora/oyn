@@ -25,7 +25,6 @@ import {
 import "../../packages/ui/src/styles/tooltip.css";
 import "../../packages/ui/src/styles/toast.css";
 import "../../packages/ui/src/styles/progress.css";
-import "../../packages/ui/src/styles/otp-input.css";
 
 function NativeInput(props: ComponentProps<"input">) {
   return <input {...props} />;
@@ -67,7 +66,11 @@ function Fixture() {
           }}
         >
           <fieldset id="fieldset">
-            <Button id="key" style={{ width: 160, height: 44 }}>
+            <Button
+              id="key"
+              hoverEffect="lower"
+              style={{ width: 160, height: 44 }}
+            >
               Save
             </Button>
           </fieldset>
@@ -135,11 +138,6 @@ function Fixture() {
             <span data-slot="progress-track" data-indeterminate="">
               <span data-slot="progress-indicator" data-loop-probe="" />
             </span>
-            <span
-              id="caret-motion"
-              data-slot="otp-input-slot"
-              data-fake-caret=""
-            />
           </section>
         </main>
       )}

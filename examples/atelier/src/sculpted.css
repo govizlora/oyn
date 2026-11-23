@@ -1,3 +1,4 @@
+@import "@oyn/ui/motion.css";
 .atelier.atelier-sculpture {
   height: auto;
   min-height: 100svh;
@@ -227,7 +228,7 @@
   width: 84px;
   height: 37px;
   border-radius: 22px;
-  transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: left 0.3s var(--oyn-ease-out);
 }
 .bridge-status {
   position: absolute;
@@ -269,7 +270,7 @@
   width: 101px;
   height: 37px;
   border-radius: 22px;
-  transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: left 0.3s var(--oyn-ease-out);
 }
 .long-thumb > .sculpted-dot {
   position: absolute;

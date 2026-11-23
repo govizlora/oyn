@@ -142,6 +142,11 @@
         "caption": "Click Button, or focus it and press Enter or Space. The console logs each press."
       },
       {
+        "id": "hover-effects",
+        "title": "Hover Effects",
+        "caption": "Hover over each button, then press and hold. All three press in 150 ms; Lift travels farther in the same time."
+      },
+      {
         "id": "pending",
         "title": "Pending",
         "caption": "Press Save, then press it again while it saves. Nothing happens until the first action finishes."

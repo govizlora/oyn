@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createServer } from "vite";
+import { PNG } from "pngjs";
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { createControlMotion } from "../packages/ui/dist/control-motion.js";
@@ -26,6 +27,27 @@ function step(dt) {
   callbacks.clear();
   for (const callback of pending) callback(now);
 }
+// Same press deadline for Recess, Lower slightly and Lift slightly. A longer
+// trip must move faster, not take longer or acquire a longer settling tail.
+for (const hover of [-2.8, 2, 24]) {
+  const press = createControlMotion(view, hover);
+  press.setTarget(-6);
+  let previous = hover;
+  let previousStep = Infinity;
+  for (let i = 1; i <= 6; i++) {
+    step(25);
+    const distance = previous - press.get();
+    assert.ok(distance > 0 && distance < previousStep);
+    assert.ok(
+      Math.abs((press.get() + 6) / (hover + 6) - (1 - i / 6) ** 3) < 1e-10,
+    );
+    assert.equal(callbacks.size, i === 6 ? 0 : 1);
+    previous = press.get();
+    previousStep = distance;
+  }
+  assert.equal(press.get(), -6);
+  press.dispose();
+}
 const motion = createControlMotion(view, 8);
 const values = [];
 const disconnect = bindMotion(motion, (value) => values.push(value));
@@ -43,7 +65,10 @@ assert.equal(
   "reversal must not introduce another animation clock",
 );
 step(1);
-assert.ok(motion.get() < before, "reversal preserves incoming velocity");
+assert.ok(
+  motion.get() > before,
+  "reversal immediately heads toward the new target",
+);
 for (let i = 0; i < 80; i++) step(16);
 assert.equal(motion.get(), 8);
 assert.equal(callbacks.size, 0, "settled sources stop scheduling");
@@ -107,6 +132,38 @@ try {
     await settle();
     return canvas.screenshot();
   };
+  // Read a composed pixel inside the real Button, away from the label and rim.
+  // Changing the receiver (not the Button) exposes any invented pigment or self-shadow.
+  await page
+    .locator("#fieldset")
+    .evaluate((el) => (el.style.backgroundColor = "#458692"));
+  async function checkInterior(rgb) {
+    await settle();
+    const png = PNG.sync.read(
+      await page.screenshot({
+        clip: {
+          x: Math.floor(bounds.x + 32),
+          y: Math.floor(bounds.y + bounds.height / 2),
+          width: 1,
+          height: 1,
+        },
+      }),
+    );
+    assert.deepEqual([...png.data], [...rgb, 255]);
+  }
+  for (const [css, rgb] of [
+    ["", [69, 134, 146]],
+    ["#b56338", [181, 99, 56]],
+  ]) {
+    await key.evaluate((el, color) => (el.style.backgroundColor = color), css);
+    await at(-10, 0);
+    await checkInterior(rgb); // raised
+    await at(3, bounds.height / 2);
+    await checkInterior(rgb); // flat
+    await page.mouse.down();
+    await checkInterior(rgb); // recessed
+    await page.mouse.up();
+  }
   await at(3, bounds.height / 2);
   const hover = await painted();
   await page.mouse.down();
@@ -307,18 +364,13 @@ try {
     "nested themes must not restore motion; all DOM transitions use reduced-motion policy",
   );
   const animations = () =>
-    page.evaluate(() => [
-      ...Array.from(
-        document.querySelectorAll("[data-loop-probe]"),
-        (node) => getComputedStyle(node).animationName,
-      ),
-      getComputedStyle(document.querySelector("#caret-motion"), "::after")
-        .animationName,
-    ]);
+    page.locator("[data-loop-probe]").evaluateAll((nodes) =>
+      nodes.map((node) => getComputedStyle(node).animationName),
+    );
   assert.deepEqual(
     await animations(),
-    ["none", "none", "none", "none"],
-    "reduced motion must stop spinner, toast, indeterminate progress and caret loops",
+    ["none", "none", "none"],
+    "reduced motion must stop spinner, toast and indeterminate progress loops",
   );
   await page.emulateMedia({ reducedMotion: "no-preference" });
   assert.ok((await durations()).every((value) => parseFloat(value) > 0));
@@ -388,7 +440,8 @@ try {
     "Works without GPU",
   );
   assert.equal(await fallback.locator("canvas").count(), 0);
-  assert.notEqual(
+  await fallback.locator("#key").hover();
+  assert.equal(
     await fallback
       .locator("#key")
       .evaluate((node) => getComputedStyle(node).backgroundColor),

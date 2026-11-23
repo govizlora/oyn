@@ -1,4 +1,5 @@
 import type { Appearance, Material, SurfaceBindingContext } from "@oyn/surface";
+import { sampleControlMotion } from "@oyn/ui/control-motion";
 import { bindMotion, type MotionNumber } from "@oyn/surface/adapters/motion";
 import {
   createFlipDiscMaterial,
@@ -57,21 +58,26 @@ export const stoneAppearance: Appearance<StoneProps> = {
           let hovering = false,
             pressed = false,
             holdUntil = 0,
-            position = 0;
-          let last = view.performance.now(),
+            origin = 0,
+            destination = 0,
+            started = 0,
             frame = 0;
           function tick() {
             frame = 0;
             const now = view.performance.now();
             const target = pressed || now < holdUntil ? 1 : hovering ? 0.46 : 0;
-            const dt = Math.min(now - last, 32);
-            last = now;
-            position = reduced.matches
-              ? target
-              : target +
-                (position - target) *
-                  Math.exp(-dt / (target > position ? 24 : 55));
-            if (Math.abs(target - position) < 0.002) position = target;
+            let position = sampleControlMotion(
+              origin,
+              destination,
+              now - started,
+            );
+            if (reduced.matches) {
+              origin = destination = position = target;
+            } else if (target !== destination) {
+              origin = position;
+              destination = target;
+              started = now;
+            }
             const { depth, gap } = props.profile;
             travel.set(position * props.stroke * (gap - depth));
             glow.set(Number(el.matches(":focus-visible")));

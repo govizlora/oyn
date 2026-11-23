@@ -28,6 +28,11 @@
           "path": "packages/ui/src/use-ceramic-tabs.ts",
           "type": "registry:ui",
           "target": "@ui/use-ceramic-tabs.ts"
+        },
+        {
+          "path": "packages/ui/src/motion.css",
+          "type": "registry:ui",
+          "target": "@ui/motion.css"
         }
       ]
     },
@@ -57,6 +62,11 @@
           "path": "packages/ui/src/use-ceramic-tabs.ts",
           "type": "registry:ui",
           "target": "@ui/use-ceramic-tabs.ts"
+        },
+        {
+          "path": "packages/ui/src/motion.css",
+          "type": "registry:ui",
+          "target": "@ui/motion.css"
         }
       ]
     },
@@ -110,6 +120,11 @@
           "path": "packages/ui/src/styles/base.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/base.css"
+        },
+        {
+          "path": "packages/ui/src/motion.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/motion.css"
         }
       ]
     },
