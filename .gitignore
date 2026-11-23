@@ -20,3 +20,6 @@ playwright-report/
 # Materialized from the pinned UI SDK documentation at build time.
 examples/atelier/src/components/generated/
 examples/atelier/public/recipe-source/
+
+# Independently versioned Letterform Lab site checkout (not a workspace or submodule).
+/docs/brand/letterform-lab/
