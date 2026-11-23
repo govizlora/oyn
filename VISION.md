@@ -6,7 +6,7 @@ installed component source. The material does not replace HTML layout,
 focusable elements or accessible content.
 
 The spatial design principles, component examples and visual review criteria
-are collected in [OYN Ceramic 设计哲学](docs/ceramic-design.md).
+are collected in [OYN Ceramic design philosophy](docs/ceramic-design.md).
 
 Current technical boundaries are specified only in [ARCHITECTURE.md](ARCHITECTURE.md).
 

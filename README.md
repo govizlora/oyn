@@ -5,12 +5,12 @@ Experimental GPU surfaces with native DOM layout and interaction.
 Start with [the architecture contract](ARCHITECTURE.md): the one current source for
 package boundaries, animation ownership, lifecycle and supported usage.
 [Oyn UI vision](VISION.md) describes product/distribution;
-[OYN Ceramic 设计哲学](docs/ceramic-design.md) describes spatial design.
+[OYN Ceramic design philosophy](docs/ceramic-design.md) describes spatial design.
 
 ## Component library
 
 The [Atelier component library](http://127.0.0.1:5177/components.html)
-contains 55 UI SDK React families with interactive Ceramic previews. Run
+shows the actively maintained UI SDK families and the standalone Card study. Run
 `npm run dev` to browse them. See [Oyn UI](packages/ui/README.md) for
 package imports and source installation.
 
