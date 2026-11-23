@@ -77,7 +77,7 @@ export function createPresentation(mesh: Mesh) {
       }),
     }) ?? [0, 0, 0];
     if (
-      extras.length !== 3 ||
+      (extras.length !== 3 && extras.length !== 4 && extras.length !== 6) ||
       !extras.every(
         (v) => Number.isFinite(v) && Number.isFinite(Math.fround(v)),
       )
@@ -95,7 +95,8 @@ export function createPresentation(mesh: Mesh) {
       extras[2],
       canvas.width / cssW,
       canvas.height / cssH,
-      0,
+      extras[3] ?? 0,
+      extras[4] ?? 0, extras[5] ?? 0, 0, 0,
     ]);
   }
   function dispose() {

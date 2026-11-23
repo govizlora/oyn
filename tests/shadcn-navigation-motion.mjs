@@ -9,15 +9,23 @@ try {
   page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   await page.addInitScript(() => {
     window.recessDepths = [];
+    // Frame uploads can be skipped while only elevation changes. Associate
+    // uniforms by their actual binding, not by the order of writeBuffer calls.
+    const frameFor = new WeakMap(), matchingFrames = new WeakSet();
+    const bind = GPUDevice.prototype.createBindGroup;
+    GPUDevice.prototype.createBindGroup = function(descriptor) {
+      const frame = descriptor.entries.find(e => e.binding === 0)?.resource.buffer;
+      const params = descriptor.entries.find(e => e.binding === 1)?.resource.buffer;
+      if (frame && params) frameFor.set(params, frame);
+      return bind.call(this, descriptor);
+    };
     const write = GPUQueue.prototype.writeBuffer;
     GPUQueue.prototype.writeBuffer = function(buffer, offset, data, ...args) {
-      // Match the navigation frame, excluding unrelated recessed Select triggers.
-      if (data instanceof Float32Array && data.length === 12) {
-        window.recessFrameMatches = window.recessTarget &&
-          data[6] === window.recessTarget[0] && data[7] === window.recessTarget[1];
+      if (data instanceof Float32Array && data.length === 16) {
+        if (window.recessTarget && data[6] === window.recessTarget[0] && data[7] === window.recessTarget[1]) matchingFrames.add(buffer);
+        else matchingFrames.delete(buffer);
       }
-      // Signed height has one uniform lane on either side of the plane.
-      if (window.recessFrameMatches && data instanceof Float32Array && data.length === 28 &&
+      if (matchingFrames.has(frameFor.get(buffer)) && data instanceof Float32Array &&
           data[1] < 0 && Math.abs(data[1] + 2.3) > 0.0001) window.recessDepths.push(-data[1]);
       return write.call(this, buffer, offset, data, ...args);
     };

@@ -15,7 +15,7 @@ try{
   window.addEventListener=function(type,listener,...args){if(type==='pointermove'){subscriptions.add(listener);stats.pointerListeners=subscriptions.size;}return add.call(this,type,listener,...args);};
   window.removeEventListener=function(type,listener,...args){if(type==='pointermove'){subscriptions.delete(listener);stats.pointerListeners=subscriptions.size;}return remove.call(this,type,listener,...args);};
   for(const [proto,name,key]of [[GPUDevice.prototype,'createBuffer','buffers'],[GPUDevice.prototype,'createRenderPipeline','pipelines'],[GPUQueue.prototype,'submit','submits']]){const original=proto[name];proto[name]=function(...args){stats[key]++;return original.apply(this,args);};}
-  const write=GPUQueue.prototype.writeBuffer;GPUQueue.prototype.writeBuffer=function(buffer,...args){if(buffer.size===48)stats.frameWrites++;else if(buffer.size===112)stats.parameterWrites++;return write.call(this,buffer,...args);};
+  const write=GPUQueue.prototype.writeBuffer;GPUQueue.prototype.writeBuffer=function(buffer,...args){if(buffer.size===64)stats.frameWrites++;else if(buffer.size===112)stats.parameterWrites++;return write.call(this,buffer,...args);};
  });
  await page.goto(fixtureUrl);await page.locator('#sample canvas').waitFor();
  const settle=()=>page.waitForTimeout(150);

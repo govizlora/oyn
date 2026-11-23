@@ -95,15 +95,16 @@ interpretation also belongs to Ceramic's binding, not Surface presentation code.
 ## GPU and frame contract
 
 Premultiplied RGBA; six procedural vertices via `vertex`; ordered fragment entry
-names in `passes`. Group 0 binding 0 remains 48 bytes / three vec4f fields:
+names in `passes`. Group 0 binding 0 is 64 bytes / four vec4f fields (the original 48-byte prefix is unchanged):
 
 1. canvas CSS width/height, appearance extension lanes 0/1;
 2. element x/y/width/height in canvas coordinates;
-3. appearance extension lane 2, raster scale x/y, reserved zero.
+3. appearance extension lane 2, raster scale x/y, optional appearance extension lane 3 (defaults to zero);
+4. optional appearance extension lanes 4/5 and two reserved zeros.
 
-`binding.frame()` returns three finite f32 values for extension lanes; omitted means
-zeros. Surface does not interpret them. Ceramic uses them for local light XY and
-its CSS radius, preserving the existing shader ABI without core optical assumptions.
+`binding.frame()` returns three, four or six finite f32 values for extension lanes; omitted means
+zeros. Surface does not interpret them. Ceramic uses them for local light XY,
+CSS radius, receiver eligibility and the independent backlight position, preserving the existing shader ABI without core optical assumptions.
 Binding 1 is the fixed-layout numeric parameter block. Binding 2 optionally holds
 immutable read-only storage. The renderer shares storage by resource identity and
 reference counts it; no second GPU cache owns lifetime. Pipeline keys include shader,

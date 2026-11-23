@@ -61,7 +61,7 @@ export function createWebGPU(
     const context = canvas.getContext("webgpu");
     if (!context) throw Error("Surface WebGPU canvas unavailable.");
     const programs = cache.get(material);
-    const frame = uniform(48),
+    const frame = uniform(64),
       parameters = uniform(material.parameters.length * 4);
     const bind = binding(frame, parameters, material.data);
     const target = {

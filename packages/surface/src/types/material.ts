@@ -5,9 +5,9 @@ export type Parameters = ReturnType<typeof createParameters>;
 export type Insets = Readonly<{ x: number; y: number }>;
 /** Immutable payload. The renderer owns its GPU copy and shares it by identity. */
 export type StaticData = Readonly<{ bytes: Uint8Array<ArrayBuffer> }>;
-/** Material-owned extension lanes in the 48-byte frame ABI: offsets 2, 3, 8.
+/** Material-owned extension lanes in the 64-byte frame ABI: offsets 2, 3, 8 and optionally 11–13.
  * Surface does not interpret these as pointer coordinates, light or corner radius. */
-export type FrameExtras = readonly [number, number, number];
+export type FrameExtras = readonly [number, number, number] | readonly [number, number, number, number] | readonly [number, number, number, number, number, number];
 export type SurfaceFrame = Readonly<{
   element: HTMLElement;
   width: number;
