@@ -4,8 +4,7 @@ Experimental GPU surfaces with native DOM layout and interaction.
 
 Start with [the architecture contract](ARCHITECTURE.md): the one current source for
 package boundaries, animation ownership, lifecycle and supported usage.
-[Oyn UI vision](VISION.md) describes product/distribution;
-[OYN Ceramic design philosophy](docs/ceramic-design.md) describes spatial design.
+[Oyn UI vision](VISION.md) describes product and distribution.
 
 ## Component library
 
@@ -47,7 +46,7 @@ Mount under `SurfaceProvider`. `ceramic` is a stable definition; props update a
 persistent per-node appearance after commit. No manual memoization is required.
 Surface manages DOM/canvas, WebGPU, resources, GPU draw scheduling and optional shared input
 facts. Ceramic interprets pointer state as light and owns hold/return/fixed policy.
-See [API decisions](docs/surface-api.md) and [Surface contracts](packages/surface/README.md).
+See [Surface contracts](packages/surface/README.md).
 React Compiler validation remains future work, not a current compatibility claim.
 
 ## Object library — 53 objects + 2 compositions

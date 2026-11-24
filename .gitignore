@@ -21,5 +21,13 @@ playwright-report/
 examples/atelier/src/components/generated/
 examples/atelier/public/recipe-source/
 
-# Independently versioned Letterform Lab site checkout (not a workspace or submodule).
-/docs/brand/letterform-lab/
+# Local design studies, proof sheets, and launch exports.
+/docs/
+/launch/
+artifacts/
+recordings/
+screenshots/
+*.mp4
+*.m4v
+*.mov
+*.webm

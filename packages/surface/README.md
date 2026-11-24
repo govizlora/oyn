@@ -140,7 +140,7 @@ Axis-aligned targets only; no general rotation/skew/perspective or animation tra
 Render-time writes to live instance/ref state and render-time mode resolution were
 removed from the hook. Correctness does not depend on memoization. Compiler-enabled
 consumer/library validation remains future work: no Compiler certification or
-`use no memo` workaround is claimed. See [API decisions](../../docs/surface-api.md) and headless
+`use no memo` workaround is claimed. See the [architecture contract](../../ARCHITECTURE.md) and headless
 `test:surface-appearance` for current lifecycle/input/type coverage.
 
 ## Optional external animation adapter

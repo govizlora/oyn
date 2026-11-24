@@ -2,7 +2,6 @@
 
 This is the **authoritative specification for cross-package boundaries**. Read it before changing APIs, interaction, animation, materials or rendering. If the implementation diverges, reconcile the code, tests and documentation together.
 
-- [Design philosophy](docs/ceramic-design.md): spatial relationships and motion.
 - [UI usage and delivery](packages/ui/README.md): component sources, SDK composition and registry.
 - [Surface API](packages/surface/README.md) and [source map](packages/surface/ARCHITECTURE.md): interfaces and reading order.
 - [Ceramic optics](packages/ceramic/README.md): color, lighting, shadows, padding and geometry.
