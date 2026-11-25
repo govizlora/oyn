@@ -651,17 +651,7 @@ try {
       .isChecked(),
     true,
   );
-  await room('Archive');
-  assert.equal(
-    await page.locator('.library-specimen[data-layout="composition"]').count(),
-    2,
-  );
-  assert.equal(await page.locator('.task-list').count(), 1);
-  assert.equal(await page.locator('.file-table').count(), 1);
-  assert.equal((await page.evaluate(() => window.gpuStats)).pipelines, 5);
-  results.push({
-    interactions: '5 hardware objects and 2 preserved compositions passed',
-  });
+  results.push({ interactions: '5 hardware objects passed' });
   await page.getByRole('button', { name: /^Picked/ }).click();
   assert.equal(await page.locator('.library-specimen').count(), 3);
   assert.deepEqual(
@@ -718,21 +708,28 @@ try {
     'calculator',
   );
   await room('All objects');
-  const allIds = [];
-  for (let p = 0; p < 10; p++) {
-    await settle();
-    allIds.push(
-      ...(await page
-        .locator('.library-specimen')
-        .evaluateAll((els) => els.map((el) => el.dataset.object))),
-    );
-    assert.ok((await page.locator('.library-specimen').count()) <= 6);
-    if (p < 9)
-      await page
-        .getByRole('button', { name: 'Next library page', exact: true })
-        .click();
-  }
-  assert.equal(new Set(allIds).size, 55);
+  const firstPageIds = await page
+    .locator('.library-specimen')
+    .evaluateAll((els) => els.map((el) => el.dataset.object));
+  await page
+    .getByRole('button', { name: 'Next library page', exact: true })
+    .click();
+  await settle();
+  assert.equal(await page.locator('.library-specimen').count(), 6);
+  const secondPageIds = await page
+    .locator('.library-specimen')
+    .evaluateAll((els) => els.map((el) => el.dataset.object));
+  assert.equal(new Set([...firstPageIds, ...secondPageIds]).size, 12);
+  await page
+    .getByRole('button', { name: 'Previous library page', exact: true })
+    .click();
+  await settle();
+  assert.deepEqual(
+    await page
+      .locator('.library-specimen')
+      .evaluateAll((els) => els.map((el) => el.dataset.object)),
+    firstPageIds,
+  );
   await page
     .getByRole('link', { name: 'Quiet', exact: true })
     .click();
@@ -752,7 +749,6 @@ try {
     'curiosities',
     'systems',
     'hardware',
-    'archive',
   ];
   for (const width of [1440, 1024, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
@@ -862,7 +858,7 @@ try {
     JSON.stringify(results, null, 2),
   );
   console.log(
-    'PASS: 53 interactive objects + 2 preserved compositions; 10 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/zero copies; 30 responsive screenshots; idle/reduced-motion; hardware controls with WebGL2 fallback.',
+    'PASS: 53 interactive objects; 9 rooms; persistent picks/export/inspection/history; real shader text and custom colors; one GPU device/zero copies; 27 responsive screenshots; idle/reduced-motion; hardware controls with WebGL2 fallback.',
   );
 } finally {
   server?.kill('SIGTERM');

@@ -24,8 +24,8 @@ imported by the homepage or any other Atelier route.
 ```sh
 npm run dev                 # http://127.0.0.1:5177
 npm run build               # root dist/, static hosting; no deployment
-npm run test:atelier        # production, headless Chrome, including the archive
-npm run test:library        # full collection and selection workflow
+npm run test:atelier        # production Card checks, headless Chrome
+npm run test:library        # active specimens and selection workflow
 ```
 
 - `/`: **Sculpted Ceramic**. Responsive nine-object specimen board.
@@ -132,19 +132,13 @@ mobile GPU performance guarantee. Use HTTPS or localhost for WebGPU. Materials w
 ## Validation
 
 `test:sculpted` covers the current baked homepage. `test:atelier` builds production
-and runs Card, Quiet, and the
-archive regression suite. The browser
-suites run headless with local previews; `BASE_URL` can use an existing
-server. Tests include actual changed pixels, mouse/keyboard input, single device,
-cached pipelines, zero Canvas2D copies, idle rendering, motion cleanup, hidden and
-reduced-motion policy, history, WebGL2 fallback and five viewport sizes:
-1440×1000, 1440×900, 1280×720, 900×600, 390×844 (DPR 2). Desktop studies fit one screen;
-small screens reflow. Archive tests retain calendar/search/sort/filter/dropdown and
-mixed-selection coverage. Outputs: `test-results/atelier-archive/`.
+and runs the Card suite. Browser suites run headlessly with local previews;
+`BASE_URL` can use an existing server. Archived compositions are not tested.
 
-The library suite covers all 55 entries, persisted picks/export, isolated links,
-search/paging, denied storage, and 30 room/viewport screenshots. Outputs:
-`test-results/library/`. All screenshots are ignored by git.
+The library suite covers the 53 non-archived specimens, persisted picks/export,
+isolated links, search/paging, denied storage, and 27 room/viewport screenshots.
+It does not visit the Archive room or enumerate archived entries.
+Outputs: `test-results/library/`. All screenshots are ignored by git.
 
 Chrome is the rendered review target. Stock installed headless Firefox blocklists
 WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison,

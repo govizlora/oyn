@@ -100,13 +100,13 @@ bounds demo size; it is **not** viewport culling or a mobile performance claim. 
 ## Verification
 
 `npm run test:library` builds production, starts its own local preview, and runs
-headless Chrome. It exercises all 53 specimens and mounts both archived compositions, persistent picks, JSON download,
+headless Chrome. It exercises the 53 non-archived specimens, persistent picks, JSON download,
 search, paging, isolation/history, storage-denied behavior and hardware controls without WebGPU.
 It verifies actual changed pixels for custom Ceramic color and live CRT glyphs,
-one live GPU device/five cached pipelines/zero Canvas2D copies, idle rendering,
-reduced motion, and 30 room/viewport screenshots (1440, 1024, 390 pixels wide).
+one live GPU device/cached pipelines/zero Canvas2D copies, idle rendering,
+reduced motion, and 27 room/viewport screenshots (1440, 1024, 390 pixels wide).
 Outputs are gitignored under `test-results/library/`.
 
-`npm run test:atelier` covers Card, Quiet,
-and the full original calendar/list/table regression suite inside Archive.
+Archived compositions are excluded from tests.
+`npm run test:atelier` covers Card.
 No remote deployment, push, or publishing happens in either command.
