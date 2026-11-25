@@ -32,10 +32,16 @@ npm run test:browser   # Explicit headless GPU, CSS fallback and optical regress
 `npm run dev` serves fixtures under `/tests/fixtures/`; it does not open a browser
 or launch a component showcase. Browser tests are not part of the fast suite.
 
+## Website
+
+The official [oyn.dev](https://oyn.dev/) homepage lives in `site/`. It consumes the
+public package and is not an npm workspace. Run `npm run build:site` to build
+`site/dist/`; Vercel publishes that directory on pushes to `main`.
+
 ## Frozen local work
 
 Only Core, the React interface and standard Ceramic are active. The Ready list
-was empty at cleanup, so all UI components, examples, site/deployment files and
+was empty at cleanup, so all UI components, examples, former site implementation and
 material experiments were archived with their dedicated tests.
 
 - `archive/2026-11-25-lean-core/`: original work and a complete baseline snapshot.

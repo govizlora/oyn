@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:site": "npm run build -w oyn && vite build site",
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build -w oyn && npm run check:architecture",
     "test": "npm run build && node tests/material-core.mjs && node tests/ceramic-elevation.mjs && node tests/ceramic-light.mjs && node tests/package-entrypoints.mjs",

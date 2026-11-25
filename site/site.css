@@ -1,0 +1,103 @@
+:root {
+  color-scheme: light dark;
+  font:
+    100%/1.45 Helvetica,
+    Arial,
+    sans-serif;
+  background: light-dark(#f0f0f0, #0c0c0c);
+  color: light-dark(#171717, #ededed);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+header,
+footer {
+  min-height: 5rem;
+  padding: 1rem clamp(1rem, 3vw, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+}
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+.logo {
+  width: 3rem;
+  height: 1rem;
+  mask: url("/oyn.svg") center/contain no-repeat;
+  background: currentColor;
+}
+nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1rem;
+}
+main {
+  align-self: center;
+  width: min(42rem, calc(100% - 2.5rem));
+  margin: 2rem auto;
+}
+fieldset {
+  min-width: 0;
+  margin: 0;
+  border: none;
+  padding: 0.5rem;
+  display: flex;
+  background: light-dark(#e5e5e5, #181818);
+  border-radius: 2rem;
+}
+legend,
+input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+fieldset label {
+  flex: 1;
+  text-align: center;
+  padding: 1rem 0.2rem;
+  border-radius: 1.5rem;
+  cursor: pointer;
+}
+label:has(:checked):not([data-oyn-active]),
+article:not([data-oyn-active]) {
+  background: light-dark(#fafafa, #242424);
+  box-shadow: 0 2px 5px #0002;
+}
+label:has(:focus-visible) {
+  outline: 2px solid currentColor;
+}
+article {
+  margin-top: 1.5rem;
+  padding: clamp(1.5rem, 6vw, 4rem);
+  border-radius: 2rem;
+}
+h1 {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 1.05;
+  margin: 0;
+}
+p {
+  margin: 0.8rem 0 0;
+}
+footer {
+  justify-content: center;
+}
+select {
+  font: inherit;
+}
+[hidden] {
+  display: none;
+}

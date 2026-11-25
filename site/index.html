@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OYN — Materials for native HTML</title>
+    <meta
+      name="description"
+      content="Explore Ceramic, a pointer-lit WebGPU material for native HTML."
+    />
+    <meta property="og:title" content="OYN — Materials for native HTML" />
+    <meta property="og:image" content="https://oyn.dev/oyn-preview.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://oyn.dev/" />
+    <link rel="icon" href="/oyn.svg" />
+    <link rel="stylesheet" href="./site.css" />
+  </head>
+  <body>
+    <header>
+      <a class="logo" href="/" aria-label="OYN home"></a
+      ><a href="/about/">WIP</a>
+      <nav aria-label="Project links">
+        <a href="https://github.com/govizlora/oyn">GitHub</a
+        ><a href="https://x.com/Govizlora">X</a>
+      </nav>
+    </header>
+    <main>
+      <fieldset hidden>
+        <legend>Ceramic study</legend>
+        <label
+          ><input
+            type="radio"
+            name="study"
+            value="surface"
+            checked
+          />Surface</label
+        >
+        <label><input type="radio" name="study" value="light" />Light</label>
+        <label><input type="radio" name="study" value="motion" />Motion</label>
+      </fieldset>
+      <article aria-live="polite">
+        <section id="surface">
+          <h1>Native HTML</h1>
+          <p>Tab in. Switch with the arrow keys.</p>
+        </section>
+        <section id="light" hidden>
+          <h1>Light, not borders</h1>
+          <p>Move your pointer. Watch the edge.</p>
+        </section>
+        <section id="motion" hidden>
+          <h1>Motion in sync</h1>
+          <p>Switch the selection. Follow the light.</p>
+        </section>
+      </article>
+      <noscript
+        >OYN brings ceramic surfaces to native HTML. Enable JavaScript to try
+        the study.</noscript
+      >
+    </main>
+    <footer>
+      <label hidden
+        >Appearance
+        <select>
+          <option value="light dark">System</option>
+          <option>light</option>
+          <option>dark</option>
+        </select></label
+      >
+    </footer>
+    <script type="module" src="./study.js"></script>
+  </body>
+</html>
