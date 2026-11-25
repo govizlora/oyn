@@ -15,8 +15,13 @@ function files(directory) {
   });
 }
 const failures = [];
-for (const layer of ["surface", "ceramic", "ui"]) {
-  for (const file of files(`packages/${layer}/src`)) {
+for (const [layer, directory] of Object.entries({
+  surface: "packages/oyn/src/core",
+  react: "packages/oyn/src/react",
+  ceramic: "packages/oyn/src/materials",
+  ui: "packages/ui/src",
+})) {
+  for (const file of files(directory)) {
     const source = ts.createSourceFile(
       file,
       fs.readFileSync(file, "utf8"),
@@ -36,7 +41,7 @@ for (const layer of ["surface", "ceramic", "ui"]) {
         const name = node.moduleSpecifier.text;
         if (
           layer === "surface" &&
-          /@oyn\/(ceramic|ui)|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(
+          /materials\/|@oyn\/ui|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(
             name,
           )
         )
@@ -47,7 +52,6 @@ for (const layer of ["surface", "ceramic", "ui"]) {
         if (
           layer === "surface" &&
           !file.includes("/react/") &&
-          !file.endsWith("/index.ts") &&
           (/^(react|react-dom)(\/|$)/.test(name) || /(^|\/)react\//.test(name))
         )
           report(
@@ -61,7 +65,7 @@ for (const layer of ["surface", "ceramic", "ui"]) {
           )
         )
           report(node, "Ceramic must not own React/UI/animation policy.");
-        if (layer !== "surface" && /surface\/(src|dist)\//.test(name))
+        if (layer === "ui" && /oyn\/(src|dist)\//.test(name))
           report(node, "Consumers must use Surface public entry points.");
       }
       if (ts.isCallExpression(node)) {

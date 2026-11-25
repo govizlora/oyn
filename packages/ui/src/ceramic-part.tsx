@@ -10,8 +10,8 @@ import {
 } from "react";
 import { mergeProps } from "@ui-sdk/react/primitive";
 import { useCeramicControl } from "./ceramic-control.js";
-import { ceramic } from "@oyn/ceramic";
-import { useSurface } from "@oyn/surface";
+import { ceramic } from "oyn/materials/ceramic";
+import { useMaterial } from "oyn/react";
 import "./styles/material.css";
 
 // Compound fields have one well around the input and its adornments.
@@ -26,7 +26,7 @@ const elevations = {
 type Face = keyof typeof elevations;
 
 export function useCeramicFace(face: Face, ref?: Ref<HTMLElement>) {
-  const surface = useSurface({
+  const surface = useMaterial({
     appearance: ceramic,
     props:
       face === "floating"

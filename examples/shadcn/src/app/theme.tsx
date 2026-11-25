@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
-import { SurfaceProvider } from '@oyn/surface';
+import { OynProvider } from 'oyn/react';
 
 type Mode = 'light' | 'dark' | 'system';
 const themeStorageKey = 'oyn:theme-mode';
@@ -35,5 +35,5 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.toggle('dark', dark);
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
   }, [dark]);
-  return <ThemeContext value={{ mode, dark, setMode }}><SurfaceProvider>{children}</SurfaceProvider></ThemeContext>;
+  return <ThemeContext value={{ mode, dark, setMode }}><OynProvider>{children}</OynProvider></ThemeContext>;
 }

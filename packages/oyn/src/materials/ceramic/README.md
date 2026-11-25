@@ -1,8 +1,8 @@
-# @oyn/ceramic
+# oyn/materials/ceramic
 
-Environment-aware soft/glossy Ceramic optics for @oyn/surface's WebGPU renderer.
+Environment-aware soft/glossy Ceramic optics for oyn's WebGPU renderer.
 
-Read [ARCHITECTURE.md](../../ARCHITECTURE.md) before changing animation or package boundaries.
+Read [ARCHITECTURE.md](../../../../../ARCHITECTURE.md) before changing animation or package boundaries.
 Ceramic consumes instantaneous values; it has no spring/transition or UI gesture policy.
 
 Raised analytic cards and baked controls share the geometry/lighting contract.
@@ -14,7 +14,7 @@ comparison adapter; `./sculpted` is deprecated and unused by Atelier. Concave op
 are a branch of the same signed analytic program, not another material or pipeline.
 
 ```tsx
-const ref = useSurface({
+const ref = useMaterial({
   appearance: ceramic,
   props: { elevation: pressed ? 3 : 12, maxElevation: 12 },
 });
@@ -110,7 +110,7 @@ No idle polling loop is installed.
 
 Options: `color` (single RGB/HEX string), `colorScheme` (`light`/`dark`), `elevation` (default 16), optional `maxElevation`, `lighting` (soft/glossy override), `rim` (glossy edges), `lightRim` (soft edges). Analytic elevation may be negative (recess depth), zero (flat, with unchanged pigment), or positive (raised). It must be a finite f32 and below `shadowLightHeight` (480 by default); the point-light projection is singular at the light height. The optional maximum is a canvas-space budget, not a clamp or animation target. Its effective value cannot be smaller than the initial instance height. If omitted, the elevation at material creation supplies the budget. Replacing the material can change the explicit maximum; changing the live elevation cannot.
 
-For upward springs, reserve space explicitly: `props: { elevation: 12, maxElevation: 18 }`. Use `bindMotion` from `@oyn/surface/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
+For upward springs, reserve space explicitly: `props: { elevation: 12, maxElevation: 18 }`. Use `bindMotion` from `oyn/adapters/motion` to connect a MotionValue to `material.setElevation`. The material itself only accepts numbers. If an animation exceeds the reserved height its shadow may be clipped; the library does not alter the curve.
 
 `bounds.ts` derives independent horizontal/vertical margins from element size and budget height, using the infinite-pointer-distance limit. The two shadow contributions are each bounded to 0.0005 alpha outside the estimated region; two CSS pixels cover anti-aliasing. This is a practical visibility bound, not an exact finite support. Elevation zero paints no ground shadow.
 
@@ -131,8 +131,8 @@ Canvas padding reserves the larger of the shadow and glow footprints.
 
 
 ```ts
-useSurface({ appearance: ceramic, props: {} }); // elevation 16, automatic environment and lighting
-useSurface({
+useMaterial({ appearance: ceramic, props: {} }); // elevation 16, automatic environment and lighting
+useMaterial({
   appearance: ceramic,
   props: { lightReflectionStrength: 2, shadowStrength: 0.1 },
 });
@@ -166,7 +166,7 @@ square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 
 ### Signed elevation
 
-`useSurface({ appearance: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
+`useMaterial({ appearance: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
 floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised. Pigment is
 independent of elevation: the same color covers the face at every height.
 Only optical cues fade with relief. At zero a colored face is flat paint;
@@ -190,7 +190,7 @@ outline, canvas or temporal state. Glossy recesses use `reflectionStrength` and
 
 ```tsx
 // In Card Fantony, choose a dark pigment and negative Elevation / depth.
-useSurface({ appearance: ceramic, props: {
+useMaterial({ appearance: ceramic, props: {
   color: "#171717", elevation: -4, reflectionStrength: 1, sharpness: 1,
 } });
 ```
@@ -229,7 +229,7 @@ does not require extra shadow space. Layout radius still belongs to the host.
 ## Pointer light policy
 
 ```tsx
-useSurface({
+useMaterial({
   appearance: ceramic,
   props: {
     elevation: 16,
@@ -260,7 +260,7 @@ they must not reduce AO by global cast strength when an edge may be unshadowed.
 ## Minimal usage and defaults
 
 ```tsx
-useSurface({ appearance: ceramic, props: { elevation: 16 } });
+useMaterial({ appearance: ceramic, props: { elevation: 16 } });
 ```
 
 Both `maxElevation` and `light` are optional. Without an explicit maximum, the
@@ -275,7 +275,7 @@ requested. These same defaults drive the input adapter, not a duplicate preset.
 
 ## Flip-disc exploration material
 
-`@oyn/ceramic/flip-disc` exports `createFlipDiscMaterial(options)` and numeric
+`oyn/materials/ceramic/flip-disc` exports `createFlipDiscMaterial(options)` and numeric
 `setAngle`, `setTravel`, `setGlow` setters. It contains only geometry, optics and
 light-coordinate binding. The former gesture/time-driven `flipDisc` appearance
 was replaced, not retained as a second animation path. Atelier's

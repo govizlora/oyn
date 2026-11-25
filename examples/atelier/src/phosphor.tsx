@@ -1,6 +1,7 @@
-import { ceramicBinding } from '../../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../../packages/oyn/src/materials/ceramic/interaction';
 import { useLayoutEffect, useMemo, type CSSProperties } from 'react';
-import { materialAppearance, createParameters, useSurface, type Material } from '@oyn/surface';
+import { materialAppearance, createParameters, type Material } from 'oyn';
+import { useMaterial } from 'oyn/react';
 
 const font: Record<string, string[]> = {
   A: ['01110', '10001', '11111', '10001', '10001'],
@@ -214,7 +215,7 @@ export function Phosphor({
     );
     cells.forEach((cell, i) => material.parameters.set(i + 8, cell));
   }, [material, screenText]);
-  const ref = useSurface({ appearance: materialAppearance, props: { material: material } });
+  const ref = useMaterial({ appearance: materialAppearance, props: { material: material } });
   return (
     <div
       ref={ref}

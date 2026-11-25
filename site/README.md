@@ -6,7 +6,7 @@ The Vercel project `govi/oyn` tracks `govizlora/oyn`. Pushes to `main` trigger p
 
 ## Pointer study
 
-The site supplies one stable `SurfaceInputs` source to `SurfaceProvider`.
+The site supplies one stable `SurfaceInputs` source to `OynProvider`.
 It starts at the viewport center. Devices without a hover-capable fine pointer
 show a non-interactive macOS-style arrow following a slow figure-eight. The same snapshot
 drives Ceramic lighting; no synthetic DOM events or separate lighting loop is used.

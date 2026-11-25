@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { createServer } from "vite";
 import { chromium } from "playwright";
-import { createCeramicMaterial } from "../packages/ceramic/dist/index.js";
+import { createCeramicMaterial } from "../packages/oyn/dist/materials/ceramic/index.js";
 import {
   insetSurfaceWGSL,
   insetWallSlope,
-} from "../packages/ceramic/dist/inset.js";
-import { geometryWGSL } from "../packages/ceramic/dist/effects/geometry.js";
-import { ceramicLightingWGSL } from "../packages/ceramic/dist/effects/ceramic-lighting.js";
+} from "../packages/oyn/dist/materials/ceramic/inset.js";
+import { geometryWGSL } from "../packages/oyn/dist/materials/ceramic/effects/geometry.js";
+import { ceramicLightingWGSL } from "../packages/oyn/dist/materials/ceramic/effects/ceramic-lighting.js";
 
 // Coverage cannot amplify or saturate radiance. Test the production function,
 // including deliberately overbright lobes and fully/subpixel-covered edges.

@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { Button } from "@oyn/ui/button";
 import { Tabs, TabsList, TabsTab } from "@oyn/ui/tabs";
 import { FilmTabs } from "../examples/atelier/src/tabs-film/FilmTabs";
@@ -122,8 +122,8 @@ function Study() {
   );
 }
 createRoot(document.getElementById("study")!).render(
-  <SurfaceProvider inputs={studyPointer.inputs}>
+  <OynProvider inputs={studyPointer.inputs}>
     <StudyCursor />
     <Study />
-  </SurfaceProvider>,
+  </OynProvider>,
 );

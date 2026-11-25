@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { useSurface } from '@oyn/surface';
-import { ceramic } from '@oyn/ceramic';
+import { useMaterial } from 'oyn/react';
+import { ceramic } from 'oyn/materials/ceramic';
 
 // The entire subject: one native button, one ref, no synchronization helpers.
 export function SurfaceButton() {
   const [pressed, setPressed] = useState(false);
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: ceramic,
     props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
   });

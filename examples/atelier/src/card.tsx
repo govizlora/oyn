@@ -1,9 +1,9 @@
-import { ceramic } from "@oyn/ceramic";
-import { useSurface } from "@oyn/surface";
+import { ceramic } from "oyn/materials/ceramic";
+import { useMaterial } from "oyn/react";
 import "./card.css";
 
 export function Card() {
-  const ref = useSurface({ appearance: ceramic, props: {} });
+  const ref = useMaterial({ appearance: ceramic, props: {} });
   return (
     <section className="sculpture-page card-page" aria-labelledby="card-title">
       <header className="sculpture-heading">

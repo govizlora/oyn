@@ -30,9 +30,9 @@ To add a migration, implement it in `src/ceramic/`, register it in the app regis
 Follow [ARCHITECTURE.md](../../ARCHITECTURE.md): consumer animation clocks publish
 numbers; Surface owns rendering, not interpolation.
 
-- Ceramic uses `useSurface` directly; there is no `useAppearanceSurface` that toggles materials based on app mode.
+- Ceramic uses `useMaterial` directly; there is no `useAppearanceSurface` that toggles materials based on app mode.
 - Each appearance has one drawing source; do not overlay the original CSS background/shadow.
-- SurfaceProvider, theme, and scheduling each retain a single control source.
+- OynProvider, theme, and scheduling each retain a single control source.
 - Do not introduce another canvas, GPU submission loop, or duplicate ref-composition mechanism; preserve native DOM interactions and accessibility semantics.
 - Groove formulas and presets are ported from Still Creek, excluding glass, focus light bands, and loading effects; leave Still Creek source unchanged.
 - Handle layout corrections, preview scrolling, and business demos only in the app.

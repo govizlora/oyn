@@ -1,8 +1,7 @@
 import { useTheme } from '@/app/theme'
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
-import { ceramic } from '@oyn/ceramic'
-import { useSurface } from '@oyn/surface'
-import { neutralProps, destructiveProps, primaryProps } from '@/ceramic/materials'
+import { ceramic } from 'oyn/materials/ceramic'
+import { useMaterial } from 'oyn/react';import { neutralProps, destructiveProps, primaryProps } from '@/ceramic/materials'
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -56,7 +55,7 @@ function Button({
   const mode = useTheme().dark ? 'dark' : 'light'
   const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps[mode] : neutralProps
   const filled = variant !== 'ghost' && variant !== 'link'
-  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...material } })
+  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...material } })
   const ref = useComposedRefs(filled ? surfaceRef : undefined, forwardedRef)
   const materialClass = variant === 'default' ? 'text-primary-foreground' : variant === 'destructive' ? 'text-white' : 'text-foreground'
   const Comp = asChild ? Slot.Root : "button"

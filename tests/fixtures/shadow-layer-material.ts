@@ -1,13 +1,13 @@
-import { ceramicBinding } from '../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../packages/oyn/src/materials/ceramic/interaction';
 /** Research-only assemblies. Production optics, geometry and scheduling stay unchanged. */
-import { createParameters, type Material } from '@oyn/surface';
-import { ceramicFinish } from '../../packages/ceramic/src/finish';
-import { frameWGSL } from '../../packages/ceramic/src/effects/frame';
-import { geometryWGSL } from '../../packages/ceramic/src/effects/geometry';
-import { ceramicLightingWGSL } from '../../packages/ceramic/src/effects/ceramic-lighting';
-import { ceramicGeometryWGSL } from '../../packages/ceramic/src/effects/ceramic-geometry';
-import { ceramicSurfaceWGSL } from '../../packages/ceramic/src/effects/ceramic-surface';
-import { gaussianCoverageWGSL, ceramicShadowForLayers } from '../../packages/ceramic/src/effects/shadow';
+import { createParameters, type Material } from 'oyn';
+import { ceramicFinish } from '../../packages/oyn/src/materials/ceramic/finish';
+import { frameWGSL } from '../../packages/oyn/src/materials/ceramic/effects/frame';
+import { geometryWGSL } from '../../packages/oyn/src/materials/ceramic/effects/geometry';
+import { ceramicLightingWGSL } from '../../packages/oyn/src/materials/ceramic/effects/ceramic-lighting';
+import { ceramicGeometryWGSL } from '../../packages/oyn/src/materials/ceramic/effects/ceramic-geometry';
+import { ceramicSurfaceWGSL } from '../../packages/oyn/src/materials/ceramic/effects/ceramic-surface';
+import { gaussianCoverageWGSL, ceramicShadowForLayers } from '../../packages/oyn/src/materials/ceramic/effects/shadow';
 // Uniform midpoint sampling centered on the production mean height 7H/12.
 // n=6 reproduces iH/6; n=3 preserves the previously approved paired-average rule.
 export const layerCounts=[6,5,4,3] as const;

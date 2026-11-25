@@ -4,7 +4,7 @@ import {
   preferredColorScheme,
   type ColorScheme,
 } from "./environment.js";
-import { createParameters, type Material } from "@oyn/surface";
+import { createParameters, type Material } from "../../core/index.js";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicWGSL } from "./shaders.js";
 import { receiverBounds } from "./bounds.js";

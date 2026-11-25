@@ -2,7 +2,7 @@ import { groundFrostWGSL } from "./optics.js";
 import { environmentBinding, preferredColorScheme } from "./environment.js";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicSurfaceWGSL } from "./effects/ceramic-surface.js";
-import { createParameters, type Material } from "@oyn/surface";
+import { createParameters, type Material } from "../../core/index.js";
 import { frameWGSL } from "./effects/frame.js";
 import {
   ceramicFinish,

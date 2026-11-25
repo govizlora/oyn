@@ -1,9 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { SurfaceInputs } from "../types/input.js";
-import { createEngine } from "../engine.js";
-import { SurfaceEngineContext } from "./SurfaceEngineContext.js";
+import type { SurfaceInputs } from "../core/types/input.js";
+import { createEngine } from "../core/engine.js";
+import { OynContext } from "./OynContext.js";
 
-export function SurfaceProvider({
+export function OynProvider({
   children,
   hdr = false,
   inputs,
@@ -29,5 +29,5 @@ export function SurfaceProvider({
     };
   }, [engine, hdr, inputs]);
 
-  return <SurfaceEngineContext value={engine}>{children}</SurfaceEngineContext>;
+  return <OynContext value={engine}>{children}</OynContext>;
 }

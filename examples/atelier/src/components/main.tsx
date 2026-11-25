@@ -1,6 +1,6 @@
 import { StrictMode, useEffect, useState, type MouseEvent } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { ProjectSwitch } from "../projects";
 import { readStory } from "./catalog";
 import { Overview } from "./overview";
@@ -140,9 +140,9 @@ function App() {
             </footer>
           </article>
         ) : (
-          <SurfaceProvider>
+          <OynProvider>
             <Overview group={group} />
-          </SurfaceProvider>
+          </OynProvider>
         )}
       </main>
     </>

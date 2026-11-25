@@ -1,7 +1,4 @@
 // Public entry point only. Internal modules import their dependencies directly.
-export { SurfaceProvider } from './react/SurfaceProvider.js';
-export { useSurface } from './react/useSurface.js';
-export type { SurfaceOptions } from './react/useSurface.js';
 export type {
   Material,
   Parameters,

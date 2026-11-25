@@ -29,7 +29,7 @@ try {
   const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
   await page.goto(fixtureUrl);
   const captures = await page.evaluate(async () => {
-    const { createEngine } = await import('/packages/surface/src/engine.ts');
+    const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
     const { solidCeramic } =
       await import('/tests/fixtures/runtime-solid.ts');
     const a = {

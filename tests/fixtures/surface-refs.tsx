@@ -1,7 +1,7 @@
 import { StrictMode, createElement, createRef, useMemo, type Ref } from 'react';
 import { createRoot } from 'react-dom/client';
-import {  SurfaceProvider, useSurface } from '@oyn/surface';
-import { ceramic } from '@oyn/ceramic';
+import { OynProvider, useMaterial } from 'oyn/react';
+import { ceramic } from 'oyn/materials/ceramic';
 
 export async function checkRefLifecycle() {
   const container = document.createElement('div');
@@ -18,7 +18,7 @@ export async function checkRefLifecycle() {
   };
   const objectRef = createRef<HTMLButtonElement>();
   function Probe({ forwardedRef, color }: { forwardedRef: Ref<HTMLButtonElement>; color: string }) {
-    const ref = useSurface({ appearance: ceramic, props: { color, elevation: 4 } });
+    const ref = useMaterial({ appearance: ceramic, props: { color, elevation: 4 } });
     const composed = useMemo(() => (node: HTMLButtonElement | null) => {
       const releaseSurface = ref(node);
       const cleanup = typeof forwardedRef === "function" ? forwardedRef(node) : undefined;
@@ -34,7 +34,7 @@ export async function checkRefLifecycle() {
   }
   const settle = async () => { for (let i = 0; i < 4; i++) await new Promise(requestAnimationFrame); };
   const render = async (forwardedRef: Ref<HTMLButtonElement>, color = '#123') => {
-    root.render(createElement(StrictMode, null, createElement(SurfaceProvider, null, createElement(Probe, { forwardedRef, color }))));
+    root.render(createElement(StrictMode, null, createElement(OynProvider, null, createElement(Probe, { forwardedRef, color }))));
     for (let i = 0; i < 300; i++) {
       await new Promise(requestAnimationFrame);
       if (container.querySelector('[data-oyn-canvas]')) break;

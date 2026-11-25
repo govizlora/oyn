@@ -73,9 +73,9 @@ try {
         const raw = await page.evaluate(
           async ({ count, mode, frozen, sampleMs, budget }) => {
             const { createEngine } =
-              await import('/packages/surface/src/engine.ts');
+              await import('/packages/oyn/src/core/engine.ts');
             const { createCeramicMaterial } =
-              await import('/packages/ceramic/src/index.ts');
+              await import('/packages/oyn/src/materials/ceramic/index.ts');
             const { solidCeramic } =
               await import('/tests/fixtures/runtime-solid.ts');
             const stats = {

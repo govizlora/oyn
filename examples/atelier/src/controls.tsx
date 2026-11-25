@@ -8,8 +8,8 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { ceramic } from '@oyn/ceramic';
-import { useSurface } from '@oyn/surface';
+import { ceramic } from 'oyn/materials/ceramic';
+import { useMaterial } from 'oyn/react';
 
 export type Tone =
   'porcelain' | 'chalk' | 'orange' | 'ink' | 'sage' | 'yellow' | 'lilac';
@@ -36,7 +36,7 @@ export function useCeramic<T extends HTMLElement>(
 ) {
   const color = tone.startsWith('#') ? tone.toLowerCase() : ceramicColors[tone as Tone];
   const ink = color === ceramicColors.ink;
-  return useSurface({ appearance: ceramic, props: {
+  return useMaterial({ appearance: ceramic, props: {
     color, elevation, maxElevation: budget,
     lightRim: ink ? 2 : rim,
     lightSurfaceTop: ink ? 0.04 : 0.16,

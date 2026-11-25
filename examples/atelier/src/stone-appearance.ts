@@ -1,10 +1,10 @@
-import type { Appearance, Material, SurfaceBindingContext } from "@oyn/surface";
+import type { Appearance, Material, SurfaceBindingContext } from "oyn";
 import { sampleControlMotion } from "@oyn/ui/control-motion";
-import { bindMotion, type MotionNumber } from "@oyn/surface/adapters/motion";
+import { bindMotion, type MotionNumber } from "oyn/adapters/motion";
 import {
   createFlipDiscMaterial,
   type FlipDiscOptions,
-} from "@oyn/ceramic/flip-disc";
+} from "oyn/materials/ceramic/flip-disc";
 
 export type StoneProps = FlipDiscOptions & {
   stroke: number;

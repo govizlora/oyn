@@ -2,7 +2,7 @@
 import { createServer } from "vite";
 import { writeFile, readFile } from "node:fs/promises";
 import { parseWgsl, validate, writeGlsl } from "naga-wasm";
-const dir = new URL("../../packages/ceramic/src/", import.meta.url);
+const dir = new URL("../../packages/oyn/src/materials/ceramic/", import.meta.url);
 const vite = await createServer({
   root: new URL("../../", import.meta.url).pathname,
   server: { middlewareMode: true, hmr: false },
@@ -18,7 +18,7 @@ try {
     for (const [path, key] of entries) {
       code += `import {${key}} from "../${path}.js";\n`;
       const wgsl = (
-        await vite.ssrLoadModule("/packages/ceramic/src/" + path + ".ts")
+        await vite.ssrLoadModule("/packages/oyn/src/materials/ceramic/" + path + ".ts")
       )[key];
       const module = parseWgsl(wgsl),
         info = validate(module),

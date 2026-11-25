@@ -1,20 +1,20 @@
 import { useContext, useLayoutEffect, useMemo } from "react";
-import type { Mesh } from "../types/scene.js";
-import type { Appearance, AppearanceInstance } from "../types/appearance.js";
-import { SurfaceEngineContext } from "./SurfaceEngineContext.js";
+import type { Mesh } from "../core/types/scene.js";
+import type { Appearance, AppearanceInstance } from "../core/types/appearance.js";
+import { OynContext } from "./OynContext.js";
 
-export type SurfaceOptions<P> = {
+export type MaterialOptions<P> = {
   appearance: Appearance<P>;
   props: NoInfer<P>;
 };
 
 /** Ref owns the binding; the layout effect supplies committed configuration. */
-export function useSurface<P, T extends HTMLElement = HTMLElement>({
+export function useMaterial<P, T extends HTMLElement = HTMLElement>({
   appearance,
   props,
-}: SurfaceOptions<P>) {
-  const engine = useContext(SurfaceEngineContext);
-  if (!engine) throw new Error("useSurface requires SurfaceProvider");
+}: MaterialOptions<P>) {
+  const engine = useContext(OynContext);
+  if (!engine) throw new Error("useMaterial requires OynProvider");
 
   // Only allocate a handle during render. Instances are created by the ref.
   const binding = useMemo(() => {

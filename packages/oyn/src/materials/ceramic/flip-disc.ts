@@ -1,4 +1,4 @@
-import { createParameters, type Material } from "@oyn/surface";
+import { createParameters, type Material } from "../../core/index.js";
 import { frameWGSL } from "./effects/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
 import { parseColor } from "./color.js";

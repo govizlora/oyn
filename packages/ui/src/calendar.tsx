@@ -2,8 +2,8 @@
 
 import "./styles/base.css";
 import "./styles/calendar.css";
-import { useSurface } from "@oyn/surface";
-import { ceramic } from "@oyn/ceramic";
+import { useMaterial } from "oyn/react";
+import { ceramic } from "oyn/materials/ceramic";
 import type { ComponentProps } from "react";
 import * as Parts from "@ui-sdk/react/calendar";
 import { ceramicPart } from "./ceramic-part.js";
@@ -25,7 +25,7 @@ export const CalendarNext: typeof Parts.CalendarNext = ceramicPart(
 // Range wells sit behind the endpoint keys. The SDK supplies both committed
 // and preview range state, including a one-day range with coincident ends.
 function DayFace({ face }: { face: "range" | "key" }) {
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: ceramic,
     props: { elevation: face === "range" ? -2.4 : 6 },
   });

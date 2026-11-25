@@ -4,8 +4,8 @@ import {
   ceramicDefaults,
   type CeramicLight,
   type CeramicOptions,
-} from "@oyn/ceramic";
-import { useSurface } from "@oyn/surface";
+} from "oyn/materials/ceramic";
+import { useMaterial } from "oyn/react";
 import "./card-fantony.css";
 
 const { light, ...preset } = ceramicDefaults;
@@ -203,7 +203,7 @@ function Specimen({
   height: number;
   radius: number;
 }) {
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: ceramic,
     props: { ...options, colorScheme: scheme },
   });

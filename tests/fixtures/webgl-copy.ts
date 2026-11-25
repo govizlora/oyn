@@ -1,5 +1,5 @@
-import { createCeramicMaterial } from "../../packages/ceramic/src/material.js";
-import { createRenderer } from "../../packages/surface/src/renderer.js";
+import { createCeramicMaterial } from "../../packages/oyn/src/materials/ceramic/material.js";
+import { createRenderer } from "../../packages/oyn/src/core/renderer.js";
 
 // Benchmark-only alternative copy strategies. All GLSL is generated
 // from the production WGSL by the Node runner, never independently authored.

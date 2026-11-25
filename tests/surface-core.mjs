@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import { PNG } from 'pngjs';
 import { chromium, firefox } from 'playwright';
 import { spawn } from 'node:child_process';
-import { createParameters } from '../packages/surface/dist/index.js';
-import { bindMotion } from '../packages/surface/dist/adapters/motion.js';
-import { createCeramicMaterial, ceramicDefaults, ceramic } from '../packages/ceramic/dist/index.js';
-import { shadowBounds } from '../packages/ceramic/dist/bounds.js';
+import { createParameters } from '../packages/oyn/dist/index.js';
+import { bindMotion } from '../packages/oyn/dist/core/adapters/motion.js';
+import { createCeramicMaterial, ceramicDefaults, ceramic } from '../packages/oyn/dist/materials/ceramic/index.js';
+import { shadowBounds } from '../packages/oyn/dist/materials/ceramic/bounds.js';
 
 assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
@@ -62,8 +62,8 @@ try {
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
   await page.goto(fixtureUrl);
   const result = await page.evaluate(async () => {
-    const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
+    const { createCeramicMaterial } = await import('/packages/oyn/src/materials/ceramic/index.ts');
     const settle = async () => { for (let i = 0; i < 8; i++) await new Promise(requestAnimationFrame); };
     const wait = async condition => { for (let i = 0; !condition(); i++) { if (i > 300) throw Error('Timed out waiting for GPU canvas'); await new Promise(requestAnimationFrame); } };
     let devices = 0, submits = 0, pipelines = 0, copies = 0, measurements = 0, scheduled = 0;
@@ -116,8 +116,8 @@ try {
   for (const key of ['noAnimationMeasurement', 'stable', 'replacementPaddingChanged', 'explicitGrowth', 'resized', 'oldUnsubscribed', 'cleaned']) assert.ok(result[key], key);
   assert.equal(result.failed, false);
   const suppliedInputs = await page.evaluate(async () => {
-    const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
+    const { createCeramicMaterial } = await import('/packages/oyn/src/materials/ceramic/index.ts');
     const element = document.createElement('div');
     element.style.cssText = 'width:120px;height:40px';
     document.body.append(element);
@@ -171,8 +171,8 @@ try {
   assert.equal(refs.firstCanvases, 1);
   for (const key of ['stableOnMaterialChange', 'oldRefCleaned', 'newRefCleaned', 'objectAttached', 'objectCleared', 'noCanvases']) assert.ok(refs[key], key);
   await page.evaluate(async () => {
-    const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
+    const { createCeramicMaterial } = await import('/packages/oyn/src/materials/ceramic/index.ts');
     document.body.style.background = '#808080';
     const element = document.createElement('div');
     element.style.cssText = 'position:absolute;left:100px;top:100px;width:160px;height:100px;border-radius:12px';
@@ -191,7 +191,7 @@ try {
   assert.deepEqual(pixel(180,150), [12,12,12,255], 'dark material paints its DOM-aligned center');
   assert.deepEqual(pixel(50,50), [128,128,128,255]);
   await page.evaluate(async () => {
-    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const { createCeramicMaterial } = await import('/packages/oyn/src/materials/ceramic/index.ts');
     window.visual.meshes.get(window.visual.element).material = createCeramicMaterial({ elevation: 12 });
     window.visual.engine.requestMeasure();
   });
@@ -200,9 +200,9 @@ try {
   assert.ok(light.data[(150 * light.width + 180) * 4] >= 235, 'light material repaints without pipeline state leaking');
   await page.evaluate(() => { window.visual.engine.stop(); window.visual.element.remove(); });
   const failureChecks = await page.evaluate(async () => {
-    const { createRenderer } = await import('/packages/surface/src/renderer.ts');
-    const { createEngine } = await import('/packages/surface/src/engine.ts');
-    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const { createRenderer } = await import('/packages/oyn/src/core/renderer.ts');
+    const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
+    const { createCeramicMaterial } = await import('/packages/oyn/src/materials/ceramic/index.ts');
     const own = Object.getOwnPropertyDescriptor(navigator, 'gpu');
     let unavailable = false;
     Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });

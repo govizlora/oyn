@@ -1,4 +1,4 @@
-import type { Material, SurfaceBindingContext } from "@oyn/surface";
+import type { Material, SurfaceBindingContext } from "../../core/index.js";
 
 /** The surrounding page/section environment, independent of surface lighting. */
 export type ColorScheme = "light" | "dark";

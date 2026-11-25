@@ -1,7 +1,7 @@
 import { ProjectSwitch } from './projects';
 import { StrictMode, useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { SurfaceProvider } from '@oyn/surface';
+import { OynProvider } from 'oyn/react';
 import { SurfaceButton } from './surface-button';
 import './surface-example.css';
 import { bindSurfaceDomControls } from './surface-dom-controls';
@@ -115,7 +115,7 @@ function Example() {
         Scroll this page, resize the window, or scroll / drag the bottom-right
         corner of the dashed container.
       </p>
-      <SurfaceProvider>
+      <OynProvider>
         <div className="scroll-box" aria-label="Resizable scroll container">
           <div className="scroll-content">
             <p className="scroll-hint">Scroll down to the button ↓</p>
@@ -125,7 +125,7 @@ function Example() {
             <p className="scroll-hint">More native scroll space ↓</p>
           </div>
         </div>
-      </SurfaceProvider>
+      </OynProvider>
       <section className="notes">
         <h2>What to watch</h2>
         <ul>

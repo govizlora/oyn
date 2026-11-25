@@ -5,13 +5,13 @@ import {
   type ComponentProps,
 } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider, useSurface } from "@oyn/surface";
+import { OynProvider, useMaterial } from "oyn/react";
 import { Button } from "../../packages/ui/src/button";
 import { Avatar, AvatarFallback } from "../../packages/ui/src/avatar";
 import { Toggle } from "../../packages/ui/src/toggle";
 import { StoryButton } from "../../examples/atelier/src/components/recipe-button";
 
-import { ceramic } from "@oyn/ceramic";
+import { ceramic } from "oyn/materials/ceramic";
 import { NavigationDisclosure } from "../../packages/ui/src/navigation-menu";
 import { Input, InputGroup } from "../../packages/ui/src/input";
 import { Switch, SwitchThumb } from "../../packages/ui/src/switch";
@@ -30,8 +30,8 @@ function NativeInput(props: ComponentProps<"input">) {
   return <input {...props} />;
 }
 function Duplicate() {
-  const first = useSurface({ appearance: ceramic, props: {} });
-  const second = useSurface({ appearance: ceramic, props: {} });
+  const first = useMaterial({ appearance: ceramic, props: {} });
+  const second = useMaterial({ appearance: ceramic, props: {} });
   return (
     <div
       id="duplicate"
@@ -53,7 +53,7 @@ function Fixture() {
     Object.assign(window, { controls: { setMounted, setDuplicate } });
   });
   return (
-    <SurfaceProvider>
+    <OynProvider>
       {duplicate && <Duplicate />}
       {mounted && (
         <main
@@ -143,7 +143,7 @@ function Fixture() {
           </section>
         </main>
       )}
-    </SurfaceProvider>
+    </OynProvider>
   );
 }
 createRoot(document.getElementById("root")!).render(

@@ -2,7 +2,7 @@
 import { ProjectSwitch } from "./projects";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider, useSurface } from "@oyn/surface";
+import { OynProvider, useMaterial } from "oyn/react";
 import { stoneAppearance, type StoneProps } from "./stone-appearance";
 import { atRest, lattice, sample, stones, strike } from "./ripple-field";
 import "./flip-disc.css";
@@ -37,7 +37,7 @@ function Stone({
   props: StoneProps;
   onStrike: (index: number) => void;
 }) {
-  const ref = useSurface({ appearance: stoneAppearance, props });
+  const ref = useMaterial({ appearance: stoneAppearance, props });
   const { x, y, row, col } = stones[index];
   return (
     <button
@@ -131,7 +131,7 @@ function Atelier() {
     );
   }
   return (
-    <SurfaceProvider hdr={values.hdr}>
+    <OynProvider hdr={values.hdr}>
       <main className="ripple-page">
         <h1>Ripple field</h1>
         <p>Hover over a disc to lower it slightly; press to sink it deeper. Activate a disc to send a ripple outward.</p>
@@ -268,7 +268,7 @@ function Atelier() {
           </aside>
         </div>
       </main>
-    </SurfaceProvider>
+    </OynProvider>
   );
 }
 createRoot(document.getElementById("root")!).render(

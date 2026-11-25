@@ -1,4 +1,4 @@
-import { decodeGeometry, type BakedGeometry } from '@oyn/ceramic/baked';
+import { decodeGeometry, type BakedGeometry } from 'oyn/materials/ceramic/baked';
 /** App-owned, finite preset catalogue. GPU ownership stays in Surface. */
 const assets = new Map<string, Promise<BakedGeometry>>();
 export function loadGeometry(key: string) {

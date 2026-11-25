@@ -1,13 +1,13 @@
-import { ceramicBinding } from '../../packages/ceramic/src/interaction';
+import { ceramicBinding } from '../../packages/oyn/src/materials/ceramic/interaction';
 // Historical runtime-CSG baseline, test-only. Never import from application code.
-import { createParameters, type Material } from '@oyn/surface';
-import { frameWGSL } from '../../packages/ceramic/src/effects/frame.js';
-import { createCeramicMaterial, type CeramicOptions } from '../../packages/ceramic/src/index.js';
-import { shadowBounds } from '../../packages/ceramic/src/bounds.js';
-import { geometryWGSL } from '../../packages/ceramic/src/effects/geometry.js';
-import { ceramicLightingWGSL } from '../../packages/ceramic/src/effects/ceramic-lighting.js';
-import { ceramicGeometryWGSL } from '../../packages/ceramic/src/effects/ceramic-geometry.js';
-import { gaussianCoverageWGSL, ceramicShadowWGSL } from '../../packages/ceramic/src/effects/shadow.js';
+import { createParameters, type Material } from 'oyn';
+import { frameWGSL } from '../../packages/oyn/src/materials/ceramic/effects/frame.js';
+import { createCeramicMaterial, type CeramicOptions } from '../../packages/oyn/src/materials/ceramic/index.js';
+import { shadowBounds } from '../../packages/oyn/src/materials/ceramic/bounds.js';
+import { geometryWGSL } from '../../packages/oyn/src/materials/ceramic/effects/geometry.js';
+import { ceramicLightingWGSL } from '../../packages/oyn/src/materials/ceramic/effects/ceramic-lighting.js';
+import { ceramicGeometryWGSL } from '../../packages/oyn/src/materials/ceramic/effects/ceramic-geometry.js';
+import { gaussianCoverageWGSL, ceramicShadowWGSL } from '../../packages/oyn/src/materials/ceramic/effects/shadow.js';
 
 export type Vec3 = readonly [number, number, number];
 export type Solid =

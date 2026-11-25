@@ -26,11 +26,11 @@ try {
   await page.goto(server.resolvedUrls.local[0] + "tests/fixtures/surface.html");
   const results = await page.evaluate(async (reference) => {
     const { createCeramicMaterial } =
-      await import("/packages/ceramic/src/index.ts");
-    const { cardCeramic } = await import("/packages/ceramic/src/card.ts");
+      await import("/packages/oyn/src/materials/ceramic/index.ts");
+    const { cardCeramic } = await import("/packages/oyn/src/materials/ceramic/card.ts");
     const { ceramicBinding } =
-      await import("/packages/ceramic/src/interaction.ts");
-    const { createEngine } = await import("/packages/surface/src/engine.ts");
+      await import("/packages/oyn/src/materials/ceramic/interaction.ts");
+    const { createEngine } = await import("/packages/oyn/src/core/engine.ts");
     const host = document.createElement("div");
     host.style.cssText =
       "position:absolute;left:250px;top:220px;width:280px;height:160px";

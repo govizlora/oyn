@@ -12,8 +12,8 @@ A button is still a `<button>`. The browser lays it out, gives it focus, and han
 
 | Package | Responsibility |
 | --- | --- |
-| [Surface](packages/surface/) | Binds GPU rendering to DOM elements. HTML and CSS own layout. |
-| [Ceramic](packages/ceramic/) | Computes highlights and shadows from geometry, elevation, and light. |
+| [Surface](packages/oyn/) | Binds GPU rendering to DOM elements. HTML and CSS own layout. |
+| [Ceramic](packages/oyn/src/materials/ceramic/) | Computes highlights and shadows from geometry, elevation, and light. |
 | [UI](packages/ui/) | Combines materials and motion with native controls. For composite widgets, Base UI or UI SDK handles selection and keyboard behavior. |
 
 See the [architecture](ARCHITECTURE.md) for how the packages work together.

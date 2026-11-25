@@ -7,10 +7,9 @@
       "name": "base-ui-ceramic-tabs-list",
       "type": "registry:ui",
       "title": "Ceramic Tabs List (Base UI)",
-      "description": "Keep Base UI Tabs and replace only its List. Mount under SurfaceProvider.",
+      "description": "Keep Base UI Tabs and replace only its List. Mount under OynProvider.",
       "dependencies": [
-        "@oyn/surface@0.0.0",
-        "@oyn/ceramic@0.0.0",
+        "oyn@0.0.0",
         "@base-ui/react@^1.9.0"
       ],
       "files": [
@@ -55,10 +54,9 @@
       "name": "ceramic-tabs-list",
       "type": "registry:ui",
       "title": "Ceramic Tabs List",
-      "description": "Replace only UI SDK's TabsList with a recessed Ceramic track and a sliding indicator. Mount under SurfaceProvider.",
+      "description": "Replace only UI SDK's TabsList with a recessed Ceramic track and a sliding indicator. Mount under OynProvider.",
       "dependencies": [
-        "@oyn/surface@0.0.0",
-        "@oyn/ceramic@0.0.0",
+        "oyn@0.0.0",
         "@ui-sdk/core@0.1.0-beta.13",
         "@ui-sdk/react@0.1.0-beta.13"
       ],
@@ -106,8 +104,7 @@
       "title": "Ceramic Segmented Control (Base UI)",
       "description": "SDK-owned single selection with a recessed Ceramic track and sliding indicator.",
       "dependencies": [
-        "@oyn/surface@0.0.0",
-        "@oyn/ceramic@0.0.0",
+        "oyn@0.0.0",
         "@base-ui/react@^1.9.0"
       ],
       "files": [
@@ -149,8 +146,7 @@
       "title": "Ceramic Segmented Control (UI SDK)",
       "description": "SDK-owned single selection with a recessed Ceramic track and sliding indicator.",
       "dependencies": [
-        "@oyn/surface@0.0.0",
-        "@oyn/ceramic@0.0.0",
+        "oyn@0.0.0",
         "@ui-sdk/core@0.1.0-beta.13",
         "@ui-sdk/react@0.1.0-beta.13"
       ],
@@ -192,8 +188,7 @@
       "type": "registry:ui",
       "title": "Ceramic UI foundation",
       "dependencies": [
-        "@oyn/surface@0.0.0",
-        "@oyn/ceramic@0.0.0",
+        "oyn@0.0.0",
         "@ui-sdk/core@0.1.0-beta.13",
         "@ui-sdk/react@0.1.0-beta.13"
       ],

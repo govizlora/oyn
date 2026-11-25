@@ -3,8 +3,8 @@ import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
 } from 'react';
-import { useSurface } from '@oyn/surface';
-import { baked, type BakedProps } from '@oyn/ceramic/baked';
+import { useMaterial } from 'oyn/react';
+import { baked, type BakedProps } from 'oyn/materials/ceramic/baked';
 import { loadGeometry } from './geometry-assets';
 import { Surface } from './controls';
 
@@ -33,7 +33,7 @@ function useBakedControl<T extends HTMLElement>({
   rotation = 0,
 }: ControlOptions) {
   const geometry = use(loadGeometry(`controls/${shape}`));
-  return useSurface<BakedProps, T>({
+  return useMaterial<BakedProps, T>({
     appearance: baked,
     props: {
       geometry,

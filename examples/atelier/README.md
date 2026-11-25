@@ -62,8 +62,8 @@ Run `npm run bake:geometry` after editing the homepage control profiles. Normal 
 
 Read [the architecture contract](../../ARCHITECTURE.md) for current ownership.
 
-- `@oyn/ceramic/baked`: immutable geometry data, one shared baked adapter.
-- `@oyn/ceramic/card`: compact analytic card adapter; no CSG machinery.
+- `oyn/materials/ceramic/baked`: immutable geometry data, one shared baked adapter.
+- `oyn/materials/ceramic/card`: compact analytic card adapter; no CSG machinery.
 - `finish.ts`: sole optical configuration normalization.
 - `effects/ceramic-lighting.ts`: shared original Ceramic optical response.
 - `effects/shadow.ts`: shared light integration; each geometry supplies coverage.
@@ -119,7 +119,7 @@ are involved. Dates/files/status meters in the archive are samples, not live dat
 - `phosphor.tsx`: one additional shader/pipeline for graphical fields and editable
   CRT glyphs. Text uniforms and semantic HTML come from one string.
 
-One SurfaceProvider owns one GPU device, its pipeline cache and the existing draw
+One OynProvider owns one GPU device, its pipeline cache and the existing draw
 scheduler. Every raised/recessed element is HTML bound to Ceramic; CSS lays out
 geometry and prints flat marks, never another bevel/shadow approximation. Numeric
 updates wake Surface's sole GPU draw scheduler. The current homepage uses five pipelines (raised Ceramic, inset Ceramic and the
@@ -147,11 +147,11 @@ or publicly deployed by these commands.
 
 ### Declarative appearance migration
 
-Homepage housings/wells use `useSurface({ appearance: ceramic, props })`; sculpted
+Homepage housings/wells use `useMaterial({ appearance: ceramic, props })`; sculpted
 controls use `appearance: baked` with geometry/elevation/rotation props. Instances
 and numeric parameter blocks persist through ordinary state changes. Specialized
 instrument/phosphor/research programs use the explicit `materialAppearance` adapter
-through the same lifecycle. No `useSurface({material})` overload remains. Optical
+through the same lifecycle. No `useMaterial({material})` overload remains. Optical
 math, including four uniform shadow layers and contact composition, is unchanged.
 
 ## Minimal Surface / DOM Example
@@ -170,8 +170,8 @@ Use window and nested scrolling, viewport and native container resizing, width/h
 
 | Scenario | Surface path to inspect | Caveat |
 | --- | --- | --- |
-| Button click / ordinary rerender | `useSurface` commit and update effects | Numeric updates should retain the canvas |
-| Mount, replacement | `useSurface` lifecycle effect and ref cleanup | Unmount and replacement dispose the previous binding |
+| Button click / ordinary rerender | `useMaterial` commit and update effects | Numeric updates should retain the canvas |
+| Mount, replacement | `useMaterial` lifecycle effect and ref cleanup | Unmount and replacement dispose the previous binding |
 | Window / container / slider resize | Engine `ResizeObserver`, window resize | These signals can overlap; this page does not prove both are required |
 | Native radius class, hidden ancestor, details | Engine attribute observer, binding measurement | No React state updates; details moves the button without resizing it |
 | CSS-only radius / space above | CSS `:has(:checked)` | No attribute mutation or React update; can expose missing computed-style or position invalidation |

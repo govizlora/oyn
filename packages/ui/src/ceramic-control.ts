@@ -1,12 +1,8 @@
 import { useMemo, type Ref } from "react";
 import { mergeProps } from "@ui-sdk/react/primitive";
-import {
-  useSurface,
-  type Appearance,
-  type Material,
-  type SurfaceBindingContext,
-} from "@oyn/surface";
-import { createCeramicMaterial } from "@oyn/ceramic";
+import { type Appearance, type Material, type SurfaceBindingContext } from "oyn";
+import { useMaterial } from "oyn/react";
+import { createCeramicMaterial } from "oyn/materials/ceramic";
 import { bindAnimatedElevation } from "./animated-elevation.js";
 
 // Unpigmented controls have nothing to draw at zero relief.
@@ -261,7 +257,7 @@ export function useCeramicControl(
     "hoverOffset" | "pressElevation" | "maxElevation"
   >,
 ) {
-  const bind = useSurface({ appearance: control, props: { rest, ...options } });
+  const bind = useMaterial({ appearance: control, props: { rest, ...options } });
   return {
     ...useMemo(() => mergeProps({ ref: bind }, { ref }), [bind, ref]),
     "data-oyn-control": "",

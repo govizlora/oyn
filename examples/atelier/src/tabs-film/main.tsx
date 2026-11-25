@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { FilmTabs } from "./FilmTabs";
 import "./stage.css";
 
@@ -72,7 +72,7 @@ function TabsFilm() {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <SurfaceProvider>
+  <OynProvider>
     <TabsFilm />
-  </SurfaceProvider>,
+  </OynProvider>,
 );

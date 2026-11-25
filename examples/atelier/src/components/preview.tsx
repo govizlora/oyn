@@ -7,7 +7,7 @@ import {
   type ComponentType,
 } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { StoryLog } from "./log";
 import "./recipe-layout.css";
 import "./preview.css";
@@ -28,7 +28,7 @@ function Preview() {
     setMessage(value);
   }, []);
   return Example ? (
-    <SurfaceProvider>
+    <OynProvider>
       <section
         className="oyn-ui specimen-content"
         aria-label="Component preview"
@@ -49,7 +49,7 @@ function Preview() {
       <output className="story-event" role="status">
         {message}
       </output>
-    </SurfaceProvider>
+    </OynProvider>
   ) : (
     <p role="status">Unknown example.</p>
   );

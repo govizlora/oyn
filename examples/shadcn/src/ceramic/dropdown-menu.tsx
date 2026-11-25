@@ -3,11 +3,10 @@ import { useTheme } from '@/app/theme'
 
 import { useComposedRefs } from '@radix-ui/react-compose-refs'
 
-import { ceramic } from '@oyn/ceramic'
+import { ceramic } from 'oyn/materials/ceramic'
 
 import * as React from "react"
-import { useSurface } from "@oyn/surface"
-import { popoverProps } from "./materials"
+import { useMaterial } from "oyn/react";import { popoverProps } from "./materials"
 import { useRecessInteraction } from "./recess-interaction"
 import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
@@ -45,7 +44,7 @@ function DropdownMenuContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
+  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>
@@ -257,7 +256,7 @@ function DropdownMenuSubContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
-  const surfaceRef = useSurface({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
+  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>

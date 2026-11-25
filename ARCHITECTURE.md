@@ -3,8 +3,17 @@
 This is the **authoritative specification for cross-package boundaries**. Read it before changing APIs, interaction, animation, materials or rendering. If the implementation diverges, reconcile the code, tests and documentation together.
 
 - [UI usage and delivery](packages/ui/README.md): component sources, SDK composition and registry.
-- [Surface API](packages/surface/README.md) and [source map](packages/surface/ARCHITECTURE.md): interfaces and reading order.
-- [Ceramic optics](packages/ceramic/README.md): color, lighting, shadows, padding and geometry.
+- [Surface API](packages/oyn/README.md) and [source map](packages/oyn/ARCHITECTURE.md): interfaces and reading order.
+- [Ceramic optics](packages/oyn/src/materials/ceramic/README.md): color, lighting, shadows, padding and geometry.
+
+## Package and entry points
+
+`oyn` is the single runtime distribution. Its Core (`packages/oyn/src/core`) and
+built-in materials (`packages/oyn/src/materials`) do not depend on React.
+`oyn/react` provides `OynProvider` and `useMaterial`; `oyn/materials/ceramic`
+provides Ceramic. Surface remains the internal DOM-binding concept, not a package.
+The optional UI recipes remain in `packages/ui`. Only API imports are migrated in
+Not ready families; this does not promote or redesign them.
 
 ## 1. Identify the output and assign one owner
 
@@ -24,7 +33,7 @@ This is the **authoritative specification for cross-package boundaries**. Read i
 | Non-GPU fallback, text, data markers and focus outlines | Component CSS | Only Surface writes `data-oyn-active`; the fallback must not paint over active GPU output. |
 | Geometry compilation and generated shader mirrors | Offline tools | Do not rebake during interaction or edit `src/generated/` by hand. |
 
-The **consumer** is the component or app calling Surface, including its custom Appearance adapter. Putting code in `Appearance.bind` does not make it Ceramic's responsibility. Gesture handling and animation bindings belong in `packages/ui` or the app; `packages/ceramic` contains only the material.
+The **consumer** is the component or app calling Surface, including its custom Appearance adapter. Putting code in `Appearance.bind` does not make it Ceramic's responsibility. Gesture handling and animation bindings belong in `packages/ui` or the app; `packages/oyn/src/materials/ceramic` contains only the material.
 
 ## 2. One write path, two ways to supply a value
 
@@ -33,11 +42,11 @@ Choose one per parameter.
 ### Instantaneous declarative values
 
 ```tsx
-import { SurfaceProvider, useSurface } from "@oyn/surface";
-import { ceramic } from "@oyn/ceramic";
+import { OynProvider, useMaterial } from "oyn/react";
+import { ceramic } from "oyn/materials/ceramic";
 
 function Key({ selected }: { selected: boolean }) {
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: ceramic,
     props: { elevation: selected ? -3.2 : 8, maxElevation: 8 },
   });
@@ -45,7 +54,7 @@ function Key({ selected }: { selected: boolean }) {
 }
 
 export function Example() {
-  return <SurfaceProvider><Key selected={false} /></SurfaceProvider>;
+  return <OynProvider><Key selected={false} /></OynProvider>;
 }
 ```
 
@@ -55,9 +64,10 @@ export function Example() {
 
 ```tsx
 import { useEffect } from "react";
-import { materialAppearance, useSurface } from "@oyn/surface";
-import { bindMotion, type MotionNumber } from "@oyn/surface/adapters/motion";
-import type { CeramicMaterial } from "@oyn/ceramic";
+import { materialAppearance } from "oyn";
+import { useMaterial } from "oyn/react";
+import { bindMotion, type MotionNumber } from "oyn/adapters/motion";
+import type { CeramicMaterial } from "oyn/materials/ceramic";
 
 // Caller owns these stable objects and creates the material with a suitable
 // maxElevation. The source may be a MotionValue or a consumer-owned animation source.
@@ -65,7 +75,7 @@ export function AnimatedKey({ height, material }: {
   height: MotionNumber;
   material: CeramicMaterial;
 }) {
-  const ref = useSurface({ appearance: materialAppearance, props: { material } });
+  const ref = useMaterial({ appearance: materialAppearance, props: { material } });
   useEffect(() => bindMotion(height, material.setElevation), [height, material]);
   return <button ref={ref} type="button">Animated key</button>;
 }
@@ -106,7 +116,7 @@ Each animation owner responds to reduced motion: the numeric source emits the fi
 
 ## 4. Lifecycle and composition
 
-- `useSurface` creates the appearance only after commit. Ref binding defines the lifecycle; ordinary prop updates do not rebind.
+- `useMaterial` creates the appearance only after commit. Ref binding defines the lifecycle; ordinary prop updates do not rebind.
 - **One surface binding per DOM host in a provider.** Duplicate binding is an error, not last-writer-wins. Typically there is one provider per document; nested or independent providers should not bind the same host.
 - When composing Trigger → Button → Avatar, the outer component declares the material and inner components forward props and refs. This also applies to props received by a `render` callback. A native-element adapter must not hide them inside an inner `render` and cause the wrapper to create a second material. Examples and registry items follow the same rule.
 - Void elements such as `<input>` cannot contain a canvas. The field container owns one well; the native input keeps its ref, caret and label. A custom `render` does not guarantee a material. Use the actual `FieldWell` container boundary rather than guessing from the component type.

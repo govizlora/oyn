@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { createCeramicMaterial } from "../packages/ceramic/dist/index.js";
-import { shadowBounds } from "../packages/ceramic/dist/bounds.js";
+import { createCeramicMaterial } from "../packages/oyn/dist/materials/ceramic/index.js";
+import { shadowBounds } from "../packages/oyn/dist/materials/ceramic/bounds.js";
 
 // One signed height lane, one program and one immutable finish on both sides.
 for (const colorScheme of ["light", "dark"]) {

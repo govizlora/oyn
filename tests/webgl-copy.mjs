@@ -52,7 +52,7 @@ try {
     ["ceramic", "shaders", "ceramicWGSL", ["surface"]],
   ]) {
     const wgsl = (
-      await server.ssrLoadModule(`/packages/ceramic/src/${path}.ts`)
+      await server.ssrLoadModule(`/packages/oyn/src/materials/ceramic/${path}.ts`)
     )[exportName];
     const module = parseWgsl(wgsl);
     const info = validate(module);

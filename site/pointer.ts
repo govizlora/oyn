@@ -1,4 +1,4 @@
-import type { PointerSnapshot, SurfaceInputs } from "@oyn/surface";
+import type { PointerSnapshot, SurfaceInputs } from "oyn";
 
 /** One app-owned position feeds both the decorative cursor and every material. */
 export function createStudyPointer(win: Window) {

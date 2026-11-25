@@ -1,7 +1,7 @@
 import { ProjectSwitch, currentProject } from "./projects";
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { QuietStudy } from "./studies";
 import { ObjectLibrary, type LibraryLocation } from "./library";
 import { objects, rooms } from "./library/registry";
@@ -67,7 +67,7 @@ function App() {
               : "atelier-sculpture")
         }
       >
-        <SurfaceProvider>
+        <OynProvider>
           {quiet ? (
             <div className="composition">
               <QuietStudy />
@@ -88,7 +88,7 @@ function App() {
           ) : (
             <SculptedStudy />
           )}
-        </SurfaceProvider>
+        </OynProvider>
       </main>
     </>
   );

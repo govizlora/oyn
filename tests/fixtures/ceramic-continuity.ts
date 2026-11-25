@@ -1,6 +1,6 @@
-import { createCeramicMaterial, type CeramicOptions } from "@oyn/ceramic";
-import { createEngine } from "../../packages/surface/src/engine";
-import { ceramicBinding } from "../../packages/ceramic/src/interaction";
+import { createCeramicMaterial, type CeramicOptions } from "oyn/materials/ceramic";
+import { createEngine } from "../../packages/oyn/src/core/engine";
+import { ceramicBinding } from "../../packages/oyn/src/materials/ceramic/interaction";
 
 const elevations = [
   8, 6, 4, 2, 1, 0.5, 0.25, 0.1, 0.01, 0.001, 0, -0.001, -0.01, -0.1, -0.25,

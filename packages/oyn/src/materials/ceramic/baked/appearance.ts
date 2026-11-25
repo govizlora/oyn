@@ -1,4 +1,4 @@
-import type { Appearance } from "@oyn/surface";
+import type { Appearance } from "../../../core/index.js";
 import type { BakedGeometry } from "./geometry.js";
 import { bakedCeramic, type BakedOptions } from "./material.js";
 

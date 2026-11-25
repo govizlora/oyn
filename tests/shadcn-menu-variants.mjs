@@ -15,19 +15,19 @@ try {
   const select = await (await page.request.get(base + '/src/ceramic/select.tsx')).text();
   const react = main.match(/from "([^"]*\/react\.js[^"]*)"/)[1];
   const dom = main.match(/from "([^"]*\/react-dom_client\.js[^"]*)"/)[1];
-  const surface = select.match(/import \{ useSurface \} from "([^"]*)"/)[1];
+  const surface = select.match(/import \{ useMaterial \} from "([^"]*)"/)[1];
   await page.route('**/__menu-fixture', route => route.fulfill({ contentType: 'text/html', body: `
     <html><body><div id="root"></div><script type="module">
     import React from '${react}';
     import ReactDOM from '${dom}';
-    import { SurfaceProvider } from '${surface}';
+    import { OynProvider } from '${surface}';
     import * as D from '/src/ceramic/dropdown-menu.tsx';
     import * as S from '/src/ceramic/select.tsx';
     import '/src/style.css';
     const h = React.createElement;
     function Fixture() {
       const [choice,setChoice] = React.useState('one');
-      return h(SurfaceProvider,{},h('main',{style:{padding:50,display:'flex',gap:24}},
+      return h(OynProvider,{},h('main',{style:{padding:50,display:'flex',gap:24}},
         h(D.DropdownMenu,null,
           h(D.DropdownMenuTrigger,null,'Variants'),
           h(D.DropdownMenuContent,{ref:node=>{window.menuRef=node}},

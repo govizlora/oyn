@@ -1,4 +1,4 @@
-import type { CeramicProps } from '@oyn/ceramic';
+import type { CeramicProps } from 'oyn/materials/ceramic';
 
 export const neutralProps = {};
 export const panelProps = { elevation: 4 };

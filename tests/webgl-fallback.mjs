@@ -19,10 +19,10 @@ try {
       server.resolvedUrls.local[0] + "tests/fixtures/surface.html",
     );
     await page.evaluate(async () => {
-      const { createEngine } = await import("/packages/surface/src/engine.ts");
+      const { createEngine } = await import("/packages/oyn/src/core/engine.ts");
       const { createCeramicMaterial } =
-        await import("/packages/ceramic/src/material.ts");
-      const { cardCeramic } = await import("/packages/ceramic/src/card.ts");
+        await import("/packages/oyn/src/materials/ceramic/material.ts");
+      const { cardCeramic } = await import("/packages/oyn/src/materials/ceramic/card.ts");
       const a = createCeramicMaterial({ elevation: 8 }),
         b = createCeramicMaterial({ elevation: -2 }),
         c = cardCeramic({ width: 100, height: 60, radius: 8, elevation: 8 });

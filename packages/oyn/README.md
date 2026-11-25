@@ -1,29 +1,31 @@
-# @oyn/surface
+# oyn
 
-React 19 DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second GPU draw scheduler, or runtime backend switching.
+One package for the React-free Core and built-in materials, with an optional React 19 interface. Import runtime contracts from `oyn`, React APIs from `oyn/react`, and Ceramic from `oyn/materials/ceramic`. React is an optional peer dependency and is never loaded by the Core or material entry points.
+
+DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second GPU draw scheduler, or runtime backend switching.
 
 Read the [architecture contract](../../ARCHITECTURE.md) for ownership and animation rules.
-See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useSurface.ts`.
+See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useMaterial.ts`.
 
 ## Declarative API
 
 ```tsx
-import { SurfaceProvider, useSurface } from '@oyn/surface';
-import { ceramic } from '@oyn/ceramic';
+import { OynProvider, useMaterial } from 'oyn/react';
+import { ceramic } from 'oyn/materials/ceramic';
 
 function Button({ pressed }: { pressed: boolean }) {
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: ceramic,
     props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
   });
   return <button ref={ref}>Confirm</button>;
 }
-// <SurfaceProvider><Button pressed={false} /></SurfaceProvider>
+// <OynProvider><Button pressed={false} /></OynProvider>
 ```
 
 `appearance` is a stable `Appearance<P>` definition. `props` is inferred from that
 definition; unknown fields, missing required fields and wrong types are rejected.
-`ceramic` is no longer a callable mutable-material factory. `useSurface({material})`
+`ceramic` is no longer a callable mutable-material factory. `useMaterial({material})`
 is removed. Ordinary React users need neither manual memoization nor instance setters.
 The hook accepts only appearance and props. Consumers compose additional refs outside
 the hook, preserving React 19 cleanup. Binding and unbinding the returned ref controls
@@ -35,12 +37,12 @@ Fresh props object identity alone does not imply a new instance. Appearance or t
 replacement ends the old instance. StrictMode setup/cleanup replay is supported;
 there is no promise of exactly-once effects. Async GPU initialization is cancellable.
 
-`SurfaceProvider` owns the engine. Theme policy belongs to appearances, not Surface.
+`OynProvider` owns the engine. Theme policy belongs to appearances, not Surface.
 
 ## Appearance authoring
 
 ```ts
-import type { Appearance } from '@oyn/surface';
+import type { Appearance } from 'oyn';
 const visual: Appearance<MyProps> = {
   create(props) {
     return {
@@ -146,7 +148,7 @@ consumer/library validation remains future work: no Compiler certification or
 ## Optional external animation adapter
 
 `bindMotion(source, write)` remains an opt-in low-level adapter at
-`@oyn/surface/adapters/motion`, with no Motion runtime dependency in core. One writer
+`oyn/adapters/motion`, with no Motion runtime dependency in core. One writer
 owns each parameter. Use `materialAppearance` for such explicit externally driven
 programs; do not simultaneously write the same property from declarative props.
 The consumer owns animation targets, interpolation, reduced-motion policy and
@@ -188,7 +190,7 @@ logged for diagnostics; there is no application error callback to wire up.
 
 ### Application-owned inputs
 
-`<SurfaceProvider inputs={inputs}>` accepts a stable `SurfaceInputs` object
+`<OynProvider inputs={inputs}>` accepts a stable `SurfaceInputs` object
 instead of installing Surface's default browser input listeners. Omit it for the
 normal browser input source. The application owns the supplied source's behavior
 and lifetime; bindings subscribe and unsubscribe normally. Changing its identity

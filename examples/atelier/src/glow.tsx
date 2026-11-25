@@ -1,11 +1,7 @@
-import { ceramicBinding } from "../../../packages/ceramic/src/interaction";
+import { ceramicBinding } from "../../../packages/oyn/src/materials/ceramic/interaction";
 import { useLayoutEffect, useMemo, type HTMLAttributes } from "react";
-import {
-  materialAppearance,
-  createParameters,
-  useSurface,
-  type Material,
-} from "@oyn/surface";
+import { materialAppearance, createParameters, type Material } from "oyn";
+import { useMaterial } from "oyn/react";
 
 const shader = /* wgsl */ `
 struct Frame { viewportLight: vec4f, rect: vec4f, geometry: vec4f }
@@ -59,7 +55,7 @@ export function Glow({
     material.parameters.set(3, level);
     lampColors[color].forEach((v, i) => material.parameters.set(i, v));
   }, [material, level, color]);
-  const ref = useSurface({
+  const ref = useMaterial({
     appearance: materialAppearance,
     props: { material },
   });

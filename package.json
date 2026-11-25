@@ -1,5 +1,5 @@
 {
-  "name": "oyn",
+  "name": "oyn-workspace",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "dev:mui": "npm run dev -w @oyn/example-mui",
     "dev:shadcn": "npm run dev -w @oyn/example-shadcn",
     "build:all": "npm run build:packages && npm run build -w @oyn/example-mui -w @oyn/example-shadcn && npm run build:atelier",
-    "build:packages": "npm run build -w @oyn/surface && npm run build -w @oyn/ceramic && npm run build -w @oyn/ui && npm run check:architecture",
+    "build:packages": "npm run build -w oyn && npm run build -w @oyn/ui && npm run check:architecture",
     "test:ceramic-policy": "npm run build:packages && node tests/ceramic-policy.mjs",
     "test:ceramic": "npm run build:packages && node tests/ceramic-light.mjs && node tests/ceramic.mjs",
     "test:theme": "node tests/theme-persistence.mjs",

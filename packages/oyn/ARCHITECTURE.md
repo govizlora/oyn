@@ -1,4 +1,4 @@
-# Surface Source Map
+# OYN Source Map
 
 [The root architecture contract](../../ARCHITECTURE.md) owns cross-package boundaries.
 This file only maps Surface internals. “Scheduler” below means GPU draw scheduling,
@@ -6,23 +6,23 @@ not the consumer’s numeric animation clock.
 
 This refactor preserves the public API, lifecycle ordering, and rendering behavior. `index.ts` only exports public interfaces. Internal modules import implementations or types directly, never through the public entry point.
 
-## Start with useSurface
+## Start with useMaterial
 
-1. `src/react/useSurface.ts`: the application entry point. Read the ref callback for creation, registration, and cleanup, then the single layout effect for configuration updates. There is no DOM-to-state rerender.
-2. `src/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
-3. `src/react/SurfaceEngineContext.ts`: provides the Engine instance shared by the hook and Provider.
-4. `src/react/SurfaceProvider.tsx`: the sole Provider-level engine lifecycle.
-5. `src/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
-6. `src/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
-7. `src/renderer.ts`: one-time backend selection. webgpu.ts owns direct submission; the lazy webgl2.ts owns batch rendering and element-local copies.
+1. `src/react/useMaterial.ts`: the application entry point. Read the ref callback for creation, registration, and cleanup, then the single layout effect for configuration updates. There is no DOM-to-state rerender.
+2. `src/core/types/appearance.ts`: the Appearance / AppearanceInstance contracts used by the hook.
+3. `src/react/OynContext.ts`: provides the Engine instance shared by the hook and Provider.
+4. `src/react/OynProvider.tsx`: the sole Provider-level engine lifecycle.
+5. `src/core/engine.ts`: synchronizes registered meshes with rendering objects and schedules measurement and drawing.
+6. `src/core/presentation.ts`: per-element DOM layers, dimensions, visual bounds, coordinates, and cleanup.
+7. `src/core/renderer.ts`: one-time backend selection. webgpu.ts owns direct submission; the lazy webgl2.ts owns batch rendering and element-local copies.
 
 ## Files and Responsibilities
 
 | File | Responsibility |
 | --- | --- |
-| `react/useSurface.ts` | React lifecycle of one DOM / Appearance binding |
-| `react/SurfaceProvider.tsx` | Provider-level engine lifecycle |
-| `react/SurfaceEngineContext.ts` | Provide the Engine instance through React Context |
+| `react/useMaterial.ts` | React lifecycle of one DOM / Appearance binding |
+| `react/OynProvider.tsx` | Provider-level engine lifecycle |
+| `react/OynContext.ts` | Provide the Engine instance through React Context |
 | `types/appearance.ts` | Visual definition and instance contracts |
 | `materialAppearance.ts` | Adapt an externally controlled Material to the same Appearance lifecycle |
 | `types/material.ts` | Low-level drawing, bounds, and binding contracts |
@@ -43,8 +43,8 @@ This refactor preserves the public API, lifecycle ordering, and rendering behavi
 
 ```text
 Public entry point: index.ts (exports only)
-  ├─ react/useSurface → Context + Appearance / Mesh types
-  ├─ react/SurfaceProvider → Context + engine
+  ├─ react/useMaterial → Context + Appearance / Mesh types
+  ├─ react/OynProvider → Context + engine
   ├─ materialAppearance → Appearance / Material types
   └─ createParameters (standalone)
 
@@ -67,7 +67,7 @@ GPU cache extraction only reorganizes renderer internals: the renderer still cre
 
 ## Type Organization
 
-Cross-module contracts live in `src/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `SurfaceOptions` in `react/useSurface.ts`, and `Engine` in `engine.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.
+Cross-module contracts live in `src/core/types/`: Appearance, Material, input snapshots, and Mesh. Implementation-specific types stay beside their owner, such as `gpu/Target.ts`, `MaterialOptions` in `react/useMaterial.ts`, and `Engine` in `engine.ts`. There is no additional types barrel; import the specific file directly. Public package exports remain unchanged.
 
 The hook keeps one memoized binding handle per appearance/engine pair. Creating this handle has no side effects. Its ref creates and registers the instance, and its cleanup releases it. One layout effect saves committed configuration and updates the active instance; configuration changes do not replace the ref. Reattachment starts with the last committed configuration, then the layout effect applies the current commit before the scheduled draw.
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { createServer } from "vite";
-import { ceramicShadowWGSL } from "../packages/ceramic/dist/effects/shadow.js";
+import { ceramicShadowWGSL } from "../packages/oyn/dist/materials/ceramic/effects/shadow.js";
 const server = await createServer({ server: { host: "127.0.0.1", port: 0 } });
 await server.listen();
 let browser;

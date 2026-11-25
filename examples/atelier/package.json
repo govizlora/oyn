@@ -11,8 +11,7 @@
     "prepare:stories": "node scripts/prepare-stories.mjs"
   },
   "dependencies": {
-    "@oyn/ceramic": "0.0.0",
-    "@oyn/surface": "0.0.0",
+    "oyn": "0.0.0",
     "@oyn/ui": "0.0.0",
     "@ui-sdk/core": "0.1.0-beta.13",
     "@ui-sdk/react": "0.1.0-beta.13",

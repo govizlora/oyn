@@ -1,9 +1,4 @@
-import type {
-  Material,
-  Point,
-  SurfaceBindingContext,
-  SurfaceBinding,
-} from "@oyn/surface";
+import type { Material, Point, SurfaceBindingContext, SurfaceBinding } from "../../core/index.js";
 /** Ceramic policy, not a Surface input default. Positions are viewport CSS pixels. */
 export type CeramicLight = Readonly<{
   source?: "pointer" | "fixed";

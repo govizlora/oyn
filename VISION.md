@@ -22,11 +22,11 @@ Current technical boundaries are specified only in [ARCHITECTURE.md](ARCHITECTUR
 The Tabs story compares the two combinations on identical content. They share
 the material bindings and CSS, not their keyboard or selection implementations.
 There is no Vanilla React component distribution. For custom interactions,
-use `useSurface` with `ceramic` directly on your own DOM elements. The native
+use `useMaterial` with `ceramic` directly on your own DOM elements. The native
 button in Atelier demonstrates that material API, not a third component line.
 Consumers own animation values; Ceramic owns instantaneous optical response;
 Surface owns DOM binding, graphics resources and GPU draw scheduling. Neither package knows what a button or tab is. Mount one
-SurfaceProvider above the controls.
+OynProvider above the controls.
 
 ## Source, stories and delivery
 

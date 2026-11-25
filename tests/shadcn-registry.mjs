@@ -14,7 +14,7 @@ for (const file of await readdir(`${root}/src/ceramic`)) {
   assert.doesNotMatch(content, /useAppearance|@\/app\/|componentRegistry/, `${file} must not know the app mode`);
 }
 const appearance = await readFile(`${root}/src/app/appearance.tsx`, 'utf8');
-assert.doesNotMatch(appearance, /useSurface/, 'app mode must not control individual material registration');
+assert.doesNotMatch(appearance, /useMaterial/, 'app mode must not control individual material registration');
 const preview = await readFile(`${root}/src/app/dashboard-preview.tsx`, 'utf8');
 assert.match(preview, /<Dashboard \/>/, 'preview shell stays mounted');
 const dashboard = await readFile(`${root}/src/app/page.tsx`, 'utf8');

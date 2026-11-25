@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { ceramic, createCeramicMaterial } from '../packages/ceramic/dist/index.js';
+import { ceramic, createCeramicMaterial } from '../packages/oyn/dist/materials/ceramic/index.js';
 
 const light = { source: 'fixed', position: { x: 24, y: 36 } };
 const context = {

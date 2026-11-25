@@ -1,9 +1,8 @@
-import { materialAppearance } from '@oyn/surface'
-import { useLayoutEffect, useRef, useState } from 'react'
-import { createCeramicMaterial } from '@oyn/ceramic'
+import { materialAppearance } from 'oyn';import { useLayoutEffect, useRef, useState } from 'react'
+import { createCeramicMaterial } from 'oyn/materials/ceramic'
 
 import { createControlMotion } from '@oyn/ui/control-motion'
-import { bindMotion } from '@oyn/surface/adapters/motion'
+import { bindMotion } from 'oyn/adapters/motion'
 
 // Stay strictly on the concave program, including the visually flat endpoints.
 // The surface is detached once its exit settles, rather than switching through zero.

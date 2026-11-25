@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, readFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
-import { bakedCeramic, decodeGeometry } from '@oyn/ceramic/baked';
+import { bakedCeramic, decodeGeometry } from 'oyn/materials/ceramic/baked';
 import { bakeControl, controls } from '../tools/geometry/controls.mjs';
 const bytes=await readFile('examples/atelier/public/geometries/controls/thumbDial.bin');
 assert.deepEqual(bytes,bakeControl(controls.thumbDial),'Homepage profile is reproducible');

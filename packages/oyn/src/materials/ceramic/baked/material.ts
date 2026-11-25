@@ -1,5 +1,5 @@
 import { environmentBinding, preferredColorScheme } from "../environment.js";
-import { createParameters, type Material } from "@oyn/surface";
+import { createParameters, type Material } from "../../../core/index.js";
 import { ceramicBinding } from "../interaction.js";
 import {
   ceramicFinish,

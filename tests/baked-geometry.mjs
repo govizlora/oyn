@@ -3,7 +3,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
 import { bake } from '../tools/geometry/bake.mjs';
-import { decodeGeometry, bakedCeramic } from '@oyn/ceramic/baked';
+import { decodeGeometry, bakedCeramic } from 'oyn/materials/ceramic/baked';
 const depth = 1 + 40 * 0.06, radius = (17 ** 2 + depth ** 2) / (2 * depth);
 const shape = {
   kind: 'subtract',
@@ -70,9 +70,9 @@ try {
   const result = await page.evaluate(
     async ({ surfaceCount, stress }) => {
       const { decodeGeometry, bakedCeramic } = await import(
-        '/packages/ceramic/src/baked.ts'
+        '/packages/oyn/src/materials/ceramic/baked.ts'
       );
-      const { createEngine } = await import('/packages/surface/src/engine.ts');
+      const { createEngine } = await import('/packages/oyn/src/core/engine.ts');
       const geometry = decodeGeometry(
         await (
           await fetch('/tests/fixtures/pocket-geometry.bin')

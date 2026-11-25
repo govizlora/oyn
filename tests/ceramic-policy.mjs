@@ -3,15 +3,15 @@ import { readFile } from "node:fs/promises";
 import {
   decodeGeometry,
   bakedCeramic,
-} from "../packages/ceramic/dist/baked.js";
+} from "../packages/oyn/dist/materials/ceramic/baked.js";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
-import { createCeramicMaterial } from "../packages/ceramic/dist/index.js";
+import { createCeramicMaterial } from "../packages/oyn/dist/materials/ceramic/index.js";
 import {
   ceramicFinish,
   relativeLuminance,
-} from "../packages/ceramic/dist/finish.js";
-import { cardCeramic } from "../packages/ceramic/dist/card.js";
+} from "../packages/oyn/dist/materials/ceramic/finish.js";
+import { cardCeramic } from "../packages/oyn/dist/materials/ceramic/card.js";
 
 for (const scheme of ["light", "dark"]) {
   const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
@@ -124,7 +124,7 @@ try {
   await page.goto(fixtureUrl);
   const result = await page.evaluate(async () => {
     const { createCeramicMaterial } =
-      await import("/packages/ceramic/src/material.ts");
+      await import("/packages/oyn/src/materials/ceramic/material.ts");
     const hosts = ["light", "dark"].map((colorScheme) => {
       const parent = document.createElement("section");
       parent.style.colorScheme = colorScheme;

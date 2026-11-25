@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
-import { createCeramicMaterial } from '../packages/ceramic/dist/index.js';
+import { createCeramicMaterial } from '../packages/oyn/dist/materials/ceramic/index.js';
 
 const light = createCeramicMaterial({ colorScheme: 'light' });
 const dark = createCeramicMaterial({ colorScheme: 'dark' });

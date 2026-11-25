@@ -57,9 +57,9 @@ await build({
           ...imports,
           'import {createElement} from "react"',
           'import {renderToString} from "react-dom/server"',
-          'import {SurfaceProvider} from "@oyn/surface"',
+          'import { OynProvider } from "oyn/react";',
           "const stories = [" + keys.map((_, i) => "E" + i).join(",") + "]",
-          "export function render(i) { return renderToString(createElement(SurfaceProvider,null,createElement(stories[i]))) }",
+          "export function render(i) { return renderToString(createElement(OynProvider,null,createElement(stories[i]))) }",
         ].join("\n");
       },
     },

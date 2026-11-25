@@ -1,5 +1,6 @@
 import type { HTMLAttributes } from "react";
-import { createParameters, useSurface, type Appearance } from "@oyn/surface";
+import { createParameters, type Appearance } from "oyn";
+import { useMaterial } from "oyn/react";
 import { shader } from "./relief/shader.js";
 import "./styles/relief-logo.css";
 
@@ -28,9 +29,9 @@ export interface ReliefLogoProps extends Omit<HTMLAttributes<HTMLSpanElement>, "
   lightAngle?: number;
 }
 
-/** White-on-white OYN landscape. Place under the project's SurfaceProvider. */
+/** White-on-white OYN landscape. Place under the project's OynProvider. */
 export function ReliefLogo({ lightAngle = 0, className, ...rest }: ReliefLogoProps) {
-  const ref = useSurface({ appearance: relief, props: { lightAngle } });
+  const ref = useMaterial({ appearance: relief, props: { lightAngle } });
   return (
     <span ref={ref} role="img" aria-label="OYN" {...rest}
       className={className ? "oyn-relief-logo " + className : "oyn-relief-logo"}>

@@ -4,7 +4,7 @@ import { PNG } from "pngjs";
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { createControlMotion } from "../packages/ui/dist/control-motion.js";
-import { bindMotion } from "../packages/surface/dist/adapters/motion.js";
+import { bindMotion } from "../packages/oyn/dist/core/adapters/motion.js";
 
 // Drive the consumer's clock explicitly. Surface's adapter only forwards numbers.
 let now = 0,

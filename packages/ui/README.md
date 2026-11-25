@@ -19,14 +19,14 @@ exports, registry items or existing preview URLs.
 ## Use a component
 
 Give an existing ancestor the `oyn-ui` class to scope the layout styles. Mount
-one SurfaceProvider per document. The component's SDK root owns its value,
+one OynProvider per document. The component's SDK root owns its value,
 form participation, keyboard handling and accessible name.
 
 ```tsx
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import { Switch, SwitchThumb } from "@oyn/ui/switch";
 
-<SurfaceProvider>
+<OynProvider>
   <main className="oyn-ui">
     <label data-slot="label">
       Show guides
@@ -35,7 +35,7 @@ import { Switch, SwitchThumb } from "@oyn/ui/switch";
       </Switch>
     </label>
   </main>
-</SurfaceProvider>;
+</OynProvider>;
 ```
 
 The material attaches to the SDK part's DOM ref. Native text inputs retain
@@ -78,7 +78,7 @@ import { SegmentedControl, SegmentedControlItem } from "@oyn/ui/segmented-contro
 ## Tabs
 
 Two implementations of the same Ceramic tabs share one Surface runtime. Use React 19 and mount
-`SurfaceProvider` from `@oyn/surface` above the controls.
+`OynProvider` from `oyn` above the controls.
 
 | Item | Interaction | Components to import in this workspace | Story |
 | --- | --- | --- | --- |
@@ -126,7 +126,7 @@ adds the recessed track, one moving indicator and hover wells. To give the conte
 the selected value and the indicator's measured bounds.
 
 Not using either interaction library? Attach the Ceramic material directly with
-`useSurface({ appearance: ceramic, props })` under a SurfaceProvider. The
+`useMaterial({ appearance: ceramic, props })` under a OynProvider. The
 [native button demo](http://127.0.0.1:5177/surface.html) is a material example, not an installable UI item.
 
 ## Source responsibilities
@@ -135,7 +135,7 @@ Not using either interaction library? Attach the Ceramic material directly with
 
 Shared control bindings interpret transient pointer/focus/keyboard feedback without
 owning SDK actions or selection. The UI consumer computes a fixed-duration quadratic ease-out;
-`bindMotion` from `@oyn/surface/adapters/motion` is its only writer to
+`bindMotion` from `oyn/adapters/motion` is its only writer to
 `material.setElevation`. Ceramic receives instantaneous heights, not animation
 targets or curves. Surface observes parameter changes and schedules GPU work.
 Reduced motion, interruption and cancellation belong to this consumer source.
@@ -195,7 +195,7 @@ publication is performed by these builds.
 ## Relief logo
 
 `@oyn/ui/relief-logo` is a brand graphic, not an interactive control. Place it
-inside an existing `SurfaceProvider`; its width follows its container. Give it
+inside an existing `OynProvider`; its width follows its container. Give it
 a name with `aria-label`, or use `aria-hidden` when it is decorative. For a
 static image, use the exported `@oyn/ui/relief-logo.svg` without React or a GPU.
 

@@ -1,4 +1,4 @@
-import type { Appearance } from "@oyn/surface";
+import type { Appearance } from "../../core/index.js";
 import { snapshotCeramicOptions, type CeramicOptions } from "./finish.js";
 import { ceramicDefaults } from "./defaults.js";
 import { createMaterial } from "./material.js";

@@ -1,13 +1,9 @@
 "use client";
 
 import { useCallback, type CSSProperties, type Ref } from "react";
-import { ceramic, createCeramicMaterial } from "@oyn/ceramic";
-import {
-  useSurface,
-  type Appearance,
-  type Material,
-  type SurfaceBindingContext,
-} from "@oyn/surface";
+import { ceramic, createCeramicMaterial } from "oyn/materials/ceramic";
+import { type Appearance, type Material, type SurfaceBindingContext } from "oyn";
+import { useMaterial } from "oyn/react";
 import { bindAnimatedElevation } from "./animated-elevation.js";
 import "./selection-track.css";
 
@@ -65,12 +61,12 @@ export function useSelectionTrack<State>({
   ref?: Ref<HTMLDivElement>;
   style?: CSSProperties | ((state: State) => CSSProperties | undefined);
 }) {
-  const track = useSurface({ appearance: ceramic, props: { elevation: -3.2 } });
-  const thumb = useSurface({
+  const track = useMaterial({ appearance: ceramic, props: { elevation: -3.2 } });
+  const thumb = useMaterial({
     appearance: ceramic,
     props: {},
   });
-  const well = useSurface({ appearance: hoverWell, props: {} });
+  const well = useMaterial({ appearance: hoverWell, props: {} });
 
   // The SDK owns the items. Keep a binding for each eligible host so hover-out
   // and hover-in can overlap, but release a newly selected host immediately.

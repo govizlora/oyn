@@ -4,7 +4,7 @@ import {
   NavigationMenuLink,
   NavigationDisclosure,
 } from "@oyn/ui/navigation-menu";
-import { SurfaceProvider } from "@oyn/surface";
+import { OynProvider } from "oyn/react";
 import {
   useLayoutEffect,
   useRef,
@@ -136,7 +136,7 @@ export function ProjectSwitch({
   }
   const current = currentProject();
   return (
-    <SurfaceProvider>
+    <OynProvider>
       <aside
         className="project-sidebar"
         onKeyDown={(event) => {
@@ -236,6 +236,6 @@ export function ProjectSwitch({
           </Button>
         </NavigationMenu>
       </aside>
-    </SurfaceProvider>
+    </OynProvider>
   );
 }

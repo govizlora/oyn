@@ -64,7 +64,7 @@ picks and exported manifests all derive from it. Numbers are assigned by registr
 order; append new entries to preserve existing numbers.
 
 Category modules export each specimen separately. Import its named component into
-a composition under the existing SurfaceProvider; don't add another provider per
+a composition under the existing OynProvider; don't add another provider per
 object. Current specimens use local state intentionally. Generalize a chosen
 specimen's value/onChange contract when it becomes a product component rather than
 prematurely making the entire collection into a public API.
@@ -86,7 +86,7 @@ prematurely making the entire collection into a public API.
 - `../phosphor.tsx`: one material and pipeline for the editable CRT. A bounded,
   uppercase 32×12 glyph string drives both the uniform cells and the semantic HTML
   pre element. Editing changes uniforms, not shader source or pipeline identity.
-- `../main.tsx`: one URL route owner and one SurfaceProvider for studies/library.
+- `../main.tsx`: one URL route owner and one OynProvider for studies/library.
   The original common stylesheet is loaded first; library geometry follows; scoped kinetic geometry is last.
 
 Native details owns dropdown and accordion open state. Native inputs own form
