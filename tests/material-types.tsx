@@ -76,3 +76,6 @@ import { useMaterial as coreHook } from "oyn";
 import type { Appearance } from "oyn";
 // @ts-expect-error The instance itself is the drawing object.
 ceramic.create({}).material;
+
+// Definitions preserve their concrete instance controls, not just the renderer shape.
+ceramic.create({ elevation: 8 }).setElevation(-3);

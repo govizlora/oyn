@@ -25,9 +25,9 @@ export type CeramicMaterial = MaterialInstance<CeramicProps> & {
   update(props: Readonly<CeramicProps>): MaterialUpdate;
 };
 
-export const ceramic: Material<CeramicProps> = {
+export const ceramic = {
   create: createCeramicMaterial,
-};
+} satisfies Material<CeramicProps>;
 
 /** The same instance serves declarative updates and caller-owned numeric sources. */
 export function createCeramicMaterial(

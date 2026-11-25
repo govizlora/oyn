@@ -39,6 +39,26 @@ for (const [layer, directory] of Object.entries({
       const local = name.startsWith(".")
         ? path.normalize(path.join(path.dirname(file), name))
         : name;
+      if (name.startsWith(".")) {
+        if (
+          ["entry", "surface"].includes(layer) &&
+          !local.startsWith("packages/oyn/src/core/")
+        )
+          report(node, "Core entry and runtime imports stay inside Core.");
+        if (
+          layer === "react" &&
+          !/^packages\/oyn\/src\/(react|core)\//.test(local)
+        )
+          report(node, "React imports stay inside its interface or Core.");
+        if (
+          layer === "ceramic" &&
+          !/^packages\/oyn\/src\/(materials|core)\//.test(local)
+        )
+          report(
+            node,
+            "Material imports stay inside materials or allowed Core contracts.",
+          );
+      }
       const react = /^(react|react-dom)(\/|$)|(?:^|\/)react(?:\/|$)/.test(
         local,
       );

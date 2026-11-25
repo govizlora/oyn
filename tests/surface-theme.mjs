@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
+import { createServer } from 'vite';
 import { createCeramicMaterial } from '../packages/oyn/dist/materials/ceramic/index.js';
 
 const light = createCeramicMaterial({ colorScheme: 'light' });
@@ -10,6 +11,8 @@ assert.equal(dark.parameters.get(8), 1);
 assert.deepEqual(dark.passes, ['surface']);
 assert.ok(dark.measurePadding(100, 60).x > 0); // glow, not cast shadow
 
+const server = await createServer({ configFile: false, server: { host: '127.0.0.1', port: 0 } });
+await server.listen();
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 try {
   const page = await browser.newPage({ colorScheme: 'light' });
@@ -20,7 +23,7 @@ try {
     contentType: 'text/html',
     body: `<html><head><link rel="icon" href="data:,"></head><body><div id="root"></div><script type="module" src="/@fs/${process.cwd()}/tests/fixtures/surface-theme.tsx"></script></body></html>`,
   }));
-  await page.goto('http://127.0.0.1:5176/theme-test');
+  await page.goto(server.resolvedUrls.local[0] + 'theme-test');
   await page.locator('#dark > [data-oyn-layer] > canvas').waitFor();
   const brightness = async id => {
     const box = await page.locator('#' + id).boundingBox();
@@ -50,4 +53,4 @@ try {
   assert.ok(await brightness('system') < 100);
   assert.deepEqual(errors, []);
   console.log('Surface theme: live system mode, explicit mode props, fixed material, shared-material isolation and elevation passed.');
-} finally { await browser.close(); }
+} finally { await browser.close(); await server.close(); }

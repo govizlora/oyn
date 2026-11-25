@@ -126,7 +126,7 @@ adds the recessed track, one moving indicator and hover wells. To give the conte
 the selected value and the indicator's measured bounds.
 
 Not using either interaction library? Attach the Ceramic material directly with
-`useMaterial({ material: ceramic, props })` under a OynProvider. The
+`useMaterial({ material: ceramic, props })` under an OynProvider. The
 [native button demo](http://127.0.0.1:5177/surface.html) is a material example, not an installable UI item.
 
 ## Source responsibilities
@@ -186,9 +186,9 @@ npx shadcn add http://127.0.0.1:5177/r/ceramic-tabs-list.json
 
 The files go into your configured UI directory. The Base UI entries do not require UI SDK. The CLI is a development tool, not a runtime dependency.
 
-**Release boundary:** the referenced Oyn runtime versions (0.0.0) are local
-workspace packages, not public npm releases. For an external local install,
-make the built Surface and Ceramic packages available as npm workspaces (or in
+**Release boundary:** the referenced OYN runtime version (0.0.0) is a local
+workspace package, not public npm releases. For an external local install,
+make the built `oyn` package available as an npm workspace (or in
 a private registry) before running the commands. No public deployment or npm
 publication is performed by these builds.
 

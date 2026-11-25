@@ -30,9 +30,9 @@ export type BakedMaterial = MaterialInstance<BakedProps> & {
   setRotation(value: number): void;
   update(props: Readonly<BakedProps>): MaterialUpdate;
 };
-export const baked: Material<BakedProps> = {
+export const baked = {
   create: ({ geometry, ...options }) => bakedCeramic(geometry, options),
-};
+} satisfies Material<BakedProps>;
 
 export function bakedCeramic(
   geometry: BakedGeometry,

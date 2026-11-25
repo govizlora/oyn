@@ -1,9 +1,9 @@
 # OYN architecture contract
 
-This is the **authoritative specification for cross-package boundaries**. Read it before changing APIs, interaction, animation, materials or rendering. If the implementation diverges, reconcile the code, tests and documentation together.
+This is the **authoritative specification for module and package boundaries**. Read it before changing APIs, interaction, animation, materials or rendering. If the implementation diverges, reconcile the code, tests and documentation together.
 
 - [UI usage and delivery](packages/ui/README.md): component sources, SDK composition and registry.
-- [Surface API](packages/oyn/README.md) and [source map](packages/oyn/ARCHITECTURE.md): interfaces and reading order.
+- [OYN API](packages/oyn/README.md) and [source map](packages/oyn/ARCHITECTURE.md): interfaces and reading order.
 - [Ceramic optics](packages/oyn/src/materials/ceramic/README.md): color, lighting, shadows, padding and geometry.
 
 ## Package and entry points
@@ -12,7 +12,7 @@ This is the **authoritative specification for cross-package boundaries**. Read i
 built-in materials (`packages/oyn/src/materials`) do not depend on React.
 `oyn/react` provides `OynProvider` and `useMaterial`; `oyn/materials/ceramic`
 provides Ceramic. Surface remains the internal DOM-binding concept, not a package.
-The optional UI recipes remain in `packages/ui`. Only API imports are migrated in
+The optional UI recipes remain in `packages/ui`. Only mechanical API references are migrated in
 Not ready families; this does not promote or redesign them.
 
 ## 1. Identify the output and assign one owner
@@ -29,7 +29,7 @@ Not ready families; this does not promote or redesign them.
 | Instantaneous values to geometry, optics, shadows and padding budgets | Ceramic | Do not add easing, change the caller's curve or redraw the same material shadow in CSS. |
 | Shared pointer position, window focus and page visibility | Surface inputs; optionally a consumer-supplied source | Inputs do not define a default light or interpret a button press. |
 | Pointer facts to light position (hold, return or fixed); environment to color and lighting | Ceramic | Surface does not read the theme or CSS radius, or infer material lighting. |
-| Binding, canvas, measurement, GPU resources, batching invalidations and submitting draws | Surface | The consumer does not create a second material canvas, GPUDevice or submission loop. |
+| Binding, canvas, measurement, GPU resources, batching invalidations and submitting draws | Core Surface + shared engine/renderer | The consumer does not create a second material canvas, GPUDevice or submission loop. |
 | Non-GPU fallback, text, data markers and focus outlines | Component CSS | Only Surface writes `data-oyn-active`; the fallback must not paint over active GPU output. |
 | Geometry compilation and generated shader mirrors | Offline tools | Do not rebake during interaction or edit `src/generated/` by hand. |
 
@@ -66,12 +66,12 @@ export function Example() {
 import type { Material } from "oyn";
 import { useMaterial } from "oyn/react";
 import { bindMotion, type MotionNumber } from "oyn/adapters/motion";
-import { createCeramicMaterial } from "oyn/materials/ceramic";
+import { ceramic } from "oyn/materials/ceramic";
 
 // The caller owns the source and its motion policy; each host owns its instance.
 const animatedCeramic: Material<{ height: MotionNumber }> = {
   create({ height }) {
-    const instance = createCeramicMaterial({ elevation: height.get(), maxElevation: 24 });
+    const instance = ceramic.create({ elevation: height.get(), maxElevation: 24 });
     let source = height;
     let disconnect = bindMotion(source, instance.setElevation);
     return Object.assign(instance, {
@@ -106,7 +106,7 @@ SDK / native state ──→ UI target + animation source
                    Ceramic material.setElevation
                               │ parameter notification
                               ▼
-              Surface coalesces invalidations → GPU draw
+              Core engine coalesces invalidations → GPU draw
 ```
 
 Do not write the same elevation from both declarative props and a subscription, or add an effect that writes the final value alongside the subscription. Do not represent a press by changing material height and scaling the hit area at the same time. `maxElevation` reserves shadow space; it is not a clamp, animation target or speed limit. The caller must allow room for any overshoot.
@@ -157,6 +157,8 @@ Dependencies point from UI/app to OYN's public entry points. Inside OYN, React d
 The engine owns browser resources, including HDR preference subscriptions. Stopping it releases those resources and aborts target bindings; restarting can reuse still-bound instances. Host unbinding releases the instance. A fatal failure additionally disposes all registered Core surfaces and cannot restart.
 
 ## 6. Verification, limits and change criteria
+
+`npm run test:package` packs and extracts the runtime into an isolated directory, then verifies Core/material imports and TypeScript consumption without React. `npm run test:material-core` checks the framework-independent host lifecycle, including multiple hosts and failure cleanup.
 
 `npm run check:architecture` checks layer dependencies, prohibits interaction and animation scheduling in materials, and compiles this document's examples and negative API type tests. `npm run test:ui-control` covers numeric sources, continuous reversal, reduced motion, input boundaries and composition. `npm run test:ui` checks the shipped registry, Tabs and the catalog. `npm run test:flip-disc` covers WebGPU/WebGL2, wave propagation, presses, keyboard input and parameter updates. Run all browser tests headlessly.
 

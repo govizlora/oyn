@@ -47,7 +47,8 @@
     "test:ui-catalog": "npm run build && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
     "build:site": "npm run build:packages && vite build site --base ./",
     "dev:site": "vite site",
-    "test:material-core": "npm run build:packages && node tests/material-core.mjs"
+    "test:material-core": "npm run build:packages && node tests/material-core.mjs",
+    "test:package": "npm run build:packages && node tests/package-entrypoints.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

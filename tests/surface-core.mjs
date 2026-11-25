@@ -10,7 +10,7 @@ import { shadowBounds } from '../packages/oyn/dist/materials/ceramic/bounds.js';
 assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
-// Padding policy belongs to the appearance, including remeasurement after updates.
+// Padding policy belongs to the material, including remeasurement after updates.
 const instance = ceramic.create({ elevation: 16, colorScheme: 'light' });
 const reservedPadding = instance.measurePadding(120, 40);
 instance.update({ elevation: 32, colorScheme: 'dark' });
