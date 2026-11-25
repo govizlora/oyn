@@ -185,3 +185,13 @@ layout dimensions. Initialization or runtime failure removes the attribute from
 every surface in that Provider and permanently stops its engine. New mounts and
 prop updates do not retry. Ref detachment also removes the attribute. Errors are
 logged for diagnostics; there is no application error callback to wire up.
+
+### Application-owned inputs
+
+`<SurfaceProvider inputs={inputs}>` accepts a stable `SurfaceInputs` object
+instead of installing Surface's default browser input listeners. Omit it for the
+normal browser input source. The application owns the supplied source's behavior
+and lifetime; bindings subscribe and unsubscribe normally. Changing its identity
+restarts the engine, so do not construct it during every render. For example, the
+[website study](../../site/pointer.ts) shares one position between its decorative
+touch cursor and materials without dispatching synthetic pointer events.

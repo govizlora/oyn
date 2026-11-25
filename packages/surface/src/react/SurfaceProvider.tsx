@@ -1,19 +1,22 @@
 import { useEffect, useState, type ReactNode } from "react";
+import type { SurfaceInputs } from "../types/input.js";
 import { createEngine } from "../engine.js";
 import { SurfaceEngineContext } from "./SurfaceEngineContext.js";
 
 export function SurfaceProvider({
   children,
   hdr = false,
+  inputs,
 }: {
   children: ReactNode;
   hdr?: boolean;
+  inputs?: SurfaceInputs;
 }) {
   const [engine] = useState(createEngine);
 
   useEffect(() => {
     const range = hdr ? matchMedia("(dynamic-range: high)") : null;
-    const start = () => engine.start(range?.matches ?? false);
+    const start = () => engine.start(range?.matches ?? false, inputs);
     const changed = () => {
       engine.stop();
       start();
@@ -24,7 +27,7 @@ export function SurfaceProvider({
       range?.removeEventListener("change", changed);
       engine.stop();
     };
-  }, [engine, hdr]);
+  }, [engine, hdr, inputs]);
 
   return <SurfaceEngineContext value={engine}>{children}</SurfaceEngineContext>;
 }

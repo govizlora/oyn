@@ -20,11 +20,11 @@ export async function checkRefLifecycle() {
   function Probe({ forwardedRef, color }: { forwardedRef: Ref<HTMLButtonElement>; color: string }) {
     const ref = useSurface({ appearance: ceramic, props: { color, elevation: 4 } });
     const composed = useMemo(() => (node: HTMLButtonElement | null) => {
-      ref(node);
+      const releaseSurface = ref(node);
       const cleanup = typeof forwardedRef === "function" ? forwardedRef(node) : undefined;
       if (forwardedRef && typeof forwardedRef !== "function") forwardedRef.current = node;
       return () => {
-        ref(null);
+        if (typeof releaseSurface === "function") releaseSurface();
         if (typeof cleanup === "function") cleanup();
         else if (typeof forwardedRef === "function") forwardedRef(null);
         else if (forwardedRef) forwardedRef.current = null;

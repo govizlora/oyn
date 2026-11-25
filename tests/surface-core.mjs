@@ -77,12 +77,14 @@ try {
     count(CanvasRenderingContext2D.prototype, 'drawImage', () => copies++);
     const hosts = Array.from({ length: 3 }, () => { const el = document.createElement('div'); el.style.cssText = 'width:120px;height:40px;border-radius:8px'; document.body.append(el); return el; });
     const materials = hosts.map(() => createCeramicMaterial({ elevation: 12 }));
-    const meshes = new Map(hosts.map((element, i) => [element, { element, material: materials[i] }]));
-    const failures = []; const engine = createEngine(meshes, e => failures.push(String(e)));
+    const engine = createEngine();
+    const meshes = engine.entries;
+    hosts.forEach((element, i) => meshes.set(element, { element, material: materials[i] }));
+    engine.start();
     try {
-      await wait(() => failures.length || document.querySelectorAll('[data-oyn-canvas]').length === 3);
+      await wait(() => engine.failed || document.querySelectorAll('[data-oyn-canvas]').length === 3);
       await settle();
-      if (failures.length) throw Error(failures.join('\n'));
+      if (engine.failed) throw Error('Surface engine failed');
       const canvases = hosts.map(h => h.querySelector('canvas'));
       const initial = canvases.map(c => [c.width, c.height]);
       const firstPipelines = pipelines;
@@ -93,26 +95,78 @@ try {
       await settle();
       const stable = canvases.every((c, i) => c.width === initial[i][0] && c.height === initial[i][1]);
       // A replacement material owns its own padding policy.
-      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, colorScheme: 'dark' }); engine.invalidate(); await settle();
+      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, colorScheme: 'dark' }); engine.requestMeasure(); await settle();
       const replacementPaddingChanged = canvases[0].width < initial[0][0];
-      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, maxElevation: 24 }); engine.invalidate(); await settle();
+      meshes.get(hosts[0]).material = createCeramicMaterial({ elevation: 2, maxElevation: 24 }); engine.requestMeasure(); await settle();
       const explicitGrowth = canvases[0].width > initial[0][0];
       hosts[1].style.width = '240px'; await settle();
       const resized = canvases[1].width > initial[1][0] && hosts[1].querySelector('canvas') === canvases[1];
       const beforeOld = scheduled; materials[0].setElevation(7);
       const oldUnsubscribed = scheduled === beforeOld;
       await settle();
-      const unchangedPipelines = pipelines === firstPipelines + 1; // Dark environment adds the surface-only pipeline.
+      const unchangedPipelines = pipelines === firstPipelines; // Signed relief and both themes share one surface program.
       const baselineCopies = copies;
-      engine.dispose(); await settle();
+      engine.stop(); await settle();
       const cleaned = hosts.every(h => !h.querySelector('canvas') && h.style.position === '' && h.style.isolation === '');
-      return { devices, firstPipelines, unchangedPipelines, animationSchedules, noAnimationMeasurement, stable, replacementPaddingChanged, explicitGrowth, resized, oldUnsubscribed, copies: baselineCopies, cleaned, failures };
-    } finally { engine.dispose(); hosts.forEach(h => h.remove()); originals.forEach(fn => fn()); }
+      return { devices, firstPipelines, unchangedPipelines, animationSchedules, noAnimationMeasurement, stable, replacementPaddingChanged, explicitGrowth, resized, oldUnsubscribed, copies: baselineCopies, cleaned, failed: engine.failed };
+    } finally { engine.stop(); hosts.forEach(h => h.remove()); originals.forEach(fn => fn()); }
   });
-  assert.equal(result.devices, 1); assert.equal(result.firstPipelines, 2); assert.ok(result.unchangedPipelines);
+  assert.equal(result.devices, 1); assert.equal(result.firstPipelines, 1); assert.ok(result.unchangedPipelines);
   assert.equal(result.animationSchedules, 1); assert.equal(result.copies, 0);
   for (const key of ['noAnimationMeasurement', 'stable', 'replacementPaddingChanged', 'explicitGrowth', 'resized', 'oldUnsubscribed', 'cleaned']) assert.ok(result[key], key);
-  assert.deepEqual(result.failures, []);
+  assert.equal(result.failed, false);
+  const suppliedInputs = await page.evaluate(async () => {
+    const { createEngine } = await import('/packages/surface/src/engine.ts');
+    const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
+    const element = document.createElement('div');
+    element.style.cssText = 'width:120px;height:40px';
+    document.body.append(element);
+    let reads = 0, nativeListeners = 0, sameSource = true;
+    const subscriptions = new Set();
+    let position = { x: 60, y: 20 };
+    const inputs = { pointer: {
+      getSnapshot() { reads++; return { position, inside: true, focused: true, visible: true }; },
+      subscribe(listener) { subscriptions.add(listener); return () => subscriptions.delete(listener); },
+    } };
+    const source = createCeramicMaterial();
+    const material = Object.create(source, { bind: { value(context) {
+      sameSource &&= context.inputs === inputs;
+      return source.bind(context);
+    } } });
+    const engine = createEngine();
+    engine.entries.set(element, { element, material });
+    const add = window.addEventListener;
+    window.addEventListener = function(type, ...args) {
+      if (type === 'pointermove') nativeListeners++;
+      return add.call(this, type, ...args);
+    };
+    const settle = async () => {
+      for (let i = 0; i < 12; i++) await new Promise(requestAnimationFrame);
+    };
+    try {
+      engine.start(false, inputs);
+      await settle();
+      const connected = subscriptions.size === 1 && !!element.querySelector('canvas');
+      const before = reads;
+      position = { x: 100, y: 30 };
+      subscriptions.forEach(listener => listener());
+      await settle();
+      const redrawn = reads > before;
+      engine.stop();
+      const released = subscriptions.size === 0 && !element.querySelector('canvas');
+      engine.start(false, inputs);
+      await settle();
+      return { connected, redrawn, released, reconnected: subscriptions.size === 1,
+        sameSource, nativeListeners };
+    } finally {
+      engine.stop();
+      element.remove();
+      window.addEventListener = add;
+    }
+  });
+  for (const key of ['connected', 'redrawn', 'released', 'reconnected', 'sameSource'])
+    assert.equal(suppliedInputs[key], true, key);
+  assert.equal(suppliedInputs.nativeListeners, 0, 'Supplied inputs replace native listeners');
   const refs = await page.evaluate(async () => (await import('/tests/fixtures/surface-refs.tsx')).checkRefLifecycle());
   assert.equal(refs.firstCanvases, 1);
   for (const key of ['stableOnMaterialChange', 'oldRefCleaned', 'newRefCleaned', 'objectAttached', 'objectCleared', 'noCanvases']) assert.ok(refs[key], key);
@@ -124,8 +178,11 @@ try {
     element.style.cssText = 'position:absolute;left:100px;top:100px;width:160px;height:100px;border-radius:12px';
     document.body.append(element);
     const material = createCeramicMaterial({ colorScheme: 'dark', elevation: 12 });
-    const meshes = new Map([[element, { element, material }]]);
-    window.visual = { material, element, meshes, engine: createEngine(meshes) };
+    const engine = createEngine();
+    const meshes = engine.entries;
+    meshes.set(element, { element, material });
+    engine.start();
+    window.visual = { material, element, meshes, engine };
   });
   await page.waitForSelector('[data-oyn-canvas]');
   await page.waitForTimeout(200);
@@ -136,12 +193,12 @@ try {
   await page.evaluate(async () => {
     const { createCeramicMaterial } = await import('/packages/ceramic/src/index.ts');
     window.visual.meshes.get(window.visual.element).material = createCeramicMaterial({ elevation: 12 });
-    window.visual.engine.invalidate();
+    window.visual.engine.requestMeasure();
   });
   await page.waitForTimeout(100);
   const light = PNG.sync.read(await page.screenshot());
   assert.ok(light.data[(150 * light.width + 180) * 4] >= 235, 'light material repaints without pipeline state leaking');
-  await page.evaluate(() => { window.visual.engine.dispose(); window.visual.element.remove(); });
+  await page.evaluate(() => { window.visual.engine.stop(); window.visual.element.remove(); });
   const failureChecks = await page.evaluate(async () => {
     const { createRenderer } = await import('/packages/surface/src/renderer.ts');
     const { createEngine } = await import('/packages/surface/src/engine.ts');
@@ -154,21 +211,28 @@ try {
     const wait = async predicate => { for (let i = 0; !predicate(); i++) { if (i > 300) throw Error('Failure cleanup timed out'); await new Promise(requestAnimationFrame); } };
     const host = document.createElement('div'); host.style.cssText = 'width:100000px;height:10px'; document.body.append(host);
     const material = createCeramicMaterial(); const mesh = { element: host, material };
-    const failures = []; const engine = createEngine(new Map([[host, mesh]]), e => failures.push(String(e)));
-    await wait(() => failures.length);
-    const oversized = failures[0].includes('exceeds GPU limit') && !host.querySelector('canvas'); engine.dispose(); host.remove();
+    const reported = [];
+    const originalError = console.error;
+    console.error = (...args) => reported.push(args.map(String).join(' '));
+    const engine = createEngine();
+    engine.entries.set(host, mesh);
+    engine.start();
+    await wait(() => engine.failed);
+    const oversized = reported.some(message => message.includes('exceeds GPU limit')) && !host.querySelector('canvas');
+    engine.stop(); host.remove();
     let device;
     const request = GPUAdapter.prototype.requestDevice;
     GPUAdapter.prototype.requestDevice = async function(...args) { device = await request.apply(this, args); return device; };
     const el = document.createElement('div'); el.style.cssText = 'width:100px;height:40px'; document.body.append(el);
-    const lost = [];
-    const lossEngine = createEngine(new Map([[el, { element: el, material }]]), e => lost.push(String(e)));
+    const lossEngine = createEngine();
+    lossEngine.entries.set(el, { element: el, material });
+    lossEngine.start();
     try {
       await wait(() => el.querySelector('canvas'));
-      device.destroy(); await wait(() => lost.length);
-      const lossCleaned = !el.querySelector('canvas') && lost[0].includes('device lost');
+      device.destroy(); await wait(() => lossEngine.failed);
+      const lossCleaned = !el.querySelector('canvas') && reported.some(message => message.includes('device lost'));
       return { unavailable, oversized, lossCleaned };
-    } finally { lossEngine.dispose(); el.remove(); GPUAdapter.prototype.requestDevice = request; }
+    } finally { lossEngine.stop(); el.remove(); GPUAdapter.prototype.requestDevice = request; console.error = originalError; }
   });
   assert.ok(failureChecks.unavailable && failureChecks.oversized && failureChecks.lossCleaned, JSON.stringify(failureChecks));
   assert.deepEqual(errors, []);

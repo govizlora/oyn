@@ -18,7 +18,7 @@ This is the **authoritative specification for cross-package boundaries**. Read i
 | Animation curves, targets, position, velocity, interruption and reduced motion | Consumer's numeric source; CSS or the SDK can own DOM movement | Surface and Ceramic do not provide a second spring, transition or gesture animation policy. |
 | Connection from a numeric source to a material setter | `bindMotion(source, write)` | The adapter subscribes, forwards and unsubscribes; it does not interpolate, schedule animation or submit GPU work. |
 | Instantaneous values to geometry, optics, shadows and padding budgets | Ceramic | Do not add easing, change the caller's curve or redraw the same material shadow in CSS. |
-| Shared pointer position, window focus and page visibility | Surface inputs | Inputs do not define a default light or interpret a button press. |
+| Shared pointer position, window focus and page visibility | Surface inputs; optionally a consumer-supplied source | Inputs do not define a default light or interpret a button press. |
 | Pointer facts to light position (hold, return or fixed); environment to color and lighting | Ceramic | Surface does not read the theme or CSS radius, or infer material lighting. |
 | Binding, canvas, measurement, GPU resources, batching invalidations and submitting draws | Surface | The consumer does not create a second material canvas, GPUDevice or submission loop. |
 | Non-GPU fallback, text, data markers and focus outlines | Component CSS | Only Surface writes `data-oyn-active`; the fallback must not paint over active GPU output. |
@@ -89,6 +89,8 @@ SDK / native state ──→ UI target + animation source
 ```
 
 Do not write the same elevation from both declarative props and a subscription, or add an effect that writes the final value alongside the subscription. Do not represent a press by changing material height and scaling the hit area at the same time. `maxElevation` reserves shadow space; it is not a clamp, animation target or speed limit. The caller must allow room for any overshoot.
+
+A provider may receive a stable `inputs: SurfaceInputs` source in place of its default browser listeners. This is replacement, not merging: the consumer owns that source and its lifecycle, while material bindings only subscribe. App-specific virtual pointer animation belongs in this source, never in Surface or Ceramic. A decorative marker and material lighting read the same snapshot; do not dispatch synthetic DOM interaction events.
 
 ## 3. Distinguish three kinds of frame
 

@@ -1,10 +1,34 @@
-import React, { useLayoutEffect, useState, useSyncExternalStore } from "react";
+import React, { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 import { createRoot } from "react-dom/client";
 import { SurfaceProvider } from "@oyn/surface";
 import { Button } from "@oyn/ui/button";
 import { Tabs, TabsList, TabsTab } from "@oyn/ui/tabs";
 import { FilmTabs } from "../examples/atelier/src/tabs-film/FilmTabs";
+
+import { createStudyPointer } from "./pointer";
+
+const studyPointer = createStudyPointer(window);
+
+function StudyCursor() {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const write = () => {
+      const node = ref.current!;
+      const { position, visible } = studyPointer.inputs.pointer.getSnapshot();
+      node.hidden = !studyPointer.showCursor() || !visible;
+      if (position) node.style.transform = `translate3d(${position.x}px, ${position.y}px, 0)`;
+    };
+    const unsubscribe = studyPointer.inputs.pointer.subscribe(write);
+    write();
+    return unsubscribe;
+  }, []);
+  return <div className="study-cursor-layer" aria-hidden="true"><div ref={ref} className="study-cursor">
+      <svg viewBox="0 0 20 28" focusable="false">
+        <path d="M1 1v21l5.1-5.1 4.2 9.1 4-1.9-4.2-8.9H18Z" fill="#111" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    </div></div>;
+}
 
 const xProfile = "https://x.com/Govizlora";
 const profiles = [
@@ -98,7 +122,8 @@ function Study() {
   );
 }
 createRoot(document.getElementById("study")!).render(
-  <SurfaceProvider>
+  <SurfaceProvider inputs={studyPointer.inputs}>
+    <StudyCursor />
     <Study />
   </SurfaceProvider>,
 );

@@ -1,3 +1,4 @@
+import type { SurfaceInputs } from "./types/input.js";
 import { createInputs } from "./createInputs.js";
 import type { Mesh } from "./types/scene.js";
 import type { Material, Parameters, SurfaceBinding } from "./types/material.js";
@@ -35,10 +36,10 @@ export function createEngine() {
       engine.stop();
       console.error(error);
     },
-    start(hdr = false) {
+    start(hdr = false, inputs?: SurfaceInputs) {
       if (running || failed) return;
       try {
-        running = startEngine(entries, engine.fail, hdr);
+        running = startEngine(entries, engine.fail, hdr, inputs);
       } catch (error) {
         engine.fail(error);
       }
@@ -66,13 +67,15 @@ function startEngine(
   meshes: Map<HTMLElement, Mesh>,
   fail: (error: unknown) => void,
   hdr: boolean,
+  suppliedInputs?: SurfaceInputs,
 ) {
   let renderer: Renderer | undefined,
     disposed = false,
     raf = 0,
     layoutDirty = true,
     positionDirty = true;
-  const input = createInputs(window);
+  const input = suppliedInputs ? undefined : createInputs(window);
+  const inputs = suppliedInputs ?? input!.inputs;
   const entries = new Map<HTMLElement, Entry>();
   function invalidate() {
     if (!disposed && renderer && !raf) raf = requestAnimationFrame(draw);
@@ -135,7 +138,7 @@ function startEngine(
             binding = mesh.material.bind?.({
               element,
               signal: controller.signal,
-              inputs: input.inputs,
+              inputs,
               requestDraw: invalidatePosition,
               requestMeasure: invalidateLayout,
             });
@@ -168,7 +171,7 @@ function startEngine(
             entry.binding = mesh.material.bind?.({
               element,
               signal: entry.controller.signal,
-              inputs: input.inputs,
+              inputs,
               requestDraw: invalidatePosition,
               requestMeasure: invalidateLayout,
             });
@@ -280,7 +283,7 @@ function startEngine(
       }
     });
     entries.clear();
-    input.dispose();
+    input?.dispose();
     renderer?.dispose();
     errors.forEach((error) => console.error(error));
   }
