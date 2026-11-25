@@ -14,16 +14,20 @@ This document maps the one runtime package, not a second API specification.
 5. `src/core/engine.ts`: browser resources, HDR preference, shared inputs,
    measurement/draw scheduling, target binding and fatal failure teardown.
 6. `src/core/presentation.ts`: canvas placement, bounds and active/fallback marker.
-7. `src/core/renderer.ts`: backend selection; `webgpu.ts` and `webgl2.ts` own
-   backend resource allocation and submission.
+7. `src/core/renderer.ts`: the only renderer. It acquires WebGPU, allocates
+   resources and submits draws. Acquisition failure uses the same engine failure
+   path as execution failure; native CSS remains visible.
 8. `src/materials/ceramic/material.ts`: Ceramic definition and instance factory.
    `update` changes the drawing object itself; there is no nested material wrapper.
+
+The former UI package, examples, site and experimental materials are frozen in
+the ignored local archive; they are not part of this source map or any build.
 
 ## Entry points and dependency direction
 
 - `oyn`: Core factories and contracts. No React or concrete-material imports.
 - `oyn/react`: `OynProvider`, `useMaterial` and React-facing option types.
-- `oyn/materials/ceramic`: Ceramic, with subpaths for baked, card and flip-disc.
+- `oyn/materials/ceramic`: standard signed analytic Ceramic only.
 - `oyn/adapters/motion`: subscribe/forward/unsubscribe only, no animation policy.
 
 ```text

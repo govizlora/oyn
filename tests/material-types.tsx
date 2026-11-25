@@ -79,3 +79,6 @@ ceramic.create({}).material;
 
 // Definitions preserve their concrete instance controls, not just the renderer shape.
 ceramic.create({ elevation: 8 }).setElevation(-3);
+
+// @ts-expect-error A material no longer exposes a second GPU backend.
+ceramic.create({}).loadWebGL2;

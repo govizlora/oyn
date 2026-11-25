@@ -3,18 +3,43 @@
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
-  "files": ["dist", "src", "README.md", "ARCHITECTURE.md"],
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "ARCHITECTURE.md"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "development": "./src/index.ts", "import": "./dist/index.js" },
-    "./react": { "types": "./dist/react/index.d.ts", "development": "./src/react/index.ts", "import": "./dist/react/index.js" },
-    "./adapters/motion": { "types": "./dist/core/adapters/motion.d.ts", "development": "./src/core/adapters/motion.ts", "import": "./dist/core/adapters/motion.js" },
-    "./materials/ceramic": { "types": "./dist/materials/ceramic/index.d.ts", "development": "./src/materials/ceramic/index.ts", "import": "./dist/materials/ceramic/index.js" },
-    "./materials/ceramic/baked": { "types": "./dist/materials/ceramic/baked.d.ts", "development": "./src/materials/ceramic/baked.ts", "import": "./dist/materials/ceramic/baked.js" },
-    "./materials/ceramic/card": { "types": "./dist/materials/ceramic/card.d.ts", "development": "./src/materials/ceramic/card.ts", "import": "./dist/materials/ceramic/card.js" },
-    "./materials/ceramic/flip-disc": { "types": "./dist/materials/ceramic/flip-disc.d.ts", "development": "./src/materials/ceramic/flip-disc.ts", "import": "./dist/materials/ceramic/flip-disc.js" },
-    "./materials/ceramic/sculpted": { "types": "./dist/materials/ceramic/sculpted.d.ts", "development": "./src/materials/ceramic/sculpted.ts", "import": "./dist/materials/ceramic/sculpted.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "development": "./src/react/index.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./adapters/motion": {
+      "types": "./dist/core/adapters/motion.d.ts",
+      "development": "./src/core/adapters/motion.ts",
+      "import": "./dist/core/adapters/motion.js"
+    },
+    "./materials/ceramic": {
+      "types": "./dist/materials/ceramic/index.d.ts",
+      "development": "./src/materials/ceramic/index.ts",
+      "import": "./dist/materials/ceramic/index.js"
+    }
   },
-  "scripts": { "build": "node ../../tools/webgl/generate.mjs && rm -rf dist && tsc -p tsconfig.json" },
-  "peerDependencies": { "react": "^19.0.0" },
-  "peerDependenciesMeta": { "react": { "optional": true } }
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
 }

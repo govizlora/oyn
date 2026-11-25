@@ -80,7 +80,13 @@ const samples = cases
           ? {
               ...source,
               bind: ceramicBinding({ source: "fixed" }),
-              passes: ["shadow"],
+              // A test-only entry invokes production AO without the face pass.
+              shader: source.shader + `
+@fragment fn aoProbe(in:VertexOut)->@location(0) vec4f {
+  let b=in.card.zw*0.5;
+  return ceramicShadow(in.local-b,in.card.xy+b-frame.viewportLight.zw,material.shape.y,material.shadow);
+}`,
+              passes: ["aoProbe"],
             }
           : source;
       engine.entries.set(element, { element, material });

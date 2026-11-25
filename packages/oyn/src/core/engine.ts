@@ -212,10 +212,7 @@ function startEngine(
         }
         // An empty draw program has a binding, but no presentation/resources.
         // Parameter notifications can make it drawable again through this path.
-        if (
-          !entry.material.passes.length ||
-          (renderer.ready && !renderer.ready(entry.material))
-        ) {
+        if (!entry.material.passes.length) {
           detach(entry);
           continue;
         }
@@ -310,7 +307,7 @@ function startEngine(
   const failed = (error: unknown) => {
     if (!disposed) fail(error);
   };
-  void createRenderer(failed, invalidate, hdr)
+  void createRenderer(failed, hdr)
     .then((value) => {
       if (disposed) {
         value.dispose();

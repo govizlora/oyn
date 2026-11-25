@@ -1,9 +1,4 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
-import {
-  decodeGeometry,
-  bakedCeramic,
-} from "../packages/oyn/dist/materials/ceramic/baked.js";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { createCeramicMaterial } from "../packages/oyn/dist/materials/ceramic/index.js";
@@ -11,7 +6,6 @@ import {
   ceramicFinish,
   relativeLuminance,
 } from "../packages/oyn/dist/materials/ceramic/finish.js";
-import { cardCeramic } from "../packages/oyn/dist/materials/ceramic/card.js";
 
 for (const scheme of ["light", "dark"]) {
   const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
@@ -63,40 +57,6 @@ assert.throws(
   () => createCeramicMaterial({ colorScheme: "invalid" }),
   /colorScheme/,
 );
-assert.deepEqual(
-  cardCeramic({
-    width: 100,
-    height: 60,
-    radius: 12,
-    elevation: 16,
-    finish: { colorScheme: "dark" },
-  }).passes,
-  ["shadow", "surface"],
-);
-
-const bytes = await readFile("tests/fixtures/pocket-geometry.bin");
-const geometry = decodeGeometry(
-  bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-);
-for (const colorScheme of ["light", "dark"]) {
-  const material = bakedCeramic(geometry, {
-    colorScheme,
-    color: "#171717",
-    lighting: "soft",
-  });
-  assert.equal(
-    material.parameters.get(24),
-    0,
-    "Baked lighting override is independent of environment",
-  );
-  assert.deepEqual(
-    material.passes,
-    colorScheme === "light" ? ["shadow", "surface"] : ["surface"],
-  );
-  if (colorScheme === "dark")
-    assert.deepEqual(material.measurePadding(100, 60), { x: 0, y: 0 });
-}
-
 const fixtureUrl =
   "http://127.0.0.1:5199/tests/fixtures/material-lifecycle.html";
 const server = spawn(

@@ -14,21 +14,10 @@ playwright-report/
 .env.*
 !.env.example
 
-# Static registry generated from packages/ui/src
-/examples/atelier/public/r/
-
-# Materialized from the pinned UI SDK documentation at build time.
-examples/atelier/src/components/generated/
-examples/atelier/public/recipe-source/
-
 # Local design studies, proof sheets, and launch exports.
 /docs/
 /launch/
 artifacts/
-# Only approved public brand assets are versioned.
-!/artifacts/
-/artifacts/*
-!/artifacts/brand/
 recordings/
 screenshots/
 *.mp4
@@ -38,7 +27,6 @@ screenshots/
 
 # Keep editor preferences, local archives and internal working notes off GitHub.
 /.vscode/
-/archive/ui/
+/archive/
 /AGENTS.md
 /HANDOFF.md
-/site/.openai/

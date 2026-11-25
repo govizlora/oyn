@@ -2,7 +2,7 @@
 
 One package for the React-free Core and built-in materials, with an optional React 19 interface. Import runtime contracts from `oyn`, React APIs from `oyn/react`, and Ceramic from `oyn/materials/ceramic`. React is an optional peer dependency and is never loaded by the Core or material entry points.
 
-DOM-bound surfaces. WebGPU is preferred. If device acquisition fails, a lazy WebGL2 backend renders supported materials into bounded off-DOM batches and copies each result into its own element canvas. Unsupported materials keep their native CSS. There is no page overlay, second GPU draw scheduler, or runtime backend switching.
+DOM-bound WebGPU surfaces. If WebGPU is unavailable or initialization/execution fails, the engine stops and native CSS remains visible. There is no second graphics backend, shader transpiler, page overlay or runtime retry.
 
 Read the [architecture contract](../../ARCHITECTURE.md) for ownership and animation rules.
 See the [source map](./ARCHITECTURE.md) for reading order and dependency boundaries. Start with `src/react/useMaterial.ts`.
@@ -161,7 +161,7 @@ Render-time writes to live instance/ref state and render-time mode resolution we
 removed from the hook. Correctness does not depend on memoization. Compiler-enabled
 consumer/library validation remains future work: no Compiler certification or
 `use no memo` workaround is claimed. See the [architecture contract](../../ARCHITECTURE.md) and headless
-`test:material-lifecycle` for current lifecycle/input/type coverage.
+`npm run test:browser` for current lifecycle/input/type coverage.
 
 ## Optional external animation adapter
 
@@ -175,9 +175,11 @@ cancellation. Its animation clock emits numbers; it is not a second renderer.
 Surface coalesces parameter notifications into GPU work and does not calculate
 animation curves or require an animation-specific frame API.
 
-## Focused Resource Tests
+## Focused resource verification
 
-`npm run test:baked` checks geometry reproducibility, shared GPU storage and pipelines, idle scheduling, and resource release with three surfaces. It does not collect frame-rate samples. Run `BAKED_STRESS=1 npm run test:baked` explicitly for the 100-surface workload and frame-rate sampling; both modes use the same test implementation.
+`npm test` runs fast build, type, lifecycle, numeric and package checks without a
+browser. `npm run test:browser` explicitly runs the headless WebGPU/CSS fallback
+and optical suite. Archived components, experiments and benchmarks are excluded.
 
 An empty `material.passes` list means there is currently nothing to draw. Surface
 releases its presentation/target and removes `data-oyn-active`, but preserves the

@@ -6,7 +6,6 @@ import ts from "typescript";
 function files(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
-    if (entry.name === "generated") return [];
     return entry.isDirectory()
       ? files(file)
       : /\.tsx?$/.test(file)
@@ -20,7 +19,6 @@ for (const [layer, directory] of Object.entries({
   surface: "packages/oyn/src/core",
   react: "packages/oyn/src/react",
   ceramic: "packages/oyn/src/materials",
-  ui: "packages/ui/src",
 })) {
   for (const file of fs.statSync(directory).isDirectory()
     ? files(directory)
@@ -95,8 +93,6 @@ for (const [layer, directory] of Object.entries({
             "Built-in materials import exact internal contracts, not their own public package.",
           );
       }
-      if (layer === "ui" && /oyn\/(src|dist)\//.test(name))
-        report(node, "Consumers must use OYN public entry points.");
       if (/^@oyn\/(surface|ceramic)(\/|$)/.test(name))
         report(
           node,
@@ -157,16 +153,6 @@ for (const [layer, directory] of Object.entries({
               "Reduced-motion animation policy belongs to the consumer.",
             );
         }
-        if (
-          layer === "ui" &&
-          ([
-            "requestDevice",
-            "createRenderPipeline",
-            "createCommandEncoder",
-          ].includes(name) ||
-            (name === "createElement" && literal === "canvas"))
-        )
-          report(node, "UI must not own GPU resources or a second canvas.");
       }
       ts.forEachChild(node, visit);
     }

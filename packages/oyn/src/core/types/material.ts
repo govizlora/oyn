@@ -45,17 +45,6 @@ export type MaterialInstance<P = never> = {
   /** May switch with parameter notifications; keep the parameter block layout stable.
    * WGSL: vertex entry `vertex`, binding 0 frame, binding 1 parameters. */
   shader: string;
-  /** Optional build-generated programs, indexed by the original WGSL and entry point. */
-  loadWebGL2?: () => Promise<
-    ReadonlyMap<
-      string,
-      {
-        vertex: string;
-        fragments: Readonly<Record<string, string>>;
-        blocks: Readonly<Record<string, number>>;
-      }
-    >
-  >;
   /** Optional immutable read-only storage at binding 2; never uploaded per frame. */
   data?: StaticData;
   parameters: Parameters;

@@ -31,12 +31,8 @@ function difference(a, b) {
   return { mean: total / a.data.length, max };
 }
 try {
-  for (const [fallback, dpr] of [
-    [false, 1],
-    [false, 2],
-    [true, 1.5],
-  ]) {
-    const backend = `${fallback ? "webgl2" : "webgpu"}-${dpr}`;
+  for (const dpr of [1, 2]) {
+    const backend = `webgpu-${dpr}`;
     const page = await browser.newPage({
       viewport: { width: 1180, height: 1560 },
       deviceScaleFactor: dpr,
@@ -46,17 +42,11 @@ try {
     page.on("console", (m) => {
       if (m.type() === "error") errors.push(m.text());
     });
-    if (fallback)
-      await page.addInitScript(() =>
-        Object.defineProperty(navigator, "gpu", { value: undefined }),
-      );
     await page.addInitScript(() => {
       const counts = (window.allocations = { pipelines: 0, buffers: 0 });
       for (const [type, method, key] of [
         [window.GPUDevice, "createRenderPipeline", "pipelines"],
         [window.GPUDevice, "createBuffer", "buffers"],
-        [window.WebGL2RenderingContext, "createProgram", "pipelines"],
-        [window.WebGL2RenderingContext, "createBuffer", "buffers"],
       ]) {
         if (!type) continue;
         const original = type.prototype[method];
@@ -69,7 +59,8 @@ try {
     await page.goto(
       server.resolvedUrls.local[0] + "tests/fixtures/ceramic-continuity.html",
     );
-    await page.waitForFunction(() => window.continuity?.ready());
+    await page.waitForFunction(() => window.continuity?.ready() || window.continuity?.engine.failed);
+    assert.equal(await page.evaluate(() => window.continuity.engine.failed), false, errors.join("\n"));
     await page.screenshot({
       path: `${directory}/${backend}.png`,
       fullPage: true,

@@ -18,7 +18,7 @@ fn roundedCeramicGeometry(p:vec2f,b:vec2f,radius:f32,rim:f32,exposure:f32,center
  let rimMask=max(0,mask-surfaceMask(inner));
  // Keep the calibrated glaze profile anchored in CSS space while the exposed
  // band shrinks. Rescaling its steep specular lobe through pixel centers makes
- // shallow rims flash. Authored geometry supplies full exposure (1).
+ // shallow rims flash.
  let grad=gradient(p,b,radius);let edge=1-clamp(-d,0,rim)/max(rim,0.0001);
  let angle=smoothstep(0,1,edge*edge)*1.48;
  let normal=vec3f(grad*sin(angle),cos(angle));

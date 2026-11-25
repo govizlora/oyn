@@ -7,7 +7,4 @@ playwright-report/
 .vite/
 .cache/
 package-lock.json
-packages/oyn/src/materials/ceramic/generated/
-examples/atelier/public/r/
-examples/atelier/src/components/generated/
-examples/atelier/public/recipe-source/
+archive/

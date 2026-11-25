@@ -105,7 +105,7 @@ function createResolvedMaterial(
     validateSignedElevation,
     shadows,
     frostReachPerHeight,
-  } = ceramicFinish(options, "analytic");
+  } = ceramicFinish(options);
   const paddingElevation = Math.max(
     0,
     reservedElevation ?? initialElevation,
@@ -116,7 +116,6 @@ function createResolvedMaterial(
   const shadow = parameters.snapshot().slice(12, 16);
   return {
     bind: ceramicBinding(options.light, true),
-    loadWebGL2: loadCeramic,
     shader: ceramicWGSL,
     parameters,
     // The signed surface composites its own shadow, avoiding an empty draw pass
@@ -136,8 +135,4 @@ function createResolvedMaterial(
       parameters.set(1, value);
     },
   };
-}
-
-function loadCeramic() {
-  return import("./generated/ceramic.js").then((m) => m.default);
 }

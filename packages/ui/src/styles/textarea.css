@@ -1,8 +1,0 @@
-/* Adapted from UI SDK (Apache-2.0). OYN scopes its layout and provides the material. */
-@layer oyn-layout {
-  @scope (.oyn-ui, [data-oyn-popup]) {
-    [data-slot="textarea"] + [data-slot="field-description"] {
-      font-variant-numeric: tabular-nums;
-    }
-  }
-}

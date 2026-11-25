@@ -150,7 +150,7 @@ try{
   cleanup:[1,1],
  });
  // Exercise actual renderer failure channels with two surfaces and native CSS.
- for (const reason of ['initialization','validation','device-lost']) {
+ for (const reason of ['missing-api','no-adapter','adapter-rejected','device-rejected','validation','device-lost']) {
   const result=await page.evaluate(async(reason)=>{
    const {createEngine}=await import('/packages/oyn/src/core/engine.ts');
    const {ceramic}=await import('/packages/oyn/src/materials/ceramic/index.ts');
@@ -161,19 +161,25 @@ try{
    const instances=hosts.map(()=>ceramic.create({light:{source:'fixed'}}));
    const engine=createEngine();
    hosts.forEach((element,i)=>{element.className='fallback-probe';document.body.append(element);engine.entries.set(element,{element,material:instances[i]});});
-   const requestAdapter=navigator.gpu.requestAdapter;
+   const gpu=navigator.gpu;
+   const requestAdapter=gpu.requestAdapter;
    const requestDevice=GPUAdapter.prototype.requestDevice;
    let device;
    const getContext=HTMLCanvasElement.prototype.getContext;
-   if(reason==='initialization') {
-    navigator.gpu.requestAdapter=async()=>null;
-    HTMLCanvasElement.prototype.getContext=function(type,...args){return type==='webgl2'?null:getContext.call(this,type,...args);};
-   }
+   let otherContexts = 0;
+   HTMLCanvasElement.prototype.getContext=function(type,...args){
+    if(type!=='webgpu') otherContexts++;
+    return getContext.call(this,type,...args);
+   };
+   if(reason==='missing-api') Object.defineProperty(navigator,'gpu',{configurable:true,value:undefined});
+   else if(reason==='no-adapter') gpu.requestAdapter=async()=>null;
+   else if(reason==='adapter-rejected') gpu.requestAdapter=async()=>{throw Error('test adapter rejection');};
+   else if(reason==='device-rejected') GPUAdapter.prototype.requestDevice=async()=>{throw Error('test device rejection');};
    else GPUAdapter.prototype.requestDevice=async function(...args){device=await requestDevice.apply(this,args);return device;};
    const waitFor=async(test)=>{for(let i=0;i<200;i++){if(test())return;await new Promise(r=>setTimeout(r,10));}throw Error('Timed out: '+reason);};
    try {
     engine.start();
-    if(reason!=='initialization') {
+    if(reason==='validation'||reason==='device-lost') {
      await waitFor(()=>hosts.every(h=>h.hasAttribute('data-oyn-active')));
      if(reason==='validation') device.dispatchEvent(new GPUUncapturedErrorEvent('uncapturederror',{error:new GPUValidationError('test validation failure')}));
      else device.destroy();
@@ -182,16 +188,16 @@ try{
     const fallback=hosts.map(h=>({active:h.hasAttribute('data-oyn-active'),canvases:h.querySelectorAll('canvas').length,background:getComputedStyle(h).backgroundColor}));
     engine.start();engine.requestMeasure();engine.requestDraw();
     await new Promise(r=>setTimeout(r,100));
-    return {fallback,restarted:hosts.some(h=>h.hasAttribute('data-oyn-active'))};
+    return {fallback,restarted:hosts.some(h=>h.hasAttribute('data-oyn-active')),otherContexts};
    } finally {
-    HTMLCanvasElement.prototype.getContext=getContext; navigator.gpu.requestAdapter=requestAdapter;GPUAdapter.prototype.requestDevice=requestDevice;
+    HTMLCanvasElement.prototype.getContext=getContext; if(reason==='missing-api') delete navigator.gpu; gpu.requestAdapter=requestAdapter;GPUAdapter.prototype.requestDevice=requestDevice;
     engine.stop();instances.forEach(i=>i.dispose?.());hosts.forEach(h=>h.remove());style.remove();
    }
   },reason);
-  assert.deepEqual(result,{fallback:Array.from({length:2},()=>({active:false,canvases:0,background:'rgb(12, 34, 56)'})),restarted:false},reason);
+  assert.deepEqual(result,{fallback:Array.from({length:2},()=>({active:false,canvases:0,background:'rgb(12, 34, 56)'})),restarted:false,otherContexts:0},reason);
  }
  assert.ok(errors.some(e=>e.includes('test material failure')));
- assert.equal(errors.length,4,'Exactly one diagnostic per failed engine');
+ assert.equal(errors.length,7,'Exactly one diagnostic per failed engine');
 
- console.log('PASS material API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/material replacement and cleanup.');
+ console.log('PASS material API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/material replacement, CSS-only failure handling and cleanup.');
 }finally{await browser?.close();server.kill();}

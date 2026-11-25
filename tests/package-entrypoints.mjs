@@ -26,6 +26,14 @@ try {
     await readFile(path.join(installed, "package.json"), "utf8"),
   );
   assert.equal(manifest.name, "oyn");
+  assert.equal(
+    packed.files.some(({ path }) =>
+      /webgl|generated|materials\/ceramic\/(baked|card|flip-disc|sculpted)/i.test(
+        path,
+      ),
+    ),
+    false,
+  );
   assert.equal(manifest.peerDependenciesMeta.react.optional, true);
   assert.equal(manifest.dependencies?.react, undefined);
   assert.equal(manifest.dependencies?.["@oyn/surface"], undefined);
@@ -44,9 +52,9 @@ try {
     instance.update({ elevation: -3 });
     assert.equal(instance.parameters.get(1), -3);
     assert.equal('material' in instance, false);
-    await instance.loadWebGL2();
+    assert.equal("loadWebGL2" in instance, false);
     for (const entry of ['baked', 'card', 'flip-disc', 'sculpted'])
-      await import('oyn/materials/ceramic/' + entry);
+      await assert.rejects(import('oyn/materials/ceramic/' + entry), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
     await import('oyn/adapters/motion');
     await assert.rejects(import('react'), /ERR_MODULE_NOT_FOUND|Cannot find package/);
     await assert.rejects(import('oyn/react'), /Cannot find package 'react'/);
@@ -83,17 +91,19 @@ try {
   const lock = JSON.parse(await readFile("package-lock.json", "utf8"));
   assert.equal("packages/surface" in lock.packages, false);
   assert.equal("packages/ceramic" in lock.packages, false);
-  const registry = JSON.parse(await readFile("registry.json", "utf8"));
-  for (const item of registry.items) {
-    const deps = item.dependencies ?? [];
-    assert.equal(deps.filter((d) => /^oyn(?:@|$)/.test(d)).length <= 1, true);
-    assert.equal(
-      deps.some((d) => /^@oyn\/(surface|ceramic)(?:@|$)/.test(d)),
-      false,
-    );
-  }
+  assert.equal(
+    Object.keys(lock.packages).some(
+      (p) =>
+        p.startsWith("examples/") ||
+        p === "packages/ui" ||
+        /naga-wasm|shadcn|@ui-sdk|@base-ui/.test(p),
+    ),
+    false,
+  );
+  const workspace = JSON.parse(await readFile("package.json", "utf8"));
+  assert.deepEqual(workspace.workspaces, ["packages/oyn"]);
   console.log(
-    "PASS: packed Core, material and motion entry points work without React; one runtime dependency in registry items.",
+    "PASS: packed Core, material and motion entry points work without React; retired material entry points are absent.",
   );
 } finally {
   await rm(temporary, { recursive: true, force: true });

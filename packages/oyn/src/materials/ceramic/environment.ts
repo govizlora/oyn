@@ -48,9 +48,6 @@ export function environmentBinding<T extends MaterialInstance>(
     const parameters = source.parameters;
     const material: MaterialInstance = {
       parameters,
-      get loadWebGL2() {
-        return source.loadWebGL2;
-      },
       get shader() {
         return source.shader;
       },

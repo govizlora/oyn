@@ -5,13 +5,10 @@ Environment-aware soft/glossy Ceramic optics for oyn's WebGPU renderer.
 Read [ARCHITECTURE.md](../../../../../ARCHITECTURE.md) before changing animation or package boundaries.
 Ceramic consumes instantaneous values; it has no spring/transition or UI gesture policy.
 
-Raised analytic cards and baked controls share the geometry/lighting contract.
-Signed analytic relief composites face and shadow in one surface pass; explicit
-card/baked geometry keeps its separate shadow and surface passes.
-`ceramic` is a stable `Material<CeramicProps>` definition. `./baked` also exports
-`baked` with `{ geometry, ...options }` props. `./card` remains an explicit low-level
-comparison adapter; `./sculpted` is deprecated and unused by Atelier. Concave optics
-are a branch of the same signed analytic program, not another material or pipeline.
+`ceramic` is a stable `Material<CeramicProps>` definition. Signed analytic relief
+composites face and shadow in one surface pass. Concave optics are a branch of the
+same program, not another material or pipeline. Authored/baked geometry and
+flip-disc experiments are frozen in the local archive and have no package exports.
 
 ```tsx
 const ref = useMaterial({
@@ -95,7 +92,6 @@ and sharpness still apply to this profile.
 **Ownership:** Ceramic resolves this policy. Surface owns rendering and lifecycle
 and has no theme API. Each attached target receives its own resolved material,
 including when one imperative source is shared across differently themed elements.
-The same finish and environment binding serve analytic, card and baked materials.
 Imperative setters update all currently attached targets. Before attachment,
 factories use browser preference, or light outside a browser; pass an explicit
 scheme for deterministic non-DOM rendering.
@@ -115,13 +111,15 @@ For upward springs, reserve space explicitly: `props: { elevation: 12, maxElevat
 
 `bounds.ts` derives independent horizontal/vertical margins from element size and budget height, using the infinite-pointer-distance limit. The two shadow contributions are each bounded to 0.0005 alpha outside the estimated region; two CSS pixels cover anti-aliasing. This is a practical visibility bound, not an exact finite support. Elevation zero paints no ground shadow.
 
-Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` shared optical constants, `color.ts` color validation, `shaders.ts` analytic-card assembly, `finish.ts` optical normalization,
-`inset.ts` concave optics, `effects/ceramic-surface.ts` explicit-geometry entry point, `effects/ceramic-lighting.ts` raised optical response,
-`effects/ceramic-geometry.ts` card geometry, `effects/geometry.ts`, `effects/shadow.ts`, `effects/dark-reflection.ts`. Optical constants are shared between bounds and WGSL generation. WebGL2 shaders are generated mirrors, never a separately maintained implementation.
+Modules: `material.ts` owns the definition, instance and numeric updates;
+`finish.ts` normalizes optics; `environment.ts` and `interaction.ts` bind environment
+and input facts; `bounds.ts` budgets exterior space; `shaders.ts` assembles the
+standard WGSL from `inset.ts` and `effects/`. `optics.ts` shares constants between
+bounds and WGSL. WGSL is the only shader source; there are no generated mirrors.
 
 ## Tuned defaults and overrides
 
-`defaults.json` is the checked-in preset based on the GPU Surfaces story, with `surfaceHeight` renamed to `elevation` (no alias). `ceramicDefaults` exports this frozen preset. Cast/contact shadow strengths are tuned to 0.09 / 0.015 (25% lighter than the source story); geometry and light placement are unchanged. Only explicitly supplied values override it.
+`defaults.json` is the checked-in optical preset; `elevation` is the only relief-height option. `ceramicDefaults` exports this frozen preset. Cast/contact shadow strengths are tuned to 0.09 / 0.015 (25% lighter than the source story); geometry and light placement are unchanged. Only explicitly supplied values override it.
 
 All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `frostSpread`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update material props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
 Glossy frost (`darkFrost: 0.025`, `frostSpread: 0.625` by default) is reflected light on the ground,
@@ -161,7 +159,7 @@ The 0.35px minimum Gaussian sigma is raster filtering, not minimum physical AO r
 This is a soft-shadow approximation, not a full physical light-transport solver.
 Canvas padding uses a conservative Gaussian tail bound matching this kernel.
 
-`npm run test:ceramic-shadow` starts an isolated headless fixture and compares
+`npm run test:browser` includes an isolated headless shadow fixture and compares
 the production GPU kernel against dense CPU integration for dialog, card, button,
 square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 
@@ -190,7 +188,7 @@ outline, canvas or temporal state. Glossy recesses use `reflectionStrength` and
 `sharpness`; soft recesses retain their calibrated wall lighting.
 
 ```tsx
-// In Card Fantony, choose a dark pigment and negative Elevation / depth.
+// Choose a dark pigment and negative elevation for a glossy recess.
 useMaterial({ material: ceramic, props: {
   color: "#171717", elevation: -4, reflectionStrength: 1, sharpness: 1,
 } });
@@ -210,18 +208,10 @@ shadow. No sign crossing reallocates a canvas, pipeline or parameter buffer.
 There is no previous-frame state or material-owned interpolation: consumer motion
 still feeds instantaneous numbers through `bindMotion`.
 
-`npm run test:ceramic-elevation` checks setter invariants and captures a 21-height
-sheet plus a 0.1px live sweep, subpixel joins, reversal and isolated AO on WebGPU
-(DPR 1/2) and WebGL2 (DPR 1.5). It checks visible premultiplied pixels, persistent pigment, unpainted clear interiors,
-shrinking AO reach/energy and resource reuse; artifacts are in
-`test-results/ceramic-continuity/after/`. `test:ceramic-compatibility` compares raised
-finishes at 8/16/40px against frozen WGSL: interiors stay within 2/255 premultiplied
-readback tolerance; the intentional glossy AA correction only reduces localized
-legacy overshoot. A separate GPU probe verifies linear reflection coverage.
-
-This signed relief contract belongs to the standard analytic material. Explicit
-card/baked geometry keeps its authored shape; changing its shadow height does not
-flatten it, dissolve its pigment or turn it into a recess.
+`npm test` checks numeric/setter invariants. `npm run test:browser` captures a
+21-height sheet and live 0.1px sweeps at WebGPU DPR 1/2. It checks premultiplied
+pixels, persistent pigment, clear interiors, zero crossing, reversal, reflection
+coverage and resource reuse. Artifacts go to `test-results/ceramic-continuity/after/`.
 
 `maxElevation` remains a nonnegative exterior shadow budget: reserve it when a
 surface initialized recessed or flat will later become raised. Negative depth
@@ -249,9 +239,8 @@ useMaterial({
 Default source is pointer; leave/blur/hidden default to hold the last known position.
 `return` is immediate, not an animation. These three input facts stay independent.
 `source: 'fixed'` keeps the main lamp fixed. For surfaces with a receiver, crossing the host still updates the independent backlight gate. Surface only
-records facts and converts coordinates; Ceramic owns all light policy. The existing
-low-level card/baked adapters use the same pointer adapter with default hold policy.
-CSS corner radius is read by the Ceramic binding at measurement time, not by core.
+records facts and converts coordinates; Ceramic owns all light policy.
+CSS corner radius is read by the Ceramic binding at measurement time, not by Core.
 
 Production shadows use four uniform heights (5,11,17,23)/24, weight 1/4 each.
 Contact opacity is `(P + A*(1-P)) * reliefCoverage`, where P is local projected
@@ -273,13 +262,3 @@ need more space. Increasing elevation beyond the reserved budget can clip shadow
 `ceramicDefaults.light` explicitly contains source pointer, position (100,100),
 and onLeave/onBlur/onHidden all set to hold. No return behavior is enabled unless
 requested. These same defaults drive the input adapter, not a duplicate preset.
-
-## Flip-disc exploration material
-
-`oyn/materials/ceramic/flip-disc` exports `createFlipDiscMaterial(options)` and numeric
-`setAngle`, `setTravel`, `setGlow` setters. It contains only geometry, optics and
-light-coordinate binding. The former gesture/time-driven `flipDisc` appearance
-was replaced, not retained as a second animation path. Atelier's
-`stone-material.ts` owns its stroke timing, wave sampling and focus feedback,
-and connects the three channels with `bindMotion`. The demo is not the UI catalog's
-shared spring policy.
