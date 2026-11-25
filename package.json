@@ -8,7 +8,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build -w oyn && npm run check:architecture",
     "test": "npm run build && node tests/material-core.mjs && node tests/ceramic-elevation.mjs && node tests/ceramic-light.mjs && node tests/package-entrypoints.mjs",
-    "test:browser": "npm run build && node tests/material-lifecycle.mjs && node tests/ceramic-policy.mjs && node tests/ceramic-continuity.mjs && node tests/ceramic-shadow.mjs && node tests/ceramic-reflection.mjs && node tests/ceramic-contact-composition.mjs",
+    "test:browser": "npm run build && node tests/material-lifecycle.mjs && node tests/ceramic-policy.mjs && node tests/ceramic-continuity.mjs && node tests/ceramic-shadow.mjs && node tests/ceramic-reflection.mjs && node tests/ceramic-contact-composition.mjs && node tests/site-pointer.mjs",
     "check:architecture": "node tools/check-architecture.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

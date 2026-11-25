@@ -1,6 +1,17 @@
 import { createEngine, createSurface } from "oyn";
 import { ceramic } from "oyn/materials/ceramic";
 
+import { createStudyPointer } from "./pointer.js";
+
+const pointer = createStudyPointer(window);
+const cursor = document.querySelector(".study-cursor");
+const writeCursor = () => {
+  const { position, visible } = pointer.inputs.pointer.getSnapshot();
+  cursor.hidden = !pointer.showCursor() || !visible;
+  cursor.style.transform = `translate3d(${position.x}px, ${position.y}px, 0)`;
+};
+let unsubscribeCursor = pointer.inputs.pointer.subscribe(writeCursor);
+writeCursor();
 const engine = createEngine();
 const controls = document.querySelector("fieldset");
 const appearance = document.querySelector("select");
@@ -29,4 +40,16 @@ function selectStudy() {
 }
 controls.onchange = selectStudy;
 selectStudy();
-engine.start();
+engine.start(false, pointer.inputs);
+
+// Release page-owned work without destroying state when entering the back/forward cache.
+window.addEventListener("pagehide", () => {
+  engine.stop();
+  unsubscribeCursor();
+});
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  unsubscribeCursor = pointer.inputs.pointer.subscribe(writeCursor);
+  writeCursor();
+  engine.start(false, pointer.inputs);
+});
