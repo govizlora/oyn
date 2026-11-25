@@ -1,62 +1,62 @@
-import { ceramicBinding } from '../../../packages/oyn/src/materials/ceramic/interaction';
-import { useLayoutEffect, useMemo, type CSSProperties } from 'react';
-import { materialAppearance, createParameters, type Material } from 'oyn';
-import { useMaterial } from 'oyn/react';
+import { ceramicBinding } from "../../../packages/oyn/src/materials/ceramic/interaction";
+import { type CSSProperties } from "react";
+import { createParameters, type Material } from "oyn";
+import { useMaterial } from "oyn/react";
 
 const font: Record<string, string[]> = {
-  A: ['01110', '10001', '11111', '10001', '10001'],
-  B: ['11110', '10001', '11110', '10001', '11110'],
-  C: ['01111', '10000', '10000', '10000', '01111'],
-  D: ['11110', '10001', '10001', '10001', '11110'],
-  E: ['11111', '10000', '11110', '10000', '11111'],
-  F: ['11111', '10000', '11110', '10000', '10000'],
-  G: ['01111', '10000', '10111', '10001', '01111'],
-  H: ['10001', '10001', '11111', '10001', '10001'],
-  I: ['11111', '00100', '00100', '00100', '11111'],
-  J: ['00111', '00001', '00001', '10001', '01110'],
-  K: ['10001', '10010', '11100', '10010', '10001'],
-  L: ['10000', '10000', '10000', '10000', '11111'],
-  M: ['10001', '11011', '10101', '10001', '10001'],
-  N: ['10001', '11001', '10101', '10011', '10001'],
-  O: ['01110', '10001', '10001', '10001', '01110'],
-  P: ['11110', '10001', '11110', '10000', '10000'],
-  Q: ['01110', '10001', '10101', '10010', '01101'],
-  R: ['11110', '10001', '11110', '10010', '10001'],
-  S: ['01111', '10000', '01110', '00001', '11110'],
-  T: ['11111', '00100', '00100', '00100', '00100'],
-  U: ['10001', '10001', '10001', '10001', '01110'],
-  V: ['10001', '10001', '10001', '01010', '00100'],
-  W: ['10001', '10001', '10101', '11011', '10001'],
-  X: ['10001', '01010', '00100', '01010', '10001'],
-  Y: ['10001', '01010', '00100', '00100', '00100'],
-  Z: ['11111', '00010', '00100', '01000', '11111'],
-  '0': ['01110', '10011', '10101', '11001', '01110'],
-  '1': ['00100', '01100', '00100', '00100', '01110'],
-  '2': ['01110', '10001', '00110', '01000', '11111'],
-  '3': ['11110', '00001', '00110', '00001', '11110'],
-  '4': ['10010', '10010', '11111', '00010', '00010'],
-  '5': ['11111', '10000', '11110', '00001', '11110'],
-  '6': ['01111', '10000', '11110', '10001', '01110'],
-  '7': ['11111', '00001', '00010', '00100', '00100'],
-  '8': ['01110', '10001', '01110', '10001', '01110'],
-  '9': ['01110', '10001', '01111', '00001', '11110'],
-  '=': ['00000', '11111', '00000', '11111', '00000'],
-  '(': ['00010', '00100', '00100', '00100', '00010'],
-  ')': ['01000', '00100', '00100', '00100', '01000'],
-  '{': ['00011', '00010', '00110', '00010', '00011'],
-  '}': ['11000', '01000', '01100', '01000', '11000'],
-  '.': ['00000', '00000', '00000', '00000', '00100'],
-  '*': ['00000', '10101', '01110', '10101', '00000'],
-  '+': ['00000', '00100', '11111', '00100', '00000'],
-  '-': ['00000', '00000', '11111', '00000', '00000'],
-  '>': ['10000', '01000', '00100', '01000', '10000'],
-  '/': ['00001', '00010', '00100', '01000', '10000'],
-  ':': ['00000', '00100', '00000', '00100', '00000'],
-  ';': ['00000', '00100', '00000', '00100', '01000'],
-  _: ['00000', '00000', '00000', '00000', '11111'],
+  A: ["01110", "10001", "11111", "10001", "10001"],
+  B: ["11110", "10001", "11110", "10001", "11110"],
+  C: ["01111", "10000", "10000", "10000", "01111"],
+  D: ["11110", "10001", "10001", "10001", "11110"],
+  E: ["11111", "10000", "11110", "10000", "11111"],
+  F: ["11111", "10000", "11110", "10000", "10000"],
+  G: ["01111", "10000", "10111", "10001", "01111"],
+  H: ["10001", "10001", "11111", "10001", "10001"],
+  I: ["11111", "00100", "00100", "00100", "11111"],
+  J: ["00111", "00001", "00001", "10001", "01110"],
+  K: ["10001", "10010", "11100", "10010", "10001"],
+  L: ["10000", "10000", "10000", "10000", "11111"],
+  M: ["10001", "11011", "10101", "10001", "10001"],
+  N: ["10001", "11001", "10101", "10011", "10001"],
+  O: ["01110", "10001", "10001", "10001", "01110"],
+  P: ["11110", "10001", "11110", "10000", "10000"],
+  Q: ["01110", "10001", "10101", "10010", "01101"],
+  R: ["11110", "10001", "11110", "10010", "10001"],
+  S: ["01111", "10000", "01110", "00001", "11110"],
+  T: ["11111", "00100", "00100", "00100", "00100"],
+  U: ["10001", "10001", "10001", "10001", "01110"],
+  V: ["10001", "10001", "10001", "01010", "00100"],
+  W: ["10001", "10001", "10101", "11011", "10001"],
+  X: ["10001", "01010", "00100", "01010", "10001"],
+  Y: ["10001", "01010", "00100", "00100", "00100"],
+  Z: ["11111", "00010", "00100", "01000", "11111"],
+  "0": ["01110", "10011", "10101", "11001", "01110"],
+  "1": ["00100", "01100", "00100", "00100", "01110"],
+  "2": ["01110", "10001", "00110", "01000", "11111"],
+  "3": ["11110", "00001", "00110", "00001", "11110"],
+  "4": ["10010", "10010", "11111", "00010", "00010"],
+  "5": ["11111", "10000", "11110", "00001", "11110"],
+  "6": ["01111", "10000", "11110", "10001", "01110"],
+  "7": ["11111", "00001", "00010", "00100", "00100"],
+  "8": ["01110", "10001", "01110", "10001", "01110"],
+  "9": ["01110", "10001", "01111", "00001", "11110"],
+  "=": ["00000", "11111", "00000", "11111", "00000"],
+  "(": ["00010", "00100", "00100", "00100", "00010"],
+  ")": ["01000", "00100", "00100", "00100", "01000"],
+  "{": ["00011", "00010", "00110", "00010", "00011"],
+  "}": ["11000", "01000", "01100", "01000", "11000"],
+  ".": ["00000", "00000", "00000", "00000", "00100"],
+  "*": ["00000", "10101", "01110", "10101", "00000"],
+  "+": ["00000", "00100", "11111", "00100", "00000"],
+  "-": ["00000", "00000", "11111", "00000", "00000"],
+  ">": ["10000", "01000", "00100", "01000", "10000"],
+  "/": ["00001", "00010", "00100", "01000", "10000"],
+  ":": ["00000", "00100", "00000", "00100", "00000"],
+  ";": ["00000", "00100", "00000", "00100", "01000"],
+  _: ["00000", "00000", "00000", "00000", "11111"],
 };
 const glyphs = Array.from({ length: 128 }, (_, code) => {
-  const bits = font[String.fromCharCode(code)]?.join('') ?? '0'.repeat(25);
+  const bits = font[String.fromCharCode(code)]?.join("") ?? "0".repeat(25);
   return [...bits].reduce((n, bit, i) => n + Number(bit) * 2 ** i, 0);
 });
 
@@ -77,7 +77,7 @@ struct VertexOut { @builtin(position) position: vec4f, @location(0) local: vec2f
 fn textPixel(p:vec2f)->f32 {
   let grid=p*vec2f(192,96);let cell=vec2u(clamp(floor(grid/vec2f(6,8)),vec2f(0),vec2f(31,11)));
   let index=cell.y*32u+cell.x;let code=u32(m.cells[index/4u][index%4u]);
-  let glyph=array<u32,128>(${glyphs.map((n) => `${n}u`).join(',')});
+  let glyph=array<u32,128>(${glyphs.map((n) => `${n}u`).join(",")});
   let pixel=vec2u(floor(grid))%vec2u(6,8);
   if(pixel.x>4u || pixel.y>4u || code>127u){return 0;}
   return f32((glyph[code]>>(pixel.y*5u+pixel.x))&1u);
@@ -147,34 +147,63 @@ LIGHT.FOLLOW(POINTER)
 
 > READY
 > _`;
-function makePhosphor(kind: number, amber: boolean): Material {
-  return {
-    bind: ceramicBinding(),
-    shader,
-    passes: ['surface'],
-    parameters: createParameters([
-      0.8,
-      0.6,
+type PhosphorState = {
+  kind: number;
+  amber: boolean;
+  phase: number;
+  value: number;
+  powered: boolean;
+  screenText: string;
+};
+const phosphor: Material<PhosphorState> = {
+  create(initial) {
+    const parameters = createParameters(Array(392).fill(0));
+    function update({
       kind,
-      1,
-      ...(amber ? [0.92, 0.65, 0.32] : [0.58, 0.88, 0.73]),
-      0,
-      ...Array(384).fill(0),
-    ]),
-    measurePadding: () => ({ x: 0, y: 0 }),
-  };
-}
+      amber,
+      phase,
+      value,
+      powered,
+      screenText,
+    }: PhosphorState) {
+      const cells = Array(384).fill(0);
+      screenText.split("\n").forEach((line, y) =>
+        [...line].forEach((letter, x) => {
+          cells[y * 32 + x] = letter.charCodeAt(0);
+        }),
+      );
+      [
+        phase,
+        value / 100,
+        kind,
+        Number(powered),
+        ...(amber ? [0.92, 0.65, 0.32] : [0.58, 0.88, 0.73]),
+        0,
+        ...cells,
+      ].forEach((v, i) => parameters.set(i, v));
+    }
+    update(initial);
+    return {
+      bind: ceramicBinding(),
+      shader,
+      passes: ["surface"],
+      parameters,
+      measurePadding: () => ({ x: 0, y: 0 }),
+      update,
+    };
+  },
+};
 export function Phosphor({
-  kind = 'wave',
+  kind = "wave",
   code = program,
   value = 60,
   phase = 0.8,
   powered = true,
   amber = false,
-  className = '',
+  className = "",
   style,
 }: {
-  kind?: 'wave' | 'code' | 'orbit' | 'spectrum' | 'field';
+  kind?: "wave" | "code" | "orbit" | "spectrum" | "field";
   code?: string;
   value?: number;
   phase?: number;
@@ -183,52 +212,40 @@ export function Phosphor({
   className?: string;
   style?: CSSProperties;
 }) {
-  const material = useMemo(
-    () =>
-      makePhosphor(
-        { wave: 0, code: 1, orbit: 2, spectrum: 3, field: 4 }[kind],
-        amber,
-      ),
-    [kind, amber],
-  );
-  useLayoutEffect(() => {
-    material.parameters.set(0, phase);
-    material.parameters.set(1, value / 100);
-    material.parameters.set(3, Number(powered));
-  }, [material, phase, value, powered]);
   const screenText = code
     .toUpperCase()
-    .split('\n')
+    .split("\n")
     .slice(0, 12)
     .map((line) =>
       [...line.slice(0, 32)]
-        .map((letter) => (font[letter] ? letter : ' '))
-        .join(''),
+        .map((letter) => (font[letter] ? letter : " "))
+        .join(""),
     )
-    .join('\n');
-  useLayoutEffect(() => {
-    const cells = Array(384).fill(0);
-    screenText.split('\n').forEach((line, y) =>
-      [...line].forEach((letter, x) => {
-        cells[y * 32 + x] = letter.charCodeAt(0);
-      }),
-    );
-    cells.forEach((cell, i) => material.parameters.set(i + 8, cell));
-  }, [material, screenText]);
-  const ref = useMaterial({ appearance: materialAppearance, props: { material: material } });
+    .join("\n");
+  const ref = useMaterial({
+    material: phosphor,
+    props: {
+      kind: { wave: 0, code: 1, orbit: 2, spectrum: 3, field: 4 }[kind],
+      amber,
+      phase,
+      value,
+      powered,
+      screenText,
+    },
+  });
   return (
     <div
       ref={ref}
       className={`phosphor ${className}`}
       style={style}
-      role={kind === 'code' ? undefined : 'img'}
+      role={kind === "code" ? undefined : "img"}
       aria-label={
-        kind === 'code'
+        kind === "code"
           ? undefined
           : `Phosphor ${kind} responding to the controls`
       }
     >
-      {kind === 'code' && <pre className="sr-only">{screenText}</pre>}
+      {kind === "code" && <pre className="sr-only">{screenText}</pre>}
     </div>
   );
 }

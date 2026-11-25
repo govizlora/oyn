@@ -2,7 +2,8 @@ import { groundFrostWGSL } from "./optics.js";
 import { environmentBinding, preferredColorScheme } from "./environment.js";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicSurfaceWGSL } from "./effects/ceramic-surface.js";
-import { createParameters, type Material } from "../../core/index.js";
+import { createParameters } from "../../core/createParameters.js";
+import type { MaterialInstance } from "../../core/types/material.js";
 import { frameWGSL } from "./effects/frame.js";
 import {
   ceramicFinish,
@@ -84,7 +85,7 @@ function resolvedCardCeramic(options: {
     ...finish.values,
   ]);
   const shadow = new Float32Array(finish.values.slice(12, 16));
-  const material: Material = {
+  const material: MaterialInstance = {
     bind: ceramicBinding(options.finish?.light, true),
     shader: cardWGSL,
     loadWebGL2: loadCard,

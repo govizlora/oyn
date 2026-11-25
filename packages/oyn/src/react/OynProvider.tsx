@@ -15,18 +15,8 @@ export function OynProvider({
   const [engine] = useState(createEngine);
 
   useEffect(() => {
-    const range = hdr ? matchMedia("(dynamic-range: high)") : null;
-    const start = () => engine.start(range?.matches ?? false, inputs);
-    const changed = () => {
-      engine.stop();
-      start();
-    };
-    start();
-    range?.addEventListener("change", changed);
-    return () => {
-      range?.removeEventListener("change", changed);
-      engine.stop();
-    };
+    engine.start(hdr, inputs);
+    return () => engine.stop();
   }, [engine, hdr, inputs]);
 
   return <OynContext value={engine}>{children}</OynContext>;

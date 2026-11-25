@@ -6,7 +6,7 @@ import { ceramic } from 'oyn/materials/ceramic';
 export function SurfaceButton() {
   const [pressed, setPressed] = useState(false);
   const ref = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
   });
 

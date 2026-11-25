@@ -1,4 +1,9 @@
-import type { Material, Point, SurfaceBindingContext, SurfaceBinding } from "../../core/index.js";
+import type {
+  MaterialInstance,
+  SurfaceBindingContext,
+  SurfaceBinding,
+} from "../../core/types/material.js";
+import type { Point } from "../../core/types/input.js";
 /** Ceramic policy, not a Surface input default. Positions are viewport CSS pixels. */
 export type CeramicLight = Readonly<{
   source?: "pointer" | "fixed";
@@ -35,7 +40,7 @@ export function validateLight(light: CeramicLight = {}) {
 export function ceramicBinding(
   light: CeramicLight = {},
   receiver = false,
-): NonNullable<Material["bind"]> {
+): NonNullable<MaterialInstance["bind"]> {
   validateLight(light);
   // Own the policy snapshot; never mutate or depend on a caller's mutable object.
   const config = {
@@ -88,7 +93,10 @@ export function ceramicBinding(
           lastLit = receiverLit();
           // Main-light hold/fixed policy does not pin the virtual lamp under the card.
           if (lastLit && pointer.position) {
-            const lamp = point === pointer.position ? local : frame.toLocal(pointer.position);
+            const lamp =
+              point === pointer.position
+                ? local
+                : frame.toLocal(pointer.position);
             return [local.x, local.y, radius, 1, lamp.x, lamp.y];
           }
           return [local.x, local.y, radius, 0];

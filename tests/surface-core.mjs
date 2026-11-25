@@ -11,15 +11,15 @@ assert.equal(ceramicDefaults.elevation, 16);
 assert.equal(createCeramicMaterial().parameters.get(1), 16);
 assert.equal('surfaceHeight' in ceramicDefaults, false);
 // Padding policy belongs to the appearance, including remeasurement after updates.
-const appearance = ceramic.create({ elevation: 16, colorScheme: 'light' });
-const reservedPadding = appearance.material.measurePadding(120, 40);
-appearance.update({ elevation: 32, colorScheme: 'dark' });
-assert.deepEqual(appearance.material.measurePadding(120, 40), { x: 10, y: 10 }); // glow budget for the initial 16px height
-appearance.update({ elevation: 8, maxElevation: 40, colorScheme: 'light' });
-assert.ok(appearance.material.measurePadding(120, 40).x > reservedPadding.x);
-appearance.update({ elevation: 8, colorScheme: 'light' });
-assert.deepEqual(appearance.material.measurePadding(120, 40), reservedPadding);
-appearance.dispose?.();
+const instance = ceramic.create({ elevation: 16, colorScheme: 'light' });
+const reservedPadding = instance.measurePadding(120, 40);
+instance.update({ elevation: 32, colorScheme: 'dark' });
+assert.deepEqual(instance.measurePadding(120, 40), { x: 10, y: 10 }); // glow budget for the initial 16px height
+instance.update({ elevation: 8, maxElevation: 40, colorScheme: 'light' });
+assert.ok(instance.measurePadding(120, 40).x > reservedPadding.x);
+instance.update({ elevation: 8, colorScheme: 'light' });
+assert.deepEqual(instance.measurePadding(120, 40), reservedPadding);
+instance.dispose?.();
 
 const tuned = createCeramicMaterial({ shadowLightHeight: 300, shadowLightSize: 400, shadowStrength: 0.2,
   contactShadowStrength: 0.04, lightZ: 40, reflectionStrength: 2, sharpness: 2,

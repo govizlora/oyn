@@ -33,7 +33,7 @@ Not ready families; this does not promote or redesign them.
 | Non-GPU fallback, text, data markers and focus outlines | Component CSS | Only Surface writes `data-oyn-active`; the fallback must not paint over active GPU output. |
 | Geometry compilation and generated shader mirrors | Offline tools | Do not rebake during interaction or edit `src/generated/` by hand. |
 
-The **consumer** is the component or app calling Surface, including its custom Appearance adapter. Putting code in `Appearance.bind` does not make it Ceramic's responsibility. Gesture handling and animation bindings belong in `packages/ui` or the app; `packages/oyn/src/materials/ceramic` contains only the material.
+The **consumer** is the component or app calling Surface, including its custom material definition. Putting code in `MaterialInstance.bind` does not make it Ceramic's responsibility. Gesture handling and animation bindings belong in `packages/ui` or the app; `packages/oyn/src/materials/ceramic` contains only the material.
 
 ## 2. One write path, two ways to supply a value
 
@@ -47,7 +47,7 @@ import { ceramic } from "oyn/materials/ceramic";
 
 function Key({ selected }: { selected: boolean }) {
   const ref = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: { elevation: selected ? -3.2 : 8, maxElevation: 8 },
   });
   return <button ref={ref} type="button" aria-pressed={selected}>Key</button>;
@@ -63,25 +63,36 @@ export function Example() {
 ### External animation source
 
 ```tsx
-import { useEffect } from "react";
-import { materialAppearance } from "oyn";
+import type { Material } from "oyn";
 import { useMaterial } from "oyn/react";
 import { bindMotion, type MotionNumber } from "oyn/adapters/motion";
-import type { CeramicMaterial } from "oyn/materials/ceramic";
+import { createCeramicMaterial } from "oyn/materials/ceramic";
 
-// Caller owns these stable objects and creates the material with a suitable
-// maxElevation. The source may be a MotionValue or a consumer-owned animation source.
-export function AnimatedKey({ height, material }: {
-  height: MotionNumber;
-  material: CeramicMaterial;
-}) {
-  const ref = useMaterial({ appearance: materialAppearance, props: { material } });
-  useEffect(() => bindMotion(height, material.setElevation), [height, material]);
+// The caller owns the source and its motion policy; each host owns its instance.
+const animatedCeramic: Material<{ height: MotionNumber }> = {
+  create({ height }) {
+    const instance = createCeramicMaterial({ elevation: height.get(), maxElevation: 24 });
+    let source = height;
+    let disconnect = bindMotion(source, instance.setElevation);
+    return Object.assign(instance, {
+      update({ height }: { height: MotionNumber }) {
+        if (height === source) return;
+        disconnect();
+        source = height;
+        disconnect = bindMotion(source, instance.setElevation);
+      },
+      dispose() { disconnect(); },
+    });
+  },
+};
+
+export function AnimatedKey({ height }: { height: MotionNumber }) {
+  const ref = useMaterial({ material: animatedCeramic, props: { height } });
   return <button ref={ref} type="button">Animated key</button>;
 }
 ```
 
-A `MotionNumber` provides `get(): number` and `on("change", listener): cleanup`. Surface has **no built-in Motion dependency and no appearance prop that automatically accepts a MotionValue**. External libraries and consumer-owned runtimes can both use the existing `bindMotion` adapter.
+A `MotionNumber` provides `get(): number` and `on("change", listener): cleanup`. Surface has **no built-in Motion dependency and no material prop that automatically accepts a MotionValue**. External libraries and consumer-owned runtimes can both use the existing `bindMotion` adapter.
 
 The component library creates the numeric source at node binding time and cleans it up via AbortSignal. See [ceramic-control.ts](packages/ui/src/ceramic-control.ts) and [control-motion.ts](packages/ui/src/control-motion.ts). This stops node-owned animation on failure, unbind, StrictMode replay and provider shutdown. The caller owns the lifetime of an external shared source; an individual surface must not destroy it.
 
@@ -108,7 +119,7 @@ A provider may receive a stable `inputs: SurfaceInputs` source in place of its d
 2. **CSS or SDK animation:** move existing DOM (thumb, indicator) or expand layout (accordion). The SDK supplies state or target geometry and CSS interpolates. Do not add JS interpolation for the same property.
 3. **Surface draw:** batch parameter and layout changes, read the binding's frame extras, upload and submit. Each provider has one draw scheduler. `bindMotion` does not move the consumer's clock into it.
 
-Use `Material.bind().frame()` to derive material inputs such as local coordinates from the current frame, not to hide a spring, a click handler or press timing inside a material. `requestDraw()` requests a redraw; it does not advance an animation. A consumer may emit a continuous stream of numbers, not start another render loop.
+Use `MaterialInstance.bind().frame()` to derive material inputs such as local coordinates from the current frame, not to hide a spring, a click handler or press timing inside a material. `requestDraw()` requests a redraw; it does not advance an animation. A consumer may emit a continuous stream of numbers, not start another render loop.
 
 OYN control transitions use **Instant push** (quadratic ease-out): progress is `1 − (1 − t)²`, fastest at the start and stationary at the end. On each new target, button height moves from the current position to the target in 150 ms regardless of distance. Reversing changes direction immediately. DOM state transitions use the equivalent `--oyn-ease-out` curve. Looping indicators and wave propagation are not target-state transitions.
 
@@ -116,11 +127,11 @@ Each animation owner responds to reduced motion: the numeric source emits the fi
 
 ## 4. Lifecycle and composition
 
-- `useMaterial` creates the appearance only after commit. Ref binding defines the lifecycle; ordinary prop updates do not rebind.
+- `useMaterial` forwards to Core after commit; Core creates the material instance. Ref binding defines the lifecycle; ordinary prop updates do not rebind.
 - **One surface binding per DOM host in a provider.** Duplicate binding is an error, not last-writer-wins. Typically there is one provider per document; nested or independent providers should not bind the same host.
 - When composing Trigger → Button → Avatar, the outer component declares the material and inner components forward props and refs. This also applies to props received by a `render` callback. A native-element adapter must not hide them inside an inner `render` and cause the wrapper to create a second material. Examples and registry items follow the same rule.
 - Void elements such as `<input>` cannot contain a canvas. The field container owns one well; the native input keeps its ref, caret and label. A custom `render` does not guarantee a material. Use the actual `FieldWell` container boundary rather than guessing from the component type.
-- Empty `Material.passes` means there is nothing to draw. Surface releases the presentation and target but keeps the binding and subscriptions. Derive outline presence from the existing animated value: no canvas at rest, and release it after exit. Do not add visible/enabled state. A parameter notification or `requestDraw` wakes the same resource path.
+- Empty `MaterialInstance.passes` means there is nothing to draw. Surface releases the presentation and target but keeps the binding and subscriptions. Derive outline presence from the existing animated value: no canvas at rest, and release it after exit. Do not add visible/enabled state. A parameter notification or `requestDraw` wakes the same resource path.
 - Native activation and visual press feedback are distinct. Visual listeners do not trigger actions. Blur, cancellation, dragging out and back in, capture, disabled and pending states must clear or restore transient feedback correctly. Selection remains with the SDK.
 - React bridges committed configuration and lifecycle only. Do not call setState every frame or write to a running instance during render.
 - Release node-owned subscriptions, observers and animations on abort/dispose. Unsubscribe from an external source without destroying it for its caller.
@@ -135,11 +146,15 @@ Each animation owner responds to reduced motion: the numeric source emits the fi
 | Accordion | SDK open state, panel height and presence | CSS animates height and rotation; no duplicate expansion state or measurement. |
 | Input and compound fields | Native input and SDK group | One FieldWell frame; do not repaint the contents. |
 | Dialog and popups | SDK portal, focus and presence; CSS stacking | Ceramic height expresses optical depth; CSS does not simulate a cross-element 3D scene. |
-| Ripple exploration | `ripple-field.ts` propagates waves; `stone-appearance.ts` owns gestures and animation | Consumer numeric channels → bindMotion → `createFlipDiscMaterial`. The material never reads a clock. |
+| Ripple exploration | `ripple-field.ts` propagates waves; `stone-material.ts` owns gestures and animation | Consumer numeric channels → bindMotion → `createFlipDiscMaterial`. The material never reads a clock. |
 
 The active scope comprises the families in the [Atelier catalog](examples/atelier/src/components/catalog.json) and the standalone Card. Routine iteration is limited to the [Ready list](packages/ui/ready.json). Unlisted families and their stories are Not ready but remain available for preview and testing.
 
-Dependencies point from UI/app to Ceramic and Surface, and from Ceramic to Surface's public contracts. Surface does not depend on Ceramic, UI SDKs or component types. Ceramic does not depend on React or component interaction libraries. Surface's React entry depends on its runtime, never the other way around.
+Dependencies point from UI/app to OYN's public entry points. Inside OYN, React depends on Core Surface; Surface and the renderer depend on the Material protocol, never on concrete materials. Ceramic depends only on public contracts and standalone parameter utilities, not on Surface, the engine, React or UI SDKs. The Core root entry never imports or re-exports React or concrete materials. Type-only imports obey the same direction.
+
+`Material<P>` is a stable factory; `MaterialInstance<P>` is the actual drawing object and owns optional `update(props)` and `dispose()`. There is no Appearance wrapper or nested instance.material. The optional `SurfaceBinding.material` remains a target-local view for a deliberately shared imperative source; it is not a second configuration lifecycle. Core `createSurface(engine, { material, props })` owns creation, updates, registration and disposal for every bound host. `useMaterial` only bridges refs and committed props to that same path. Instance updates report `layout` when binding, parameter identity or bounds change, and `draw` for non-notifying visual changes. Parameter writes already notify the shared draw scheduler.
+
+The engine owns browser resources, including HDR preference subscriptions. Stopping it releases those resources and aborts target bindings; restarting can reuse still-bound instances. Host unbinding releases the instance. A fatal failure additionally disposes all registered Core surfaces and cannot restart.
 
 ## 6. Verification, limits and change criteria
 

@@ -1,4 +1,4 @@
-import { materialAppearance } from 'oyn';import { useLayoutEffect, useRef, useState } from 'react'
+import type { Material } from 'oyn';import { useLayoutEffect, useRef, useState } from 'react'
 import { createCeramicMaterial } from 'oyn/materials/ceramic'
 
 import { createControlMotion } from '@oyn/ui/control-motion'
@@ -9,6 +9,7 @@ import { bindMotion } from 'oyn/adapters/motion'
 const rest = -0.001
 export function useRecessMotion(target: number | null) {
   const [material] = useState(() => createCeramicMaterial({ elevation: rest }))
+  const [definition] = useState<Material<{}>>(() => ({ create: () => ({ ...material, update: undefined }) }))
   const [visible, setVisible] = useState(false)
   const motion = useRef<ReturnType<typeof createControlMotion> | null>(null)
 
@@ -28,5 +29,5 @@ export function useRecessMotion(target: number | null) {
     }
   }, [target])
 
-  return { surface: { appearance: materialAppearance, props: { material } }, visible }
+  return { surface: { material: definition, props: {} }, visible }
 }

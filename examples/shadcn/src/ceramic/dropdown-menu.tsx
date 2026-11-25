@@ -44,7 +44,7 @@ function DropdownMenuContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
-  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
+  const surfaceRef = useMaterial({ material: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>
@@ -256,7 +256,7 @@ function DropdownMenuSubContent({
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
-  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
+  const surfaceRef = useMaterial({ material: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...popoverProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DropdownMenuPrimitive.Portal>

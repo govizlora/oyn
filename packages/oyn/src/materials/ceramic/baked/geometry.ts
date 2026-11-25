@@ -1,4 +1,4 @@
-import type { StaticData } from "../../../core/index.js";
+import type { StaticData } from "../../../core/types/material.js";
 
 /** Versioned, immutable orthographic geometry. Creation only decodes baked data. */
 export type BakedGeometry = Readonly<{

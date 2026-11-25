@@ -3,7 +3,7 @@ import { useMaterial } from "oyn/react";
 import "./card.css";
 
 export function Card() {
-  const ref = useMaterial({ appearance: ceramic, props: {} });
+  const ref = useMaterial({ material: ceramic, props: {} });
   return (
     <section className="sculpture-page card-page" aria-labelledby="card-title">
       <header className="sculpture-heading">

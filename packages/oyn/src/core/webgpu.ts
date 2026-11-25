@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import type { Material, StaticData } from "./types/material.js";
+import type { MaterialInstance, StaticData } from "./types/material.js";
 import type { Target } from "./gpu/Target.js";
 import { createLayouts } from "./gpu/createLayouts.js";
 import { createPipelineCache } from "./gpu/createPipelineCache.js";
@@ -51,13 +51,13 @@ export function createWebGPU(
   const targets = new Set<Target>();
   function uniform(size: number) {
     if (size > device.limits.maxUniformBufferBindingSize)
-      throw Error("Material parameter block exceeds GPU limit.");
+      throw Error("MaterialInstance parameter block exceeds GPU limit.");
     return device.createBuffer({
       size,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
   }
-  function createTarget(canvas: HTMLCanvasElement, material: Material): Target {
+  function createTarget(canvas: HTMLCanvasElement, material: MaterialInstance): Target {
     const context = canvas.getContext("webgpu");
     if (!context) throw Error("Surface WebGPU canvas unavailable.");
     const programs = cache.get(material);
@@ -93,7 +93,7 @@ export function createWebGPU(
   function draw(
     items: {
       target: Target;
-      material: Material;
+      material: MaterialInstance;
       frame: Float32Array<ArrayBuffer>;
     }[],
   ) {

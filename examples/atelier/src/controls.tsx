@@ -36,7 +36,7 @@ export function useCeramic<T extends HTMLElement>(
 ) {
   const color = tone.startsWith('#') ? tone.toLowerCase() : ceramicColors[tone as Tone];
   const ink = color === ceramicColors.ink;
-  return useMaterial({ appearance: ceramic, props: {
+  return useMaterial({ material: ceramic, props: {
     color, elevation, maxElevation: budget,
     lightRim: ink ? 2 : rim,
     lightSurfaceTop: ink ? 0.04 : 0.16,

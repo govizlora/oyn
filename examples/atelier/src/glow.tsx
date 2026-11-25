@@ -1,6 +1,6 @@
 import { ceramicBinding } from "../../../packages/oyn/src/materials/ceramic/interaction";
-import { useLayoutEffect, useMemo, type HTMLAttributes } from "react";
-import { materialAppearance, createParameters, type Material } from "oyn";
+import { type HTMLAttributes } from "react";
+import { createParameters, type Material } from "oyn";
 import { useMaterial } from "oyn/react";
 
 const shader = /* wgsl */ `
@@ -35,29 +35,28 @@ const lampColors = {
   lilac: [0.72, 0.6, 0.91],
 } as const;
 export type LampColor = keyof typeof lampColors;
-function glowMaterial(): Material {
-  return {
-    bind: ceramicBinding(),
-    shader,
-    passes: ["surface"],
-    parameters: createParameters([...lampColors.orange, 0]),
-    measurePadding: () => ({ x: 14, y: 14 }),
-  };
-}
+const glow: Material<{ level: number; color: LampColor }> = {
+  create({ level, color }) {
+    const parameters = createParameters([...lampColors[color], level]);
+    return {
+      bind: ceramicBinding(),
+      shader,
+      passes: ["surface"],
+      parameters,
+      measurePadding: () => ({ x: 14, y: 14 }),
+      update({ level, color }) {
+        parameters.set(3, level);
+        lampColors[color].forEach((v, i) => parameters.set(i, v));
+      },
+    };
+  },
+};
 export function Glow({
   level = 1,
   color = "orange",
   className = "",
   ...props
 }: HTMLAttributes<HTMLSpanElement> & { level?: number; color?: LampColor }) {
-  const material = useMemo(glowMaterial, []);
-  useLayoutEffect(() => {
-    material.parameters.set(3, level);
-    lampColors[color].forEach((v, i) => material.parameters.set(i, v));
-  }, [material, level, color]);
-  const ref = useMaterial({
-    appearance: materialAppearance,
-    props: { material },
-  });
+  const ref = useMaterial({ material: glow, props: { level, color } });
   return <span ref={ref} className={`glow-lens ${className}`} {...props} />;
 }

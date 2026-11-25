@@ -203,7 +203,7 @@ const commands = [
   ['Open collection', '⌘ O'],
   ['Find an object', '⌘ K'],
   ['Arrange windows', '⌥ W'],
-  ['Change appearance', '⌘ ,'],
+  ['Change material', '⌘ ,'],
 ];
 export function CommandSearch() {
   const [query, setQuery] = useState(''),

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { chromium } from 'playwright';
-const fixtureUrl = 'http://127.0.0.1:5193/tests/fixtures/surface-appearance.html';
+const fixtureUrl = 'http://127.0.0.1:5193/tests/fixtures/material-lifecycle.html';
 const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5193','--strictPort'],{stdio:'pipe'});
 let browser;
 try{
@@ -48,7 +48,7 @@ try{
  await page.evaluate(()=>{window.dispatchEvent(new Event('focus'));window.dispatchEvent(new PointerEvent('pointermove',{clientX:650,clientY:100}));document.dispatchEvent(new PointerEvent('pointerout',{relatedTarget:null}));});await settle();assert.deepEqual((await state()).last,returned,'Leave return is independent of focus');
  await page.evaluate(()=>api.setProps({elevation:8,maxElevation:40,light:{source:'fixed',position:{x:90,y:80}}}));await settle();assert.equal((await state()).stats.pointerListeners,1,'Fixed main light retains the independent receiver pointer subscription');
  const fixed=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:500,clientY:400})));await settle();assert.equal((await state()).stats.submits,fixed.stats.submits);
- await page.evaluate(()=>api.setMode('dark'));await settle();assert.equal((await state()).creates,initial.creates,'Theme updates existing appearance');
+ await page.evaluate(()=>api.setMode('dark'));await settle();assert.equal((await state()).creates,initial.creates,'Theme updates existing material');
  await page.evaluate(()=>api.setAlternate(true));await settle();assert.ok((await state()).creates>initial.creates);
  const beforeTag=(await state()).creates;await page.evaluate(()=>api.setTag(true));await settle();assert.ok((await state()).creates>beforeTag,'New DOM target owns a new instance');
  await page.evaluate(()=>{window.boundNode=document.getElementById('sample');api.setAttached(false);});await settle();
@@ -59,7 +59,7 @@ try{
  await page.evaluate(()=>api.setAttached(true));await page.locator('canvas').waitFor();await settle();
  assert.equal(await page.locator('canvas').count(),1,'Ref reattachment recreates the surface');
  assert.equal(await page.evaluate(()=>api.records.createdElevations.at(-1)),23,'Ref reattachment uses the latest committed configuration');
- await page.evaluate(()=>api.setQuiet(true));await settle();assert.equal((await state()).stats.pointerListeners,0,'No-input appearance has no implicit pointer subscription');const quiet=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:10,clientY:10})));await settle();assert.equal((await state()).stats.submits,quiet.stats.submits);
+ await page.evaluate(()=>api.setQuiet(true));await settle();assert.equal((await state()).stats.pointerListeners,0,'No-input material has no implicit pointer subscription');const quiet=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:10,clientY:10})));await settle();assert.equal((await state()).stats.submits,quiet.stats.submits);
  await page.evaluate(()=>api.setMounted(false));await settle();assert.equal(await page.locator('canvas').count(),0);
  const final=await state();assert.equal(final.creates,final.disposes,'All instrumented instances disposed');assert.deepEqual(final.errors,[]);assert.deepEqual(errors,[]);
  const defaults=await page.evaluate(async()=>(await import('/packages/oyn/src/materials/ceramic/index.ts')).ceramicDefaults);
@@ -82,7 +82,7 @@ try{
  assert.equal(inputChecks.initial.position,null);assert.equal(inputChecks.listenerCount,1);assert.equal(inputChecks.afterOne,1);assert.equal(inputChecks.afterBoth,0);
  assert.deepEqual(inputChecks.left.position,{x:321,y:123});assert.equal(inputChecks.left.inside,false);assert.equal(inputChecks.left.focused,false);assert.equal(inputChecks.hidden.visible,false);assert.equal(inputChecks.notifications,8);
 
- // Hook failures latch the engine: no future appearance updates or creations.
+ // Hook failures latch the engine: no future material updates or creations.
  await page.evaluate(()=>{api.setQuiet(false);api.setMounted(true);});
  await page.locator('#sample[data-oyn-active]').waitFor();
  await page.evaluate(()=>{api.records.failUpdate=true;api.setProps({elevation:12});});
@@ -160,7 +160,7 @@ try{
    const hosts=[document.createElement('div'),document.createElement('div')];
    const instances=hosts.map(()=>ceramic.create({light:{source:'fixed'}}));
    const engine=createEngine();
-   hosts.forEach((element,i)=>{element.className='fallback-probe';document.body.append(element);engine.entries.set(element,{element,material:instances[i].material});});
+   hosts.forEach((element,i)=>{element.className='fallback-probe';document.body.append(element);engine.entries.set(element,{element,material:instances[i]});});
    const requestAdapter=navigator.gpu.requestAdapter;
    const requestDevice=GPUAdapter.prototype.requestDevice;
    let device;
@@ -190,8 +190,8 @@ try{
   },reason);
   assert.deepEqual(result,{fallback:Array.from({length:2},()=>({active:false,canvases:0,background:'rgb(12, 34, 56)'})),restarted:false},reason);
  }
- assert.ok(errors.some(e=>e.includes('test appearance failure')));
+ assert.ok(errors.some(e=>e.includes('test material failure')));
  assert.equal(errors.length,4,'Exactly one diagnostic per failed engine');
 
- console.log('PASS appearance API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/appearance replacement and cleanup.');
+ console.log('PASS material API: StrictMode, stable instances/canvases/buffers, props/theme, shared lazy pointer, hold/return/fixed policy, no-input idle, target/material replacement and cleanup.');
 }finally{await browser?.close();server.kill();}

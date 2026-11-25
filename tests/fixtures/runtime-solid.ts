@@ -1,6 +1,6 @@
 import { ceramicBinding } from '../../packages/oyn/src/materials/ceramic/interaction';
 // Historical runtime-CSG baseline, test-only. Never import from application code.
-import { createParameters, type Material } from 'oyn';
+import { createParameters, type MaterialInstance } from 'oyn';
 import { frameWGSL } from '../../packages/oyn/src/materials/ceramic/effects/frame.js';
 import { createCeramicMaterial, type CeramicOptions } from '../../packages/oyn/src/materials/ceramic/index.js';
 import { shadowBounds } from '../../packages/oyn/src/materials/ceramic/bounds.js';
@@ -291,7 +291,7 @@ export function solidCeramic(
       parameters.set(8 + i, nodes[i] ?? 0);
   }
   setGeometry(solid);
-  const material: Material = {
+  const material: MaterialInstance = {
     bind: ceramicBinding(),
     shader,
     parameters,

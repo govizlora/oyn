@@ -33,7 +33,7 @@
     "test:ceramic-compatibility": "npm run build:packages && node tests/ceramic-compatibility.mjs",
     "bake:geometry": "node tools/geometry/controls.mjs",
     "test:baked": "npm run build:packages && node tests/baked-geometry.mjs",
-    "test:surface-appearance": "npm run build:packages && tsc -p tsconfig.json && node tests/surface-appearance.mjs",
+    "test:material-lifecycle": "npm run build:packages && tsc -p tsconfig.json && node tests/material-lifecycle.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:webgl-copy": "npm run build:packages && node tests/webgl-copy.mjs",
@@ -46,7 +46,8 @@
     "test:ui": "npm run build && node tests/ui-control.mjs && node tests/ui-items.mjs && node tests/atelier-tabs.mjs && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
     "test:ui-catalog": "npm run build && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
     "build:site": "npm run build:packages && vite build site --base ./",
-    "dev:site": "vite site"
+    "dev:site": "vite site",
+    "test:material-core": "npm run build:packages && node tests/material-core.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

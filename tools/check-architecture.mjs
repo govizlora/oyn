@@ -16,12 +16,15 @@ function files(directory) {
 }
 const failures = [];
 for (const [layer, directory] of Object.entries({
+  entry: "packages/oyn/src/index.ts",
   surface: "packages/oyn/src/core",
   react: "packages/oyn/src/react",
   ceramic: "packages/oyn/src/materials",
   ui: "packages/ui/src",
 })) {
-  for (const file of files(directory)) {
+  for (const file of fs.statSync(directory).isDirectory()
+    ? files(directory)
+    : [directory]) {
     const source = ts.createSourceFile(
       file,
       fs.readFileSync(file, "utf8"),
@@ -32,42 +35,74 @@ for (const [layer, directory] of Object.entries({
       failures.push(
         `${file}:${source.getLineAndCharacterOfPosition(node.getStart()).line + 1}: ${message}`,
       );
+    function checkImport(node, name) {
+      const local = name.startsWith(".")
+        ? path.normalize(path.join(path.dirname(file), name))
+        : name;
+      const react = /^(react|react-dom)(\/|$)|(?:^|\/)react(?:\/|$)/.test(
+        local,
+      );
+      const uiOrMotion =
+        /@oyn\/ui|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(name);
+      const concrete = /(?:^|\/)materials\//.test(local);
+      if (
+        ["entry", "surface"].includes(layer) &&
+        (react || concrete || uiOrMotion)
+      )
+        report(
+          node,
+          "Core cannot depend on React, concrete materials, UI SDKs or animation libraries.",
+        );
+      if (layer === "react" && (concrete || uiOrMotion))
+        report(
+          node,
+          "The React interface depends on Core, not concrete materials or UI policy.",
+        );
+      if (layer === "ceramic") {
+        if (react || uiOrMotion)
+          report(node, "Materials cannot own React/UI/animation policy.");
+        if (
+          local.includes("/core/") &&
+          !/\/core\/(types\/|createParameters\.js$)/.test(local)
+        )
+          report(
+            node,
+            "Built-in materials may depend only on Core contracts and the parameter utility.",
+          );
+        if (name === "oyn" || name.startsWith("oyn/"))
+          report(
+            node,
+            "Built-in materials import exact internal contracts, not their own public package.",
+          );
+      }
+      if (layer === "ui" && /oyn\/(src|dist)\//.test(name))
+        report(node, "Consumers must use OYN public entry points.");
+      if (/^@oyn\/(surface|ceramic)(\/|$)/.test(name))
+        report(
+          node,
+          "Removed package entry points must not return as compatibility paths.",
+        );
+    }
     function visit(node) {
       if (
         (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
         node.moduleSpecifier &&
         ts.isStringLiteral(node.moduleSpecifier)
-      ) {
-        const name = node.moduleSpecifier.text;
-        if (
-          layer === "surface" &&
-          /materials\/|@oyn\/ui|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(
-            name,
-          )
-        )
-          report(
-            node,
-            "Surface must not depend on materials, UI or animation libraries.",
-          );
-        if (
-          layer === "surface" &&
-          !file.includes("/react/") &&
-          (/^(react|react-dom)(\/|$)/.test(name) || /(^|\/)react\//.test(name))
-        )
-          report(
-            node,
-            "The Surface runtime must not depend on its React bridge.",
-          );
-        if (
-          layer === "ceramic" &&
-          /^(react|react-dom)(\/|$)|@oyn\/ui|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(
-            name,
-          )
-        )
-          report(node, "Ceramic must not own React/UI/animation policy.");
-        if (layer === "ui" && /oyn\/(src|dist)\//.test(name))
-          report(node, "Consumers must use Surface public entry points.");
-      }
+      )
+        checkImport(node, node.moduleSpecifier.text);
+      if (
+        ts.isCallExpression(node) &&
+        node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+        node.arguments[0] &&
+        ts.isStringLiteral(node.arguments[0])
+      )
+        checkImport(node, node.arguments[0].text);
+      if (
+        ts.isImportTypeNode(node) &&
+        ts.isLiteralTypeNode(node.argument) &&
+        ts.isStringLiteral(node.argument.literal)
+      )
+        checkImport(node, node.argument.literal.text);
       if (ts.isCallExpression(node)) {
         const name = ts.isPropertyAccessExpression(node.expression)
           ? node.expression.name.text
@@ -95,7 +130,7 @@ for (const [layer, directory] of Object.entries({
             name === "addEventListener" &&
             /^(pointer|mouse|touch|key|click|focus|blur)/.test(literal)
           )
-            report(node, "Material gestures belong in the consumer.");
+            report(node, "MaterialInstance gestures belong in the consumer.");
           if (name === "matchMedia" && literal.includes("reduced-motion"))
             report(
               node,
@@ -145,7 +180,7 @@ host.readFile = (file) => virtual.get(path.resolve(file)) ?? originalRead(file);
 host.fileExists = (file) =>
   virtual.has(path.resolve(file)) || originalExists(file);
 const program = ts.createProgram(
-  [...virtual.keys(), path.resolve("tests/surface-appearance-types.tsx")],
+  [...virtual.keys(), path.resolve("tests/material-types.tsx")],
   options,
   host,
 );

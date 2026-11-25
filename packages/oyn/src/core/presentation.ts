@@ -82,7 +82,7 @@ export function createPresentation(mesh: Mesh) {
         (v) => Number.isFinite(v) && Number.isFinite(Math.fround(v)),
       )
     )
-      throw Error('Invalid appearance frame inputs.');
+      throw Error('Invalid material frame inputs.');
     return new Float32Array([
       cssW,
       cssH,

@@ -30,8 +30,8 @@ function NativeInput(props: ComponentProps<"input">) {
   return <input {...props} />;
 }
 function Duplicate() {
-  const first = useMaterial({ appearance: ceramic, props: {} });
-  const second = useMaterial({ appearance: ceramic, props: {} });
+  const first = useMaterial({ material: ceramic, props: {} });
+  const second = useMaterial({ material: ceramic, props: {} });
   return (
     <div
       id="duplicate"

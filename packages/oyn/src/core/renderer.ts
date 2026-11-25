@@ -1,15 +1,15 @@
-import type { Material } from "./types/material.js";
+import type { MaterialInstance } from "./types/material.js";
 import { createWebGPU } from "./webgpu.js";
 export type Target = object;
 export type Draw<T extends Target = Target> = {
   target: T;
-  material: Material;
+  material: MaterialInstance;
   frame: Float32Array<ArrayBuffer>;
 };
 export interface Renderer {
   limit: number;
-  ready?(material: Material): boolean;
-  createTarget(canvas: HTMLCanvasElement, material: Material): Target;
+  ready?(material: MaterialInstance): boolean;
+  createTarget(canvas: HTMLCanvasElement, material: MaterialInstance): Target;
   draw(items: Draw[]): void;
   release(target: Target): void;
   dispose(): void;

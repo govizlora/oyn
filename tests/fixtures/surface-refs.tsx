@@ -18,7 +18,7 @@ export async function checkRefLifecycle() {
   };
   const objectRef = createRef<HTMLButtonElement>();
   function Probe({ forwardedRef, color }: { forwardedRef: Ref<HTMLButtonElement>; color: string }) {
-    const ref = useMaterial({ appearance: ceramic, props: { color, elevation: 4 } });
+    const ref = useMaterial({ material: ceramic, props: { color, elevation: 4 } });
     const composed = useMemo(() => (node: HTMLButtonElement | null) => {
       const releaseSurface = ref(node);
       const cleanup = typeof forwardedRef === "function" ? forwardedRef(node) : undefined;

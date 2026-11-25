@@ -1,13 +1,17 @@
 import type { SurfaceInputs } from "./types/input.js";
 import { createInputs } from "./createInputs.js";
 import type { Mesh } from "./types/scene.js";
-import type { Material, Parameters, SurfaceBinding } from "./types/material.js";
+import type {
+  MaterialInstance,
+  Parameters,
+  SurfaceBinding,
+} from "./types/material.js";
 import { createRenderer, type Renderer, type Target } from "./renderer.js";
 import { createPresentation } from "./presentation.js";
 
 type Entry = {
   mesh: Mesh;
-  material: Material;
+  material: MaterialInstance;
   output?: {
     presentation: ReturnType<typeof createPresentation>;
     target: Target;
@@ -16,7 +20,7 @@ type Entry = {
   parameters: Parameters;
   binding?: SurfaceBinding;
   controller: AbortController;
-  binder: Material["bind"];
+  binder: MaterialInstance["bind"];
 };
 export type Engine = ReturnType<typeof createEngine>;
 
@@ -25,6 +29,7 @@ export function createEngine() {
   const entries = new Map<HTMLElement, Mesh>();
   let running: ReturnType<typeof startEngine> | undefined;
   let failed = false;
+  let stopWatchingRange: (() => void) | undefined;
   const engine = {
     entries,
     get failed() {
@@ -34,17 +39,32 @@ export function createEngine() {
       if (failed) return;
       failed = true;
       engine.stop();
+      for (const mesh of [...entries.values()]) mesh.dispose?.();
       console.error(error);
     },
     start(hdr = false, inputs?: SurfaceInputs) {
       if (running || failed) return;
       try {
-        running = startEngine(entries, engine.fail, hdr, inputs);
+        const range = hdr ? matchMedia("(dynamic-range: high)") : null;
+        const changed = () => {
+          engine.stop();
+          engine.start(hdr, inputs);
+        };
+        range?.addEventListener("change", changed);
+        stopWatchingRange = () => range?.removeEventListener("change", changed);
+        running = startEngine(
+          entries,
+          engine.fail,
+          range?.matches ?? false,
+          inputs,
+        );
       } catch (error) {
         engine.fail(error);
       }
     },
     stop() {
+      stopWatchingRange?.();
+      stopWatchingRange = undefined;
       const current = running;
       running = undefined;
       current?.dispose();

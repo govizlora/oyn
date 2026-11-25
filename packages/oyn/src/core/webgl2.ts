@@ -1,7 +1,7 @@
-import type { Material } from "./types/material.js";
+import type { MaterialInstance } from "./types/material.js";
 import type { Draw } from "./renderer.js";
 
-type Loader = NonNullable<Material["loadWebGL2"]>;
+type Loader = NonNullable<MaterialInstance["loadWebGL2"]>;
 type Programs = Awaited<ReturnType<Loader>>;
 type GLTarget = {
   canvas: HTMLCanvasElement;
@@ -31,7 +31,7 @@ export function createWebGL2(
   const programs = new Map<string, Map<string, WebGLProgram>>();
   const frameBuffer = gl.createBuffer(),
     params = gl.createBuffer();
-  function ready(m: Material) {
+  function ready(m: MaterialInstance) {
     const load = m.loadWebGL2;
     if (!load || m.data) return false;
     if (!modules.has(load)) {
@@ -50,7 +50,7 @@ export function createWebGL2(
     }
     return modules.get(load)?.has(m.shader) ?? false;
   }
-  function program(m: Material, entry: string) {
+  function program(m: MaterialInstance, entry: string) {
     let cache = programs.get(m.shader);
     if (!cache) programs.set(m.shader, (cache = new Map()));
     const existing = cache.get(entry);

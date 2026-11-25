@@ -15,7 +15,7 @@ import { ceramic } from 'oyn/materials/ceramic';
 
 function Button({ pressed }: { pressed: boolean }) {
   const ref = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: { elevation: pressed ? 4 : 16, maxElevation: 16 },
   });
   return <button ref={ref}>Confirm</button>;
@@ -23,55 +23,73 @@ function Button({ pressed }: { pressed: boolean }) {
 // <OynProvider><Button pressed={false} /></OynProvider>
 ```
 
-`appearance` is a stable `Appearance<P>` definition. `props` is inferred from that
-definition; unknown fields, missing required fields and wrong types are rejected.
-`ceramic` is no longer a callable mutable-material factory. `useMaterial({material})`
-is removed. Ordinary React users need neither manual memoization nor instance setters.
-The hook accepts only appearance and props. Consumers compose additional refs outside
-the hook, preserving React 19 cleanup. Binding and unbinding the returned ref controls
-the instance lifetime.
+`material` is a stable `Material<P>` definition. `props` is inferred from it;
+unknown fields, missing required fields and wrong types are rejected. Consumers
+compose native props and refs without adding another Surface binding.
 
-An appearance instance is created after commit for the bound node, not during render.
-Normal props/theme updates call its `update`, preserving the instance and canvas.
-Fresh props object identity alone does not imply a new instance. Appearance or target
-replacement ends the old instance. StrictMode setup/cleanup replay is supported;
-there is no promise of exactly-once effects. Async GPU initialization is cancellable.
+Core creates one instance per bound host after commit. Ordinary props updates
+call the same instance's `update`; they do not recreate the instance or canvas.
+Changing the definition or host ends the old instance. StrictMode replay is
+supported; suspended renders cannot publish uncommitted configuration.
+`OynProvider` owns the shared engine, not theme or animation policy.
 
-`OynProvider` owns the engine. Theme policy belongs to appearances, not Surface.
-
-## Appearance authoring
+## Material authoring
 
 ```ts
-import type { Appearance } from 'oyn';
-const visual: Appearance<MyProps> = {
-  create(props) {
+import { createParameters, type Material } from "oyn";
+
+const visual: Material<{ value: number }> = {
+  create({ value }) {
+    const parameters = createParameters([value, 0, 0, 0]);
     return {
-      material: /* low-level GPU draw description */ program,
-      update(nextProps) {
-        // Validate, compare, update owned parameters/resources.
-        // Return 'layout' for changed visual bounds, 'draw' for visual-only changes,
-        // or nothing if unchanged. Never mutate caller props.
-      },
-      dispose() { /* instance-owned non-GPU cleanup */ },
+      shader, // WGSL implementing the documented frame/parameter ABI
+      parameters,
+      passes: ["surface"],
+      measurePadding: () => ({ x: 0, y: 0 }),
+      update({ value }) { parameters.set(0, value); },
+      dispose() { /* Release instance-owned non-GPU resources, if any. */ },
     };
   },
 };
 ```
 
-`Material` is the low-level draw description (shader, parameters, passes, padding measurement,
-optional immutable data), not the React lifecycle API. `materialAppearance` is an
-explicit `Appearance<{material: Material}>` for existing GPU programs and externally
-controlled numeric sources. It uses exactly the same binding/engine path, not a
-legacy hook overload. Such externally controlled sources must remain stable.
+`MaterialInstance<P>` is both the live configuration object and drawing contract.
+There is no Appearance wrapper or nested `.material`. `update` and `dispose` are
+optional for static instances. Parameter writes notify the engine automatically;
+return `draw` for other visual changes or `layout` when changing bounds, binding
+hooks or parameter identity. Validate complete updates before mutating live state.
 
-A program may provide `bind(context)` for per-target DOM subscriptions. Context has
-`element`, `signal`, `inputs`, `requestDraw()` and `requestMeasure()`. It returns
-optional `measure()`, `frame(frameContext)` and `dispose()` callbacks. Use the abort
-signal for event cleanup. Bindings end on program binding replacement, ref detachment,
-unmount or provider disposal. They must not create devices, submit GPU commands,
-control canvas placement or introduce another rendering scheduler/resource owner.
-A consumer numeric animation clock is not a renderer; it publishes values through
-the existing numeric adapter.
+An instance may provide `bind(context)` for target-local subscriptions. Context
+contains `element`, `signal`, `inputs`, `requestDraw()` and `requestMeasure()`.
+The result may supply `measure()`, `frame(frameContext)` and `dispose()`. Bindings
+end on replacement, ref detachment, unmount or engine resource shutdown. Use the
+abort signal for subscriptions. Never create devices/canvases or submit GPU work
+inside a material. Consumer animation sources still own curves and timing.
+
+## Without React
+
+```ts
+import { createEngine, createSurface } from "oyn";
+import { ceramic } from "oyn/materials/ceramic";
+
+const engine = createEngine();
+const surface = createSurface(engine, {
+  material: ceramic,
+  props: { elevation: 8, maxElevation: 24 },
+});
+const unbind = surface.bind(element);
+engine.start();
+surface.update({ elevation: 16, maxElevation: 24 });
+// On teardown:
+unbind?.();
+engine.stop();
+```
+
+This is the same binding path used by `useMaterial`, not an independent adapter.
+A handle can bind multiple hosts; each owns a separate instance. Shared external
+numeric sources are not destroyed by an individual host. Bind them in a consumer
+material definition and unsubscribe on disposal; see the canonical animation
+example in [ARCHITECTURE.md](../../ARCHITECTURE.md).
 
 ## Optional input facts — not a light model
 
@@ -84,13 +102,13 @@ the existing numeric adapter.
 
 Listeners are lazy, shared per Provider and removed after the last subscription.
 Surface never supplies a synthetic default light position and never resets pointer
-coordinates on blur/leave. Appearance decides what those states mean and whether
+coordinates on blur/leave. Material decides what those states mean and whether
 they warrant redraw. No consumer means no pointer listeners or pointer-triggered
 renders. The API is for imperative binding/frame callbacks, not hidden mutable
 state reads during React render; React consumers need an explicit snapshot subscription.
 `frameContext.toLocal(point)` performs axis-aligned viewport-to-canvas conversion.
 
-Ceramic subscribes to this service and interprets it as light. Other appearances can
+Ceramic subscribes to this service and interprets it as light. Other materials can
 ignore it, use it for hit testing, or choose different visual responses. CSS radius
 interpretation also belongs to Ceramic's binding, not Surface presentation code.
 
@@ -99,10 +117,10 @@ interpretation also belongs to Ceramic's binding, not Surface presentation code.
 Premultiplied RGBA; six procedural vertices via `vertex`; ordered fragment entry
 names in `passes`. Group 0 binding 0 is 64 bytes / four vec4f fields (the original 48-byte prefix is unchanged):
 
-1. canvas CSS width/height, appearance extension lanes 0/1;
+1. canvas CSS width/height, material extension lanes 0/1;
 2. element x/y/width/height in canvas coordinates;
-3. appearance extension lane 2, raster scale x/y, optional appearance extension lane 3 (defaults to zero);
-4. optional appearance extension lanes 4/5 and two reserved zeros.
+3. material extension lane 2, raster scale x/y, optional material extension lane 3 (defaults to zero);
+4. optional material extension lanes 4/5 and two reserved zeros.
 
 `binding.frame()` returns three, four or six finite f32 values for extension lanes; omitted means
 zeros. Surface does not interpret them. Ceramic uses them for local light XY,
@@ -130,7 +148,7 @@ The host-sized layer uses layout containment; padded ink does not enlarge ancest
 scroll areas. Native overflow and stacking still apply. There are no cross-element
 shadows. Surface restores its own temporary positioning/isolation styles on cleanup.
 
-Appearances own exterior-space policy. Material.measurePadding(width, height)
+Materials own exterior-space policy. MaterialInstance.measurePadding(width, height)
 returns horizontal/vertical CSS-pixel padding; contained effects return zero.
 Surface only sizes and positions the canvas from that result, without retaining
 a visual budget. Padding policy changes return 'layout'; resize/DPR/style changes
@@ -143,14 +161,15 @@ Render-time writes to live instance/ref state and render-time mode resolution we
 removed from the hook. Correctness does not depend on memoization. Compiler-enabled
 consumer/library validation remains future work: no Compiler certification or
 `use no memo` workaround is claimed. See the [architecture contract](../../ARCHITECTURE.md) and headless
-`test:surface-appearance` for current lifecycle/input/type coverage.
+`test:material-lifecycle` for current lifecycle/input/type coverage.
 
 ## Optional external animation adapter
 
 `bindMotion(source, write)` remains an opt-in low-level adapter at
 `oyn/adapters/motion`, with no Motion runtime dependency in core. One writer
-owns each parameter. Use `materialAppearance` for such explicit externally driven
-programs; do not simultaneously write the same property from declarative props.
+owns each parameter. A consumer material definition connects the source to its
+instance setter and owns subscription cleanup; do not also write the same
+property from declarative props.
 The consumer owns animation targets, interpolation, reduced-motion policy and
 cancellation. Its animation clock emits numbers; it is not a second renderer.
 Surface coalesces parameter notifications into GPU work and does not calculate
@@ -168,7 +187,7 @@ state or consumer-owned canvas lifecycle is needed.
 
 A binding may expose a target-local `material`. Surface uses its parameters, passes,
 shader, data and padding without invoking its bind hook recursively. This lets
-appearances isolate per-element state when a source material is shared.
+materials isolate per-element state when a source material is shared.
 
 
 ### CSS fallback

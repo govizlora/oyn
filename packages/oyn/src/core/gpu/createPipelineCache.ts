@@ -1,4 +1,4 @@
-import type { Material } from '../types/material.js';
+import type { MaterialInstance } from '../types/material.js';
 import type { createLayouts } from './createLayouts.js';
 
 /** One cache per renderer; visual parameter values are not pipeline keys. */
@@ -9,7 +9,7 @@ export function createPipelineCache(
 ) {
   const { pipelineLayout, dataPipelineLayout } = layouts;
   const cache = new Map<string, GPURenderPipeline[]>();
-  function pipelines(material: Material) {
+  function pipelines(material: MaterialInstance) {
     const key = JSON.stringify([
       material.shader,
       material.passes,
@@ -18,7 +18,7 @@ export function createPipelineCache(
     let result = cache.get(key);
     if (!result) {
       if (!material.passes.length)
-        throw Error('Material requires at least one fragment pass.');
+        throw Error('MaterialInstance requires at least one fragment pass.');
       const module = device.createShaderModule({ code: material.shader });
       result = material.passes.map((entryPoint) =>
         device.createRenderPipeline({

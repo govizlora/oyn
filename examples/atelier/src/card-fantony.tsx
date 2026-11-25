@@ -204,7 +204,7 @@ function Specimen({
   radius: number;
 }) {
   const ref = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: { ...options, colorScheme: scheme },
   });
   return (

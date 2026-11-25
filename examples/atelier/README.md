@@ -69,7 +69,7 @@ Read [the architecture contract](../../ARCHITECTURE.md) for current ownership.
 - `effects/shadow.ts`: shared light integration; each geometry supplies coverage.
 - Existing Surface renderer: static GPU data ownership and reference counting.
 - Surface engine: sole GPU draw scheduler/canvas lifecycle; lazy shared input facts.
-- Ceramic appearance binding: interprets pointer state as light and reads CSS radius.
+- Ceramic material binding: interprets pointer state as light and reads CSS radius.
 
 `npm run test:ceramic-compatibility` compares original and explicit card adapters
 against the frozen pre-extraction shader for surface lighting only. Eight
@@ -145,12 +145,12 @@ WebGPU here; it is **not a rendered pass**. The shadcn migration, MUI comparison
 and core material defaults are unchanged. Nothing is pushed
 or publicly deployed by these commands.
 
-### Declarative appearance migration
+### Unified material API
 
-Homepage housings/wells use `useMaterial({ appearance: ceramic, props })`; sculpted
-controls use `appearance: baked` with geometry/elevation/rotation props. Instances
+Homepage housings/wells use `useMaterial({ material: ceramic, props })`; sculpted
+controls use `material: baked` with geometry/elevation/rotation props. Instances
 and numeric parameter blocks persist through ordinary state changes. Specialized
-instrument/phosphor/research programs use the explicit `materialAppearance` adapter
+instrument/phosphor/research programs implement the same Material definition contract
 through the same lifecycle. No `useMaterial({material})` overload remains. Optical
 math, including four uniform shadow layers and contact composition, is unchanged.
 

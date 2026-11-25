@@ -1,5 +1,10 @@
 import { environmentBinding, preferredColorScheme } from "../environment.js";
-import { createParameters, type Material } from "../../../core/index.js";
+import { createParameters } from "../../../core/createParameters.js";
+import type {
+  Material,
+  MaterialInstance,
+  MaterialUpdate,
+} from "../../../core/types/material.js";
 import { ceramicBinding } from "../interaction.js";
 import {
   ceramicFinish,
@@ -19,18 +24,27 @@ export type BakedOptions = Omit<
   maxElevation?: number;
   rotation?: number;
 };
-export type BakedMaterial = Material & {
+export type BakedProps = BakedOptions & { geometry: BakedGeometry };
+export type BakedMaterial = MaterialInstance<BakedProps> & {
   setElevation(value: number): void;
   setRotation(value: number): void;
+  update(props: Readonly<BakedProps>): MaterialUpdate;
 };
+export const baked: Material<BakedProps> = {
+  create: ({ geometry, ...options }) => bakedCeramic(geometry, options),
+};
+
 export function bakedCeramic(
   geometry: BakedGeometry,
   options: BakedOptions = {},
 ): BakedMaterial {
-  const config = snapshotCeramicOptions(options);
-  let elevation = config.elevation ?? geometry.height,
-    rotation = config.rotation ?? 0;
-  const maxElevation = config.maxElevation ?? elevation;
+  let config = snapshotCeramicOptions(options);
+  const finishKey = ({ elevation, rotation, ...finish }: BakedOptions) =>
+    JSON.stringify(finish);
+  let key = finishKey(config);
+  let elevation = config.elevation ?? geometry.height;
+  let rotation = config.rotation ?? 0;
+  let maxElevation = config.maxElevation ?? elevation;
   const listeners = new Set<() => void>();
   const create = (colorScheme: import("../environment.js").ColorScheme) =>
     resolvedBakedCeramic(geometry, {
@@ -40,24 +54,57 @@ export function bakedCeramic(
       rotation,
       maxElevation,
     });
-  const material = create(config.colorScheme ?? preferredColorScheme());
-  const setElevation = material.setElevation,
-    setRotation = material.setRotation;
-  material.setElevation = (value) => {
-    setElevation(value);
-    elevation = value;
-    listeners.forEach((update) => update());
-  };
-  material.setRotation = (value) => {
-    setRotation(value);
-    rotation = value;
-    listeners.forEach((update) => update());
-  };
-  Object.defineProperty(material, "bind", {
-    value: environmentBinding(config.colorScheme, create, (update) => {
+  const initial = create(config.colorScheme ?? preferredColorScheme());
+  let writeElevation = initial.setElevation,
+    writeRotation = initial.setRotation;
+  const bind = () =>
+    environmentBinding(config.colorScheme, create, (update) => {
       listeners.add(update);
       return () => listeners.delete(update);
-    }),
+    });
+  const material: BakedMaterial = Object.assign(initial, {
+    bind: bind(),
+    setElevation(value: number) {
+      writeElevation(value);
+      elevation = value;
+      listeners.forEach((update) => update());
+    },
+    setRotation(value: number) {
+      writeRotation(value);
+      rotation = value;
+      listeners.forEach((update) => update());
+    },
+    update(next: Readonly<BakedProps>): MaterialUpdate {
+      const { geometry: nextGeometry, ...options } = next;
+      const nextConfig = snapshotCeramicOptions(options);
+      const nextKey = finishKey(nextConfig);
+      if (nextGeometry !== geometry || nextKey !== key) {
+        const resolved = resolvedBakedCeramic(nextGeometry, {
+          ...nextConfig,
+          colorScheme: nextConfig.colorScheme ?? preferredColorScheme(),
+        });
+        geometry = nextGeometry;
+        config = nextConfig;
+        key = nextKey;
+        elevation = config.elevation ?? geometry.height;
+        rotation = config.rotation ?? 0;
+        maxElevation = config.maxElevation ?? elevation;
+        writeElevation = resolved.setElevation;
+        writeRotation = resolved.setRotation;
+        material.parameters = resolved.parameters;
+        material.data = resolved.data;
+        material.passes = resolved.passes;
+        material.measurePadding = resolved.measurePadding;
+        material.bind = bind();
+        return "layout";
+      }
+      const height = next.elevation ?? geometry.height,
+        angle = next.rotation ?? 0;
+      if (elevation === height && rotation === angle) return;
+      material.setElevation(height);
+      material.setRotation(angle);
+      return "draw";
+    },
   });
   return material;
 }
@@ -66,15 +113,19 @@ export function bakedCeramic(
 function resolvedBakedCeramic(
   geometry: BakedGeometry,
   options: BakedOptions = {},
-): BakedMaterial {
+): MaterialInstance & {
+  setElevation(value: number): void;
+  setRotation(value: number): void;
+} {
   let elevation = options.elevation ?? geometry.height,
     rotation = options.rotation ?? 0;
   const maxElevation = options.maxElevation ?? elevation;
-  const { values, validateSignedElevation, shadows, frostReachPerHeight } = ceramicFinish({
-    ...options,
-    elevation,
-    maxElevation,
-  });
+  const { values, validateSignedElevation, shadows, frostReachPerHeight } =
+    ceramicFinish({
+      ...options,
+      elevation,
+      maxElevation,
+    });
   function validateHeight(value: number) {
     validateSignedElevation(value);
     if (

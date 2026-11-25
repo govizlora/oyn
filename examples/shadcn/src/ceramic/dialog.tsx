@@ -63,7 +63,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...dialogProps } })
+  const surfaceRef = useMaterial({ material: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...dialogProps } })
   const ref = useComposedRefs(surfaceRef, forwardedRef)
   return (
     <DialogPortal data-slot="dialog-portal">

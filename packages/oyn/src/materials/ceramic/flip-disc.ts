@@ -1,4 +1,5 @@
-import { createParameters, type Material } from "../../core/index.js";
+import { createParameters } from "../../core/createParameters.js";
+import type { MaterialInstance } from "../../core/types/material.js";
 import { frameWGSL } from "./effects/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
 import { parseColor } from "./color.js";
@@ -250,7 +251,7 @@ export function createFlipDiscMaterial(initial: FlipDiscOptions) {
     initial.extension,
     initial.lampHeight,
   ]);
-  const material: Material = {
+  const material: MaterialInstance = {
     shader: flipDiscWGSL,
     loadWebGL2,
     parameters,

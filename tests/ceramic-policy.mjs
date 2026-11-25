@@ -98,7 +98,7 @@ for (const colorScheme of ["light", "dark"]) {
 }
 
 const fixtureUrl =
-  "http://127.0.0.1:5199/tests/fixtures/surface-appearance.html";
+  "http://127.0.0.1:5199/tests/fixtures/material-lifecycle.html";
 const server = spawn(
   process.execPath,
   [

@@ -126,7 +126,7 @@ adds the recessed track, one moving indicator and hover wells. To give the conte
 the selected value and the indicator's measured bounds.
 
 Not using either interaction library? Attach the Ceramic material directly with
-`useMaterial({ appearance: ceramic, props })` under a OynProvider. The
+`useMaterial({ material: ceramic, props })` under a OynProvider. The
 [native button demo](http://127.0.0.1:5177/surface.html) is a material example, not an installable UI item.
 
 ## Source responsibilities

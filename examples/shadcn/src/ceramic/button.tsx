@@ -55,7 +55,7 @@ function Button({
   const mode = useTheme().dark ? 'dark' : 'light'
   const material = variant === 'default' ? primaryProps[mode] : variant === 'destructive' ? destructiveProps[mode] : neutralProps
   const filled = variant !== 'ghost' && variant !== 'link'
-  const surfaceRef = useMaterial({ appearance: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...material } })
+  const surfaceRef = useMaterial({ material: ceramic, props: { colorScheme: useTheme().dark ? 'dark' : 'light', ...material } })
   const ref = useComposedRefs(filled ? surfaceRef : undefined, forwardedRef)
   const materialClass = variant === 'default' ? 'text-primary-foreground' : variant === 'destructive' ? 'text-white' : 'text-foreground'
   const Comp = asChild ? Slot.Root : "button"

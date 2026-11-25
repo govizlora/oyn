@@ -27,7 +27,7 @@ type Face = keyof typeof elevations;
 
 export function useCeramicFace(face: Face, ref?: Ref<HTMLElement>) {
   const surface = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props:
       face === "floating"
         ? {

@@ -1,4 +1,7 @@
-import type { Material, SurfaceBindingContext } from "../../core/index.js";
+import type {
+  MaterialInstance,
+  SurfaceBindingContext,
+} from "../../core/types/material.js";
 
 /** The surrounding page/section environment, independent of surface lighting. */
 export type ColorScheme = "light" | "dark";
@@ -25,11 +28,11 @@ export function elementColorScheme(
  * Attach one target-local material without leaking theme policy into Surface.
  * Both automatic and explicit configurations use this same binding path.
  */
-export function environmentBinding<T extends Material>(
+export function environmentBinding<T extends MaterialInstance>(
   explicit: ColorScheme | undefined,
   create: (scheme: ColorScheme) => T,
   connect?: (update: (write?: (material: T) => void) => void) => () => void,
-): NonNullable<Material["bind"]> {
+): NonNullable<MaterialInstance["bind"]> {
   return (context: SurfaceBindingContext) => {
     const media =
       explicit === undefined
@@ -43,7 +46,7 @@ export function environmentBinding<T extends Material>(
     let scheme = read();
     let source = create(scheme);
     const parameters = source.parameters;
-    const material: Material = {
+    const material: MaterialInstance = {
       parameters,
       get loadWebGL2() {
         return source.loadWebGL2;

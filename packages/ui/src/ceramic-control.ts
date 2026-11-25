@@ -1,6 +1,10 @@
 import { useMemo, type Ref } from "react";
 import { mergeProps } from "@ui-sdk/react/primitive";
-import { type Appearance, type Material, type SurfaceBindingContext } from "oyn";
+import {
+  type Material,
+  type MaterialInstance,
+  type SurfaceBindingContext,
+} from "oyn";
 import { useMaterial } from "oyn/react";
 import { createCeramicMaterial } from "oyn/materials/ceramic";
 import { bindAnimatedElevation } from "./animated-elevation.js";
@@ -20,7 +24,7 @@ type ControlState = {
   maxElevation?: number;
 };
 
-const control: Appearance<ControlState> = {
+const control: Material<ControlState> = {
   create(initial) {
     let { rest, hoverOffset, pressElevation } = initial;
     // Selected keys may start recessed and become raised without a new canvas.
@@ -32,7 +36,7 @@ const control: Appearance<ControlState> = {
     });
     let respond: (() => void) | undefined;
     // Extend only the binding, preserving the source material's live contract.
-    const material: Material = Object.create(source, {
+    const material: MaterialInstance<ControlState> = Object.create(source, {
       bind: {
         value(context: SurfaceBindingContext) {
           const { motion, binding } = bindAnimatedElevation(
@@ -232,9 +236,8 @@ const control: Appearance<ControlState> = {
         },
       },
     });
-    return {
-      material,
-      update(next) {
+    return Object.assign(material, {
+      update(next: Readonly<ControlState>) {
         if (
           rest === next.rest &&
           hoverOffset === next.hoverOffset &&
@@ -245,7 +248,7 @@ const control: Appearance<ControlState> = {
         if (respond) respond();
         return "draw";
       },
-    };
+    });
   },
 };
 
@@ -257,7 +260,7 @@ export function useCeramicControl(
     "hoverOffset" | "pressElevation" | "maxElevation"
   >,
 ) {
-  const bind = useMaterial({ appearance: control, props: { rest, ...options } });
+  const bind = useMaterial({ material: control, props: { rest, ...options } });
   return {
     ...useMemo(() => mergeProps({ ref: bind }, { ref }), [bind, ref]),
     "data-oyn-control": "",

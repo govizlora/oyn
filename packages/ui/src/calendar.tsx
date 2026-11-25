@@ -26,7 +26,7 @@ export const CalendarNext: typeof Parts.CalendarNext = ceramicPart(
 // and preview range state, including a one-day range with coincident ends.
 function DayFace({ face }: { face: "range" | "key" }) {
   const ref = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: { elevation: face === "range" ? -2.4 : 6 },
   });
   return (

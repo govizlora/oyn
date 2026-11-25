@@ -2,7 +2,11 @@
 
 import { useCallback, type CSSProperties, type Ref } from "react";
 import { ceramic, createCeramicMaterial } from "oyn/materials/ceramic";
-import { type Appearance, type Material, type SurfaceBindingContext } from "oyn";
+import {
+  type Material,
+  type MaterialInstance,
+  type SurfaceBindingContext,
+} from "oyn";
 import { useMaterial } from "oyn/react";
 import { bindAnimatedElevation } from "./animated-elevation.js";
 import "./selection-track.css";
@@ -12,13 +16,13 @@ export type TrackAppearance = {
 };
 
 // At rest the underlying track shows through. Only the animated relief is drawn.
-const hoverWell: Appearance<{}> = {
+const hoverWell: Material<{}> = {
   create() {
     const source = createCeramicMaterial({
       elevation: 0,
       color: "transparent",
     });
-    const material: Material = Object.create(source, {
+    const material: MaterialInstance = Object.create(source, {
       bind: {
         value(context: SurfaceBindingContext) {
           const { motion, binding } = bindAnimatedElevation(
@@ -49,7 +53,7 @@ const hoverWell: Appearance<{}> = {
         },
       },
     });
-    return { material, update() {} };
+    return Object.assign(material, { update() {} });
   },
 };
 
@@ -61,12 +65,12 @@ export function useSelectionTrack<State>({
   ref?: Ref<HTMLDivElement>;
   style?: CSSProperties | ((state: State) => CSSProperties | undefined);
 }) {
-  const track = useMaterial({ appearance: ceramic, props: { elevation: -3.2 } });
+  const track = useMaterial({ material: ceramic, props: { elevation: -3.2 } });
   const thumb = useMaterial({
-    appearance: ceramic,
+    material: ceramic,
     props: {},
   });
-  const well = useMaterial({ appearance: hoverWell, props: {} });
+  const well = useMaterial({ material: hoverWell, props: {} });
 
   // The SDK owns the items. Keep a binding for each eligible host so hover-out
   // and hover-in can overlap, but release a newly selected host immediately.

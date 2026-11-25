@@ -1,4 +1,4 @@
-import type { Appearance, Material, SurfaceBindingContext } from "oyn";
+import type { Material, MaterialInstance, SurfaceBindingContext } from "oyn";
 import { sampleControlMotion } from "@oyn/ui/control-motion";
 import { bindMotion, type MotionNumber } from "oyn/adapters/motion";
 import {
@@ -32,12 +32,12 @@ function channel(initial: number) {
   } satisfies MotionNumber & { set(value: number): void };
 }
 
-export const stoneAppearance: Appearance<StoneProps> = {
+export const stoneMaterial: Material<StoneProps> = {
   create(initial) {
     let props = initial;
     let refresh: (() => void) | undefined;
     const source = createFlipDiscMaterial(initial);
-    const material: Material = Object.create(source, {
+    const material: MaterialInstance<StoneProps> = Object.create(source, {
       bind: {
         value(context: SurfaceBindingContext) {
           const binding = source.bind!(context);
@@ -170,9 +170,8 @@ export const stoneAppearance: Appearance<StoneProps> = {
         },
       },
     });
-    return {
-      material,
-      update(next) {
+    return Object.assign(material, {
+      update(next: Readonly<StoneProps>) {
         const opticalUpdate = source.update(next);
         const moved =
           props.pose !== next.pose ||
@@ -182,6 +181,6 @@ export const stoneAppearance: Appearance<StoneProps> = {
         if (moved) refresh?.();
         return opticalUpdate;
       },
-    };
+    });
   },
 };

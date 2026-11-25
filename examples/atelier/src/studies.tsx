@@ -82,7 +82,7 @@ export function QuietStudy() {
               onClick={() => setBalance(Math.max(0, balance - 10))}
             />
             <Key
-              label="Favorite appearance"
+              label="Favorite material"
               icon="star"
               active={favorite}
               onClick={() => setFavorite(!favorite)}

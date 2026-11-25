@@ -3,7 +3,7 @@ import { ProjectSwitch } from "./projects";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { OynProvider, useMaterial } from "oyn/react";
-import { stoneAppearance, type StoneProps } from "./stone-appearance";
+import { stoneMaterial, type StoneProps } from "./stone-material";
 import { atRest, lattice, sample, stones, strike } from "./ripple-field";
 import "./flip-disc.css";
 
@@ -37,7 +37,7 @@ function Stone({
   props: StoneProps;
   onStrike: (index: number) => void;
 }) {
-  const ref = useMaterial({ appearance: stoneAppearance, props });
+  const ref = useMaterial({ material: stoneMaterial, props });
   const { x, y, row, col } = stones[index];
   return (
     <button

@@ -8,31 +8,32 @@ Ceramic consumes instantaneous values; it has no spring/transition or UI gesture
 Raised analytic cards and baked controls share the geometry/lighting contract.
 Signed analytic relief composites face and shadow in one surface pass; explicit
 card/baked geometry keeps its separate shadow and surface passes.
-`ceramic` is a stable `Appearance<CeramicProps>` definition. `./baked` also exports
+`ceramic` is a stable `Material<CeramicProps>` definition. `./baked` also exports
 `baked` with `{ geometry, ...options }` props. `./card` remains an explicit low-level
 comparison adapter; `./sculpted` is deprecated and unused by Atelier. Concave optics
 are a branch of the same signed analytic program, not another material or pipeline.
 
 ```tsx
 const ref = useMaterial({
-  appearance: ceramic,
+  material: ceramic,
   props: { elevation: pressed ? 3 : 12, maxElevation: 12 },
 });
 return <button ref={ref}>Confirm</button>;
 ```
 
-Ordinary prop updates reuse a node-local appearance instance and GPU parameter buffer; no useMemo or
+Ordinary prop updates reuse a node-local material instance and GPU parameter buffer; no useMemo or
 setter is required. Surface owns GPU resources, Ceramic owns visual configuration.
-`createCeramicMaterial(options)` retains the explicit low-level program API for engine
-integrations and numeric-source adapters; it is not the primary React API.
+`ceramic.create(props)` and `createCeramicMaterial(options)` use the same instance
+factory. The returned drawing object directly implements configuration updates
+and numeric setters; there is no separate appearance lifecycle.
 
-## Appearance contract
+## Material contract
 
-The public appearance inputs are:
+The public material inputs are:
 
 ```ts
 // Excerpt of CeramicOptions; all fields are optional.
-type AppearanceOptions = {
+type FinishOptions = {
   color?: string;
   colorScheme?: "light" | "dark";
   lighting?: "soft" | "glossy";
@@ -122,7 +123,7 @@ Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` s
 
 `defaults.json` is the checked-in preset based on the GPU Surfaces story, with `surfaceHeight` renamed to `elevation` (no alias). `ceramicDefaults` exports this frozen preset. Cast/contact shadow strengths are tuned to 0.09 / 0.015 (25% lighter than the source story); geometry and light placement are unchanged. Only explicitly supplied values override it.
 
-All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `frostSpread`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update appearance props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
+All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `frostSpread`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update material props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
 Glossy frost (`darkFrost: 0.025`, `frostSpread: 0.625` by default) is reflected light on the ground,
 not a face tint. A live pointer supplies the virtual backlight independently of the main lamp. Its coupling ramps from zero with distance inside the silhouette, while diffuse transport favors the nearby ground; this is spatial rather than a timed hover fade. Its strength and reach increase with positive
 elevation; flat or recessed surfaces produce none. For example, a raised transparent
@@ -131,9 +132,9 @@ Canvas padding reserves the larger of the shadow and glow footprints.
 
 
 ```ts
-useMaterial({ appearance: ceramic, props: {} }); // elevation 16, automatic environment and lighting
+useMaterial({ material: ceramic, props: {} }); // elevation 16, automatic environment and lighting
 useMaterial({
-  appearance: ceramic,
+  material: ceramic,
   props: { lightReflectionStrength: 2, shadowStrength: 0.1 },
 });
 ```
@@ -166,7 +167,7 @@ square and circular silhouettes. Set `BROWSER=firefox` to check Naga as well.
 
 ### Signed elevation
 
-`useMaterial({ appearance: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
+`useMaterial({ material: ceramic, props: { elevation: -2 } })` renders a recess using Still Creek's concave
 floor/wall optics. `-6` is deeper, `0` is flat, and positive values are raised. Pigment is
 independent of elevation: the same color covers the face at every height.
 Only optical cues fade with relief. At zero a colored face is flat paint;
@@ -190,7 +191,7 @@ outline, canvas or temporal state. Glossy recesses use `reflectionStrength` and
 
 ```tsx
 // In Card Fantony, choose a dark pigment and negative Elevation / depth.
-useMaterial({ appearance: ceramic, props: {
+useMaterial({ material: ceramic, props: {
   color: "#171717", elevation: -4, reflectionStrength: 1, sharpness: 1,
 } });
 ```
@@ -230,7 +231,7 @@ does not require extra shadow space. Layout radius still belongs to the host.
 
 ```tsx
 useMaterial({
-  appearance: ceramic,
+  material: ceramic,
   props: {
     elevation: 16,
     light: {
@@ -260,11 +261,11 @@ they must not reduce AO by global cast strength when an edge may be unshadowed.
 ## Minimal usage and defaults
 
 ```tsx
-useMaterial({ appearance: ceramic, props: { elevation: 16 } });
+useMaterial({ material: ceramic, props: { elevation: 16 } });
 ```
 
 Both `maxElevation` and `light` are optional. Without an explicit maximum, the
-exterior shadow budget uses the initial appearance-instance elevation (clamped to zero for an
+exterior shadow budget uses the initial material-instance elevation (clamped to zero for an
 inset); it does not track subsequent elevation changes. If elevation is also
 omitted, its default is 16. Specify maxElevation only when later raised states
 need more space. Increasing elevation beyond the reserved budget can clip shadows.
@@ -279,6 +280,6 @@ requested. These same defaults drive the input adapter, not a duplicate preset.
 `setAngle`, `setTravel`, `setGlow` setters. It contains only geometry, optics and
 light-coordinate binding. The former gesture/time-driven `flipDisc` appearance
 was replaced, not retained as a second animation path. Atelier's
-`stone-appearance.ts` owns its stroke timing, wave sampling and focus feedback,
+`stone-material.ts` owns its stroke timing, wave sampling and focus feedback,
 and connects the three channels with `bindMotion`. The demo is not the UI catalog's
 shared spring policy.

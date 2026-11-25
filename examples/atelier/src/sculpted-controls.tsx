@@ -34,7 +34,7 @@ function useBakedControl<T extends HTMLElement>({
 }: ControlOptions) {
   const geometry = use(loadGeometry(`controls/${shape}`));
   return useMaterial<BakedProps, T>({
-    appearance: baked,
+    material: baked,
     props: {
       geometry,
       colorScheme: "light",

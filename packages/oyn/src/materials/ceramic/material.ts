@@ -4,7 +4,12 @@ import {
   preferredColorScheme,
   type ColorScheme,
 } from "./environment.js";
-import { createParameters, type Material } from "../../core/index.js";
+import { createParameters } from "../../core/createParameters.js";
+import type {
+  Material,
+  MaterialInstance,
+  MaterialUpdate,
+} from "../../core/types/material.js";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicWGSL } from "./shaders.js";
 import { receiverBounds } from "./bounds.js";
@@ -14,42 +19,77 @@ import {
   type CeramicOptions,
 } from "./finish.js";
 
-export type CeramicMaterial = Material & { setElevation(value: number): void };
-/** Animation libraries explicitly bind to setElevation. */
+export type CeramicProps = CeramicOptions;
+export type CeramicMaterial = MaterialInstance<CeramicProps> & {
+  setElevation(value: number): void;
+  update(props: Readonly<CeramicProps>): MaterialUpdate;
+};
+
+export const ceramic: Material<CeramicProps> = {
+  create: createCeramicMaterial,
+};
+
+/** The same instance serves declarative updates and caller-owned numeric sources. */
 export function createCeramicMaterial(
   options: CeramicOptions = {},
 ): CeramicMaterial {
-  return createMaterial(options);
-}
-/**
- * Shared factory. Every attached target owns a parameter block and environment;
- * changing the imperative elevation updates all attached targets.
- */
-export function createMaterial(
-  options: CeramicOptions,
-  reservedElevation?: number,
-): CeramicMaterial {
-  const config = snapshotCeramicOptions(options);
+  let config = snapshotCeramicOptions(options);
+  let key = JSON.stringify(config);
+  const finishKey = ({ elevation, ...finish }: CeramicProps) =>
+    JSON.stringify(finish);
+  let finish = finishKey(config);
   let elevation = config.elevation;
-  const reservation =
-    reservedElevation ?? config.elevation ?? ceramicDefaults.elevation;
+  const reservation = Math.max(0, elevation ?? ceramicDefaults.elevation);
   const listeners = new Set<(value: number) => void>();
   const create = (colorScheme: ColorScheme) =>
     createResolvedMaterial({ ...config, colorScheme, elevation }, reservation);
-  const material = create(config.colorScheme ?? preferredColorScheme());
-  const setElevation = material.setElevation;
-  material.setElevation = (value) => {
-    setElevation(value);
-    elevation = value;
-    listeners.forEach((update) => update(value));
-  };
-  Object.defineProperty(material, "bind", {
-    value: environmentBinding(config.colorScheme, create, (update) => {
+  const initial = create(config.colorScheme ?? preferredColorScheme());
+  let writeElevation = initial.setElevation;
+  const bind = () =>
+    environmentBinding(config.colorScheme, create, (update) => {
       const receive = (value: number) =>
         update((target) => target.setElevation(value));
       listeners.add(receive);
       return () => listeners.delete(receive);
-    }),
+    });
+  const material: CeramicMaterial = Object.assign(initial, {
+    bind: bind(),
+    setElevation(value: number) {
+      writeElevation(value);
+      elevation = value;
+      listeners.forEach((update) => update(value));
+    },
+    update(next: Readonly<CeramicProps>): MaterialUpdate {
+      const nextConfig = snapshotCeramicOptions(next);
+      const nextKey = JSON.stringify(nextConfig);
+      if (key === nextKey) return;
+      const nextFinish = finishKey(nextConfig);
+      if (finish === nextFinish) {
+        material.setElevation(
+          nextConfig.elevation ?? ceramicDefaults.elevation,
+        );
+        config = nextConfig;
+        key = nextKey;
+        return "draw";
+      }
+      // Validate the complete configuration before publishing any changed state.
+      const resolved = createResolvedMaterial(
+        {
+          ...nextConfig,
+          colorScheme: nextConfig.colorScheme ?? preferredColorScheme(),
+        },
+        reservation,
+      );
+      config = nextConfig;
+      elevation = config.elevation;
+      key = nextKey;
+      finish = nextFinish;
+      writeElevation = resolved.setElevation;
+      material.parameters = resolved.parameters;
+      material.measurePadding = resolved.measurePadding;
+      material.bind = bind();
+      return "layout";
+    },
   });
   return material;
 }
@@ -58,7 +98,7 @@ export function createMaterial(
 function createResolvedMaterial(
   options: CeramicOptions & { colorScheme: ColorScheme },
   reservedElevation?: number,
-): CeramicMaterial {
+): MaterialInstance & { setElevation(value: number): void } {
   const {
     values,
     elevation: initialElevation,
@@ -83,7 +123,14 @@ function createResolvedMaterial(
     // below the plane and a pipeline change when crossing it.
     passes: ["surface"],
     measurePadding: (width, height) =>
-      receiverBounds(width, height, paddingElevation, shadow, shadows, frostReachPerHeight),
+      receiverBounds(
+        width,
+        height,
+        paddingElevation,
+        shadow,
+        shadows,
+        frostReachPerHeight,
+      ),
     setElevation(value: number) {
       validateSignedElevation(value);
       parameters.set(1, value);
