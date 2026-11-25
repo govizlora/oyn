@@ -1,6 +1,8 @@
 # OYN
 
-A UI system built on native HTML with GPU-rendered materials. **WIP.**
+A React UI system built on native HTML with GPU-rendered materials. **WIP.**
+
+[Try the ceramic tabs on oyn.dev](https://oyn.dev/) · [About OYN](https://oyn.dev/about/)
 
 A button is still a `<button>`. The browser lays it out, gives it focus, and handles activation. The GPU renders the material: a raised edge catches the light, a recessed track holds a shadow, and the highlight follows your pointer. Text and hit targets stay in the DOM.
 
