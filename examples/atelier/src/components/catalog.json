@@ -142,9 +142,9 @@
         "caption": "Click Button, or focus it and press Enter or Space. The console logs each press."
       },
       {
-        "id": "hover-effects",
-        "title": "Hover Effects",
-        "caption": "Hover over each button, then press and hold. All three press in 150 ms; Lift travels farther in the same time."
+        "id": "variants",
+        "title": "Variants",
+        "caption": "Primary and Secondary lift on hover. Ghost starts flat and recedes on hover. Press and hold: the raised buttons lower, while Ghost recedes further."
       },
       {
         "id": "pending",
@@ -791,6 +791,42 @@
         "id": "render",
         "title": "Custom Rendering",
         "caption": "Choose Nothing. Each radio renders a full-width button that shows a check from its state."
+      }
+    ]
+  },
+  {
+    "id": "segmented-control",
+    "name": "Segmented Control",
+    "examples": [
+      {
+        "id": "basic",
+        "title": "Overview",
+        "caption": "Choose Grid, then use the arrow keys to move between views. The label above names the control, as in any field."
+      },
+      {
+        "id": "base-ui",
+        "title": "Base UI",
+        "caption": "Choose a view. Base UI handles the radio group; the same Ceramic indicator follows the checked item."
+      },
+      {
+        "id": "vertical",
+        "title": "Vertical",
+        "caption": "Choose Bottom, then press the Up arrow. The indicator follows down the column."
+      },
+      {
+        "id": "disabled",
+        "title": "Disabled",
+        "caption": "The Theme control is disabled. In Billing period, Lifetime is disabled, so the arrow keys move between Monthly and Yearly."
+      },
+      {
+        "id": "controlled",
+        "title": "Controlled",
+        "caption": "Choose Day, then press Show Month. The console logs each change and its reason."
+      },
+      {
+        "id": "form",
+        "title": "Form",
+        "caption": "Choose Dark and Compact, then press Save. The console logs both values, and Reset returns each control to its default."
       }
     ]
   },

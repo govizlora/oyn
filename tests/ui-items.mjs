@@ -17,6 +17,7 @@ try {
     [
       "./card",
       "./base-ui/tabs",
+      "./base-ui/segmented-control",
       "./control-motion",
       "./motion.css",
       "./relief-logo",
@@ -26,6 +27,7 @@ try {
   );
   const expected = [
     "base-ui-ceramic-tabs-list",
+    "base-ui-ceramic-segmented-control",
     "ceramic-tabs-list",
     "ceramic-ui-foundation",
     "ceramic-card",
@@ -42,11 +44,14 @@ try {
     }
     assert.equal(
       (item.dependencies ?? []).some((d) => d.startsWith("@ui-sdk/")),
-      name === "ceramic-tabs-list" || name === "ceramic-ui-foundation",
+      name === "ceramic-segmented-control" ||
+        name === "ceramic-tabs-list" ||
+        name === "ceramic-ui-foundation",
     );
     assert.equal(
       (item.dependencies ?? []).some((d) => d.startsWith("@base-ui/react")),
-      name === "base-ui-ceramic-tabs-list",
+      name === "base-ui-ceramic-tabs-list" ||
+        name === "base-ui-ceramic-segmented-control",
     );
     for (const dependency of item.registryDependencies ?? []) {
       assert.ok(

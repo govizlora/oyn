@@ -17,7 +17,7 @@
     background-color: light-dark(#e8e8e8, #202020);
   }
   [data-oyn-control],
-  [data-oyn-face][data-oyn-active] {
+  :where([data-oyn-face])[data-oyn-active] {
     background: transparent;
   }
   [data-oyn-input-frame] {
@@ -84,7 +84,6 @@
 @layer oyn-material {
   [data-oyn-input-frame]:has(:disabled) {
     opacity: 0.52;
-    cursor: default;
   }
   [data-oyn-face][data-variant="destructive"] {
     color: var(--danger);
@@ -104,7 +103,7 @@
 }
 
 @layer oyn-material {
-  [data-oyn-face="outline"]:not([data-oyn-active]) {
+  [data-oyn-face="outline"]:not([data-oyn-active], :focus-visible) {
     box-shadow: none;
     outline: none;
   }
@@ -130,8 +129,10 @@
       [aria-busy="true"],
       [data-pending]
     ):active {
-    box-shadow: inset 0 2px 5px
-      color-mix(in srgb, currentColor 32%, transparent);
+    box-shadow: var(
+      --oyn-control-press-shadow,
+      inset 0 2px 5px color-mix(in srgb, currentColor 32%, transparent)
+    );
   }
   [data-oyn-control]:focus-visible {
     outline: 2px solid currentColor;
@@ -175,6 +176,7 @@
           [role="slider"]
         ):not(
           [data-oyn-control],
+          [data-oyn-track] > *,
           :disabled,
           [aria-disabled="true"],
           [data-disabled],

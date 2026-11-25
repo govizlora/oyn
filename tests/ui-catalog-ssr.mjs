@@ -94,6 +94,13 @@ assert.equal(
   1,
 );
 
+for (const example of ["basic", "base-ui"]) {
+  const markup = html.get("segmented-control/" + example);
+  assert.equal(markup.match(/data-oyn-indicator=/g)?.length, 1);
+  assert.match(markup, /role="radiogroup"/);
+  assert.doesNotMatch(markup, /role="tab(?:list|panel)?"/);
+}
+
 // Verify installable source, including each item's transitive relative imports.
 const manifest = JSON.parse(await read("dist/r/registry.json"));
 const items = new Map(

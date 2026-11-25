@@ -4,40 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta
-      name="description"
-      content="OYN is a work-in-progress UI library exploring material, light, and depth. Play a small ceramic instrument."
-    />
-    <title>OYN — UI you can feel.</title>
+    <title>OYN — Native HTML UI with GPU-rendered materials</title>
+    <meta name="description" content="OYN is a React UI system built on native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress." />
+    <link rel="canonical" href="https://oyn.dev/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OYN" />
+    <meta property="og:url" content="https://oyn.dev/" />
+    <meta property="og:title" content="OYN — Native HTML UI with GPU-rendered materials" />
+    <meta property="og:description" content="OYN is a React UI system built on native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress." />
+    <meta property="og:image" content="https://oyn.dev/oyn-preview.png?v=light-tab-dark" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta property="og:image:alt" content="The live OYN site in dark mode, with the Light tab selected and the ceramic panel reading “Light, not borders”." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@Govizlora" />
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "OYN", "url": "https://oyn.dev/", "description": "OYN is a React UI system built on native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress.", "codeRepository": "https://github.com/govizlora/oyn", "programmingLanguage": "TypeScript", "runtimePlatform": "Web browser", "image": "https://oyn.dev/oyn-preview.png?v=light-tab-dark"}</script>
     <link rel="icon" href="../artifacts/brand/oyn-logo.svg" />
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body>
-    <header>
-      <img class="wordmark" src="../artifacts/brand/oyn-logo.svg" alt="OYN" />
-      <nav aria-label="Project links">
-        <a href="https://github.com/govizlora/oyn">GitHub</a
-        ><a href="https://x.com/Govizlora">X</a>
-      </nav>
-    </header>
-    <main>
-      <section aria-labelledby="headline">
-        <p class="status">Work in progress</p>
-        <h1 id="headline">UI you<br />can feel.</h1>
-        <p class="intro">
-          An experimental UI library shaped by material, light, and depth.
-        </p>
-      </section>
-      <figure>
-        <div id="instrument">
-          <noscript>Enable JavaScript to play the ceramic keys.</noscript>
-        </div>
-        <figcaption>
-          <strong>Ceramic keys</strong><span>Press a key to play a note.</span>
-        </figcaption>
-      </figure>
-    </main>
-    <footer>OYN <span aria-hidden="true">/</span> Interaction studies</footer>
-    <script type="module" src="./instrument.tsx"></script>
+    <div id="study">
+      <main><section>
+        <h1>OYN — Native HTML UI with GPU-rendered materials</h1>
+        <p>OYN gives HTML controls ceramic surfaces that respond to pointer motion, light, and elevation. Text, focus, and hit targets stay in the DOM.</p>
+        <p><a href="/about/">About OYN</a> · <a href="https://github.com/govizlora/oyn">Source on GitHub</a></p>
+        <noscript>Enable JavaScript to try the interactive tabs.</noscript>
+      </section></main>
+    </div>
+    <script type="module" src="./study.tsx"></script>
   </body>
 </html>

@@ -1,14 +1,16 @@
 import type { MotionNumber } from "@oyn/surface/adapters/motion";
 
-/** Sample a 150 ms cubic ease-out, independent of travel distance or frame rate. */
+const durationMs = 150;
+
+/** Sample an instant-push ease-out, independent of travel distance or frame rate. */
 export function sampleControlMotion(
   origin: number,
   target: number,
   elapsed: number,
 ) {
   if (elapsed <= 0) return origin;
-  if (elapsed >= 150) return target;
-  return target + (origin - target) * (1 - elapsed / 150) ** 3;
+  if (elapsed >= durationMs) return target;
+  return target + (origin - target) * (1 - elapsed / durationMs) ** 2;
 }
 
 /** Consumer-owned number source. No material writes or rendering work here. */

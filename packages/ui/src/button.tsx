@@ -7,31 +7,32 @@ import "./styles/base.css";
 import "./styles/button.css";
 
 export * from "@ui-sdk/react/button";
-const restElevation = 8;
-const hoverOffsets = { lower: -6, lift: 16 } as const;
+const raised = 8;
+const lift = 16;
 
 export function Button({
-  hoverEffect,
+  variant = "primary",
   ...props
 }: ComponentProps<typeof Action> & {
-  hoverEffect?: keyof typeof hoverOffsets;
+  variant?: "primary" | "secondary" | "ghost";
 }) {
   const pressed = props["aria-pressed"];
-  const face = useCeramicControl(
-    pressed === true || pressed === "true" ? -3.2 : restElevation,
-    props.ref,
-    {
-      hoverOffset: hoverEffect && hoverOffsets[hoverEffect],
-      maxElevation: restElevation + hoverOffsets.lift,
-    },
-  );
+  const ghost = variant === "ghost";
+  const selected = pressed === true || pressed === "true";
+  const rest = ghost ? (selected ? -3.2 : null) : selected ? 4 : raised;
+  const face = useCeramicControl(rest, props.ref, {
+    hoverOffset: ghost ? undefined : lift,
+    pressElevation: ghost ? -8 : 2,
+    // A mounted ghost can switch to a raised variant without rebinding.
+    maxElevation: raised + lift,
+  });
   // A trigger rendering a Button has already bound its material to this host.
   return (
     <Action
       {...props}
       {...("data-oyn-face" in props
         ? undefined
-        : { ...face, "data-oyn-hover-effect": hoverEffect })}
+        : { ...face, "data-oyn-button": variant })}
     />
   );
 }

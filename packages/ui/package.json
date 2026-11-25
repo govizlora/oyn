@@ -140,7 +140,17 @@
       "development": "./src/relief-logo.tsx",
       "import": "./dist/relief-logo.js"
     },
-    "./relief-logo.svg": "./src/relief/oyn-relief.svg"
+    "./relief-logo.svg": "./src/relief/oyn-relief.svg",
+    "./segmented-control": {
+      "types": "./dist/segmented-control.d.ts",
+      "development": "./src/segmented-control.tsx",
+      "import": "./dist/segmented-control.js"
+    },
+    "./base-ui/segmented-control": {
+      "types": "./dist/base-ui-segmented-control.d.ts",
+      "development": "./src/base-ui-segmented-control.tsx",
+      "import": "./dist/base-ui-segmented-control.js"
+    }
   },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json && cp src/*.css dist/ && cp -R src/styles dist/ && cp src/relief/oyn-relief.svg dist/relief/"

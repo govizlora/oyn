@@ -49,12 +49,32 @@ and moving thumbs their form. Text, focus rings and data marks use CSS.
 Open the [component catalog](http://127.0.0.1:5177/components.html) or
 [Calendar range](http://127.0.0.1:5177/components.html?component=calendar&example=range).
 
-The [Button hover comparison](http://127.0.0.1:5177/components.html?component=button&example=hover-effects)
-shows the default recess, `hoverEffect="lower"` (8 → 2), and
-`hoverEffect="lift"` (8 → 24). From each hover height, pressing travels to −6 in 150 ms. Lift covers more distance, not more time: all three move fastest at the start and settle without overshoot.
-The moving Ceramic surface supplies only relief; the button has no default fill.
-Use a native background, e.g. `<Button style={{ backgroundColor: "#b56338" }}>Save</Button>`,
-to keep its color when raised, flat or pressed, including without a GPU.
+### Button variants
+
+The [variant comparison](http://127.0.0.1:5177/components.html?component=button&example=variants) shows the three Button variants. Only Primary adds a CSS fill: near-black in light themes, near-white in dark themes, reaching black or white on hover. Secondary and Ghost leave the underlying surface visible. Ceramic renders only the relief.
+
+| Usage | Elevation: rest → hover → press |
+| --- | --- |
+| `<Button>Save</Button>` (default: `primary`) | 8 → 24 → 2 |
+| `<Button variant="secondary">Cancel</Button>` | 8 → 24 → 2 |
+| `<Button variant="ghost">More</Button>` | 0 → −2.8 → −8 |
+
+Primary and Secondary intentionally share the raised profile. Ghost has no resting canvas. All three use the shared 150 ms elevation transition.
+
+## Segmented Control
+
+Use `@oyn/ui/segmented-control` for UI SDK or `@oyn/ui/base-ui/segmented-control` for Base UI. Both expose the same track appearance as Tabs, with no panel required. The root provides exactly one indicator; supply only the items.
+
+```tsx
+import { SegmentedControl, SegmentedControlItem } from "@oyn/ui/segmented-control";
+
+<SegmentedControl aria-label="View" name="view" defaultValue="list">
+  <SegmentedControlItem value="list">List</SegmentedControlItem>
+  <SegmentedControlItem value="grid">Grid</SegmentedControlItem>
+</SegmentedControl>;
+```
+
+[UI SDK preview](http://127.0.0.1:5177/components.html?component=segmented-control&example=basic) · [Base UI preview](http://127.0.0.1:5177/components.html?component=segmented-control&example=base-ui).
 
 ## Tabs
 
@@ -88,20 +108,22 @@ For an existing UI SDK project, replace only its list:
 
 ```tsx
 import { Tabs, TabsTab, TabsPanel } from "@ui-sdk/react/tabs";
-import { CeramicTabsList } from "@/components/ui/ceramic-tabs-list";
+import { CeramicTabsList, TabsPanels } from "@/components/ui/ceramic-tabs-list";
 
 <Tabs defaultValue="design">
-  <CeramicTabsList aria-label="Workbench" radius={16} selectedTone="inverse">
+  <CeramicTabsList aria-label="Workbench" radius={16}>
     <TabsTab value="design">Design</TabsTab>
     <TabsTab value="code">Code</TabsTab>
   </CeramicTabsList>
-  <TabsPanel value="design">Preview</TabsPanel>
-  <TabsPanel value="code">Source</TabsPanel>
+  <TabsPanels>
+    <TabsPanel value="design">Preview</TabsPanel>
+    <TabsPanel value="code">Source</TabsPanel>
+  </TabsPanels>
 </Tabs>
 ```
 
 Your existing controlled Tabs root and routing can stay in place. The list
-adds only the recessed track and one moving indicator. UI SDK still owns
+adds the recessed track, one moving indicator and hover wells. To give the content the default raised Ceramic surface, wrap the SDK panels together in one `TabsPanels`. UI SDK still owns
 the selected value and the indicator's measured bounds.
 
 Not using either interaction library? Attach the Ceramic material directly with
@@ -110,8 +132,10 @@ Not using either interaction library? Attach the Ceramic material directly with
 
 ## Source responsibilities
 
+![Instant push: movement progress over time](./docs/instant-push.svg)
+
 Shared control bindings interpret transient pointer/focus/keyboard feedback without
-owning SDK actions or selection. The UI consumer computes a fixed-duration cubic ease-out;
+owning SDK actions or selection. The UI consumer computes a fixed-duration quadratic ease-out;
 `bindMotion` from `@oyn/surface/adapters/motion` is its only writer to
 `material.setElevation`. Ceramic receives instantaneous heights, not animation
 targets or curves. Surface observes parameter changes and schedules GPU work.
@@ -121,12 +145,7 @@ changes the resting height. Flat outline controls derive empty draw programs fro
 the same numeric source, letting Surface release the canvas without a second ref
 lifecycle. CSS does not add press scaling or a second shadow to active Ceramic.
 
-Each list entry renders only its own library’s parts and forwards that library’s
-props. Selection, keyboard handling and indicator measurements stay with the
-library. `use-ceramic-tabs.ts` binds the two surfaces and maps the shared
-appearance props to DOM attributes and CSS variables. `ceramic-tabs-list.css`
-uses those attributes and the library’s measurements for layout and motion; it
-does not measure or track the active tab.
+UI SDK and Base UI own selection, focus, keyboard behavior, forms and panel associations. `use-selection-track.ts` and `selection-track.css` provide the shared appearance. Track, indicator and panel use the automatic Ceramic finish. Hover relief is unpigmented so it reveals the underlying track. Inter-item spacing matches the track padding. Only an unselected item recesses on hover (0 → −4). Entry and return use Button’s 150 ms quadratic ease-out, reversing from the current height; reduced motion jumps directly to the target. Once the SDK selects it, the well disappears and the same raised indicator slides into place, even if the pointer stays down or over it. Tabs and UI SDK Segmented Control supply their own indicator measurements. Base UI RadioGroup has no moving group indicator, so its adapter measures only the SDK-checked radio for placement. CSS translates the indicator in 250 ms with the shared Instant push ease-out: it starts at maximum speed and decelerates uniformly to a stop, without animating canvas dimensions. The SDK panel contents crossfade in the same grid cell with the indicator’s timing and easing (both inherited from the Tabs root); their shared Ceramic surface stays mounted at full opacity. Reduced motion skips both transitions.
 
 ## Local registry
 
@@ -166,8 +185,7 @@ npx shadcn add http://127.0.0.1:5177/r/base-ui-ceramic-tabs-list.json
 npx shadcn add http://127.0.0.1:5177/r/ceramic-tabs-list.json
 ```
 
-The files go into your configured UI directory. Only ceramic-tabs-list declares
-UI SDK. The CLI is a development tool, not a runtime dependency.
+The files go into your configured UI directory. The Base UI entries do not require UI SDK. The CLI is a development tool, not a runtime dependency.
 
 **Release boundary:** the referenced Oyn runtime versions (0.0.0) are local
 workspace packages, not public npm releases. For an external local install,

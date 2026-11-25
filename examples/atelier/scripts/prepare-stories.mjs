@@ -12,6 +12,7 @@ import {
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import ts from "typescript";
+import { format } from "prettier";
 import { randomUUID } from "node:crypto";
 
 const root = fileURLToPath(new URL("../src/components/", import.meta.url));
@@ -71,7 +72,8 @@ function styleRecipe(source) {
   );
   const edits = [];
   let button = false,
-    card = false;
+    card = false,
+    panelGroup = false;
   function edit(node, replacement) {
     edits.push([node.getStart(file), node.end, replacement]);
   }
@@ -79,9 +81,41 @@ function styleRecipe(source) {
     if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
       const open = ts.isJsxElement(node) ? node.openingElement : node;
       const tag = open.tagName.getText(file);
-      if (tag === "TabsIndicator" && ts.isJsxSelfClosingElement(node)) {
+      if (
+        (tag === "TabsIndicator" || tag === "SegmentedControlIndicator") &&
+        ts.isJsxSelfClosingElement(node)
+      ) {
         edit(node, "");
         return;
+      }
+      if (tag === "Tabs" && ts.isJsxElement(node)) {
+        const children = node.children.filter(
+          (child) => !ts.isJsxText(child) || child.text.trim(),
+        );
+        const list = children.findIndex(
+          (child) =>
+            ts.isJsxElement(child) &&
+            child.openingElement.tagName.getText(file) === "TabsList",
+        );
+        const panels = children.slice(list + 1);
+        if (list >= 0 && panels.length) {
+          panelGroup = true;
+          const first = panels[0],
+            last = panels.at(-1);
+          if (
+            panels.length === 1 &&
+            ts.isJsxElement(first) &&
+            first.openingElement.getText(file) === '<div data-slot="stack">'
+          ) {
+            edit(first.openingElement, "<TabsPanels>");
+            edit(first.closingElement, "</TabsPanels>");
+          } else {
+            edits.push(
+              [first.getStart(file), first.getStart(file), "<TabsPanels>"],
+              [last.end, last.end, "</TabsPanels>"],
+            );
+          }
+        }
       }
       // Only the element passed to a part's render prop is that part's host.
       // Buttons returned by Array.map are still independent native controls.
@@ -118,13 +152,19 @@ function styleRecipe(source) {
     source = source.slice(0, from) + text + source.slice(to);
   // The Ceramic list supplies the single moving indicator.
   source = source
-    .replace(/^  TabsIndicator,\n/gm, "")
+    .replace(/^  (?:TabsIndicator|SegmentedControlIndicator),\n/gm, "")
     .replace(/^[ \t]+$/gm, "");
   const imports = [
     button && 'import { StoryButton } from "../../recipe-button";',
     card && 'import { CeramicCard } from "@oyn/ui/card";',
   ].filter(Boolean);
-  return [...imports, source].join("\n");
+  const output = [...imports, source].join("\n");
+  return panelGroup
+    ? format(
+        output.replace(/\bTabsPanel(?=\s*[,}])/, "TabsPanel, TabsPanels"),
+        { parser: "typescript" },
+      )
+    : output;
 }
 
 for (const family of catalog) {
@@ -154,7 +194,7 @@ for (const family of catalog) {
       ? await readFile(path.join(localDir, id + ".tsx"), "utf8")
       : blocks.get(id);
     if (!source) throw Error("Missing recipe: " + family.id + "/" + id);
-    const output = styleRecipe(source);
+    const output = await styleRecipe(source);
     await writeSource(path.join(dir, id + ".tsx"), output + "\n");
     await writeSource(path.join(sources, id + ".tsx.txt"), output + "\n");
   }

@@ -14,7 +14,7 @@ This is the **authoritative specification for cross-package boundaries**. Read i
 | Output or decision | Owner | Boundary |
 | --- | --- | --- |
 | Clicks, selection, forms, keyboard activation, ARIA and focus | Native HTML or the component's UI SDK or Base UI | OYN must not reimplement selection, synthesize clicks, steal focus or block SDK events. |
-| DOM structure, hit areas, size, radius, clipping and stacking | Component or application DOM and CSS | Elevation does not change z-index; Surface does not lay out elements or take over scrolling. |
+| DOM structure, hit areas, size, radius, clipping and stacking | Component or application DOM and CSS | Leave cursor choice to the browser; do not override native cursors. Elevation does not change z-index; Surface does not lay out elements or take over scrolling. |
 | Target heights for rest, hover, press and selection | UI consumer | Ceramic does not recognize buttons or tabs, or infer selection from a negative height. |
 | Animation curves, targets, position, velocity, interruption and reduced motion | Consumer's numeric source; CSS or the SDK can own DOM movement | Surface and Ceramic do not provide a second spring, transition or gesture animation policy. |
 | Connection from a numeric source to a material setter | `bindMotion(source, write)` | The adapter subscribes, forwards and unsubscribes; it does not interpolate, schedule animation or submit GPU work. |
@@ -99,7 +99,7 @@ Do not write the same elevation from both declarative props and a subscription, 
 
 Use `Material.bind().frame()` to derive material inputs such as local coordinates from the current frame, not to hide a spring, a click handler or press timing inside a material. `requestDraw()` requests a redraw; it does not advance an animation. A consumer may emit a continuous stream of numbers, not start another render loop.
 
-OYN control transitions use cubic ease-out: progress is `1 − (1 − t)³`, fastest at the start and stationary at the end. On each new target, button height moves from the current position to the target in 150 ms regardless of distance. Reversing changes direction immediately. DOM transitions use the equivalent `--oyn-ease-out` curve. Looping indicators and wave propagation are not target-state transitions.
+OYN control transitions use **Instant push** (quadratic ease-out): progress is `1 − (1 − t)²`, fastest at the start and stationary at the end. On each new target, button height moves from the current position to the target in 150 ms regardless of distance. Reversing changes direction immediately. DOM state transitions use the equivalent `--oyn-ease-out` curve. Looping indicators and wave propagation are not target-state transitions.
 
 Each animation owner responds to reduced motion: the numeric source emits the final value immediately; CSS uses duration tokens governed by the media query. Reduced motion does not change selection, propagation order or input semantics. A preference change must not require a remount.
 
@@ -119,8 +119,8 @@ Each animation owner responds to reduced motion: the numeric source emits the fi
 
 | Behavior | State or geometry source | Visual path |
 | --- | --- | --- |
-| Button, Toggle and navigation press | SDK/native state; `ceramic-control.ts` reads transient input | `control-motion.ts` → bindMotion → elevation. Selection changes only the rest height; Button hover variants supply relative heights through the same path. |
-| Switch and Tabs | SDK checked/selected state and indicator bounds | CSS moves the thumb or indicator; Ceramic moves with its DOM host. |
+| Button, Toggle and navigation press | SDK/native state; `ceramic-control.ts` reads transient input | `control-motion.ts` → bindMotion → elevation. Selection changes only the rest height; Button variants choose hover and press heights through the same path; only Primary adds a native CSS fill; Ceramic remains unpigmented for all three. |
+| Switch, Tabs and Segmented Control | SDK checked/selected state; SDK indicator bounds where supplied | CSS translates the indicator over 250 ms with the shared Instant push curve; its SDK-measured dimensions do not interpolate. One persistent TabsPanels surface draws the background. SDK presence attributes crossfade only the incoming and outgoing panel contents in the same grid cell with the same selection timing and easing as the indicator. Tabs and Segmented Control share the recessed track, sliding indicator and −4 hover relief. Base UI RadioGroup has no group indicator geometry; its adapter measures the checked radio, without managing selection or keys. Only unselected items recess on hover; the indicator stays raised while moving and at rest. Tracks, indicators and tab panels use the environment’s default Ceramic finish. Hover relief leaves the track pigment visible and eases from 0 to −4 and back with the same 150 ms motion source as Button; a flat item draws no surface. Selection removes its hover relief immediately. Tab panels use the default raised elevation. |
 | Accordion | SDK open state, panel height and presence | CSS animates height and rotation; no duplicate expansion state or measurement. |
 | Input and compound fields | Native input and SDK group | One FieldWell frame; do not repaint the contents. |
 | Dialog and popups | SDK portal, focus and presence; CSS stacking | Ceramic height expresses optical depth; CSS does not simulate a cross-element 3D scene. |
@@ -139,6 +139,8 @@ Dependencies point from UI/app to Ceramic and Surface, and from Ceramic to Surfa
 Standard analytic Ceramic uses **one shader, a fixed parameter layout and one surface pass** for signed elevation. The setter writes only height. Raised and recessed branches compute optics for the current value without switching programs, blending two canvases, adding transition progress or caching the previous frame. The consumer still owns the animation curve.
 
 **Height changes relief, not pigment coverage.** Colored Ceramic retains the same base color above, at and below zero; at zero it is flat paint. Controls without a fill use transparent Ceramic; native CSS can supply a button background. The rim, recessed wall, highlight, cast shadow and ambient occlusion (AO) disappear at zero. The material's own shadow falls outside the silhouette, never through a transparent face. Raised rim width and AO reach shrink with height, while the glaze-normal sampling profile stays fixed in CSS space so a sharp highlight does not sweep across pixel centers. Highlight brightness saturates before multiplication by geometric coverage.
+
+Recessed analytic geometry has one tangent normal profile: a small circular opening fillet joins the top plane to the concave wall, which eases into the floor. Its narrow highlight comes from that profile, not a separate border or pass. Spatial radiance sampling filters the lip; the existing relief coverage removes it at zero. Glossy recesses reuse the material reflection strength and sharpness controls.
 
 Frosted backlighting illuminates the ground outside the silhouette only when the pointer is over the actual surface. Distance inside the silhouette continuously controls how much light enters; ground brightness falls off with distance from the virtual backlight. Instantaneous positive height sets brightness and spread; zero and negative heights emit none. Backlighting does not write the base color or introduce independent hover state, animation or CSS blur.
 

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="350" viewBox="0 0 720 350" role="img" aria-labelledby="title desc">
+  <title id="title">Instant push: movement progress over time</title>
+  <desc id="desc">The solid curve starts at maximum speed and flattens to a stop. At half the duration it has covered 75 percent of the distance. The dashed diagonal shows constant speed.</desc>
+  <rect width="720" height="350" fill="#fafafa"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#202020">
+    <text x="40" y="42" font-size="25">Instant push</text>
+    <text x="680" y="40" text-anchor="end" font-size="17">p(t) = 1 − (1 − t)²</text>
+    <text x="88" y="76" font-size="14">Distance traveled</text>
+    <g fill="none" stroke="#d9d9d9">
+      <path d="M88 90H668 M88 135H378V270" stroke-dasharray="3 5"/>
+      <path d="M88 90V270H668"/>
+    </g>
+    <path d="M88 270L668 90" fill="none" stroke="#b0b0b0" stroke-width="2" stroke-dasharray="6 6"/>
+    <path d="M88 270Q378 90 668 90" fill="none" stroke="#202020" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="378" cy="135" r="5" fill="#202020"/>
+    <text x="370" y="117" font-size="14" text-anchor="end">Half the time, 75% of the distance</text>
+    <g font-size="13" fill="#555" text-anchor="end">
+      <text x="77" y="95">100%</text><text x="77" y="140">75%</text><text x="77" y="275">0%</text>
+    </g>
+    <g font-size="13" fill="#555" text-anchor="middle">
+      <text x="88" y="291">0%</text><text x="378" y="291">50%</text><text x="668" y="291">100%</text>
+    </g>
+    <text x="378" y="323" text-anchor="middle" font-size="14">Elapsed time</text>
+  </g>
+</svg>

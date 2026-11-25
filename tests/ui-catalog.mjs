@@ -173,27 +173,29 @@ try {
   await button.locator("canvas").waitFor();
   assert.ok(await canvas.evaluate((node) => node.isConnected));
 
-  await visit("button", "hover-effects");
+  await visit("button", "variants");
   const hoverButtons = demo.getByRole("button");
   assert.deepEqual(await hoverButtons.allTextContents(), [
-    "Recess",
-    "Lower slightly",
-    "Lift slightly",
+    "Primary",
+    "Secondary",
+    "Ghost",
   ]);
   for (const previewButton of await hoverButtons.all()) {
     const face = previewButton.locator("canvas");
-    const originalCanvas = await face.elementHandle();
+    if ((await previewButton.textContent()) === "Ghost")
+      assert.equal(await face.count(), 0);
     const bounds = await previewButton.boundingBox();
     await previewButton.hover();
+    const originalCanvas = await face.elementHandle();
     assert.deepEqual(await previewButton.boundingBox(), bounds);
     await page.mouse.down();
     assert.deepEqual(await previewButton.boundingBox(), bounds);
     await page.mouse.up();
     assert.ok(await originalCanvas.evaluate((node) => node.isConnected));
   }
-  await demo.getByRole("button", { name: "Lift slightly" }).focus();
+  await demo.getByRole("button", { name: "Ghost" }).focus();
   await page.keyboard.press("Space");
-  assert.equal(await frame.locator("output").textContent(), "Lift pressed");
+  assert.equal(await frame.locator("output").textContent(), "Ghost pressed");
 
   // Compare actual painted face bounds in the calendar.
   async function verifyCalendar(panel) {

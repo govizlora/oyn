@@ -10,11 +10,29 @@
 }
 
 @layer oyn-material {
-  [data-oyn-hover-effect="lower"] {
-    --oyn-control-hover-shadow: none;
+  [data-oyn-control][data-oyn-button="primary"] {
+    background-color: light-dark(#202020, #eee);
+    color: light-dark(white, black);
   }
-  [data-oyn-hover-effect="lift"] {
-    --oyn-control-hover-shadow: 0 3px 7px
-      color-mix(in srgb, #000 24%, transparent);
+  @media (hover: hover) {
+    [data-oyn-button="primary"]:hover:not(
+        :disabled,
+        [aria-disabled="true"],
+        [data-disabled],
+        [aria-busy="true"],
+        [data-pending],
+        [inert] *
+      ) {
+      background-color: light-dark(black, white);
+    }
+  }
+  /* The focus ring sits outside the face, on the surrounding page. */
+  [data-oyn-control][data-oyn-button="primary"]:focus-visible {
+    outline-color: light-dark(#171717, #eee);
+  }
+  /* CSS relief is only used by controls without an active renderer. */
+  [data-oyn-button]:not([data-oyn-button="ghost"]) {
+    --oyn-control-hover-shadow: 0 3px 7px rgb(0 0 0 / 24%);
+    --oyn-control-press-shadow: 0 1px 2px rgb(0 0 0 / 16%);
   }
 }

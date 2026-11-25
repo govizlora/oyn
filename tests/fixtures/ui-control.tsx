@@ -66,12 +66,14 @@ function Fixture() {
           }}
         >
           <fieldset id="fieldset">
-            <Button
-              id="key"
-              hoverEffect="lower"
-              style={{ width: 160, height: 44 }}
-            >
+            <Button id="key" style={{ width: 160, height: 44 }}>
               Save
+            </Button>
+            <Button id="secondary" variant="secondary">
+              Cancel
+            </Button>
+            <Button id="ghost" variant="ghost">
+              More
             </Button>
           </fieldset>
           <Toggle id="toggle" defaultPressed>

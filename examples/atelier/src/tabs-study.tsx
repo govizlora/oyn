@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Tabs, TabsTab, TabsPanel } from "@ui-sdk/react/tabs";
-import { CeramicTabsList } from "@oyn/ui/tabs";
+import { Tabs, TabsPanel, TabsTab } from "@ui-sdk/react/tabs";
+import { CeramicTabsList, TabsPanels } from "@oyn/ui/tabs";
 import { Tabs as BaseTabs } from "@base-ui/react/tabs";
 import { CeramicTabsList as BaseList } from "@oyn/ui/base-ui/tabs";
 import "./tabs-study.css";
@@ -28,12 +28,10 @@ const items = Object.entries(panels).map(([label, description]) => ({
 export function TabsStudy() {
   const [vertical, setVertical] = useState(false);
   const [radius, setRadius] = useState(16);
-  const [tone, setTone] = useState<"matching" | "inverse">("matching");
   const [value, setValue] = useState("Overview");
   const [baseUI, setBaseUI] = useState(
     () => new URLSearchParams(location.search).get("impl") === "base-ui",
   );
-  const appearance = { radius, selectedTone: tone };
   const orientation = vertical ? "vertical" : "horizontal";
   return (
     <section className="tabs-study">
@@ -71,18 +69,20 @@ export function TabsStudy() {
                 if (typeof v === "string") setValue(v);
               }}
             >
-              <BaseList aria-label="Component preview" {...appearance}>
+              <BaseList aria-label="Component preview" radius={radius}>
                 {items.map((item) => (
                   <BaseTabs.Tab key={item.value} value={item.value}>
                     {item.label}
                   </BaseTabs.Tab>
                 ))}
               </BaseList>
-              {items.map((item) => (
-                <BaseTabs.Panel key={item.value} value={item.value}>
-                  {item.panel}
-                </BaseTabs.Panel>
-              ))}
+              <TabsPanels>
+                {items.map((item) => (
+                  <BaseTabs.Panel key={item.value} value={item.value}>
+                    {item.panel}
+                  </BaseTabs.Panel>
+                ))}
+              </TabsPanels>
             </BaseTabs.Root>
           ) : (
             <Tabs
@@ -92,18 +92,20 @@ export function TabsStudy() {
               }}
               orientation={orientation}
             >
-              <CeramicTabsList aria-label="Component preview" {...appearance}>
+              <CeramicTabsList aria-label="Component preview" radius={radius}>
                 {items.map((item) => (
                   <TabsTab key={item.value} value={item.value}>
                     {item.label}
                   </TabsTab>
                 ))}
               </CeramicTabsList>
-              {items.map((item) => (
-                <TabsPanel key={item.value} value={item.value}>
-                  {item.panel}
-                </TabsPanel>
-              ))}
+              <TabsPanels>
+                {items.map((item) => (
+                  <TabsPanel key={item.value} value={item.value}>
+                    {item.panel}
+                  </TabsPanel>
+                ))}
+              </TabsPanels>
             </Tabs>
           )}
         </div>
@@ -129,20 +131,6 @@ export function TabsStudy() {
               onChange={(e) => setRadius(e.currentTarget.valueAsNumber)}
             />
           </div>
-          <fieldset>
-            <legend>Selected surface</legend>
-            {(["matching", "inverse"] as const).map((v) => (
-              <label key={v}>
-                <input
-                  type="radio"
-                  name="selected-tone"
-                  checked={v === tone}
-                  onChange={() => setTone(v)}
-                />
-                {v === "matching" ? "Same color" : "Inverse"}
-              </label>
-            ))}
-          </fieldset>
         </aside>
       </div>
     </section>

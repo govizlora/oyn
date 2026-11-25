@@ -7,8 +7,7 @@ import {
   type SurfaceBindingContext,
 } from "@oyn/surface";
 import { createCeramicMaterial } from "@oyn/ceramic";
-import { bindMotion } from "@oyn/surface/adapters/motion";
-import { createControlMotion } from "./control-motion.js";
+import { bindAnimatedElevation } from "./animated-elevation.js";
 
 // Unpigmented controls have nothing to draw at zero relief.
 const flat = 0;
@@ -21,12 +20,13 @@ const actionable =
 type ControlState = {
   rest: number | null;
   hoverOffset?: number;
+  pressElevation?: number;
   maxElevation?: number;
 };
 
 const control: Appearance<ControlState> = {
   create(initial) {
-    let { rest, hoverOffset } = initial;
+    let { rest, hoverOffset, pressElevation } = initial;
     // Selected keys may start recessed and become raised without a new canvas.
     const maxElevation = Math.max(8, rest ?? flat, initial.maxElevation ?? 0);
     const source = createCeramicMaterial({
@@ -39,21 +39,16 @@ const control: Appearance<ControlState> = {
     const material: Material = Object.create(source, {
       bind: {
         value(context: SurfaceBindingContext) {
-          const binding = source.bind!(context);
+          const { motion, binding } = bindAnimatedElevation(
+            source,
+            context,
+            rest ?? flat,
+            () => rest === null,
+          );
           const element = context.element;
           const doc = element.ownerDocument;
           const view = doc.defaultView!;
           const options = { signal: context.signal };
-          const motion = createControlMotion(view, rest ?? flat);
-          const disconnect = bindMotion(motion, source.setElevation);
-          context.signal.addEventListener(
-            "abort",
-            () => {
-              disconnect();
-              motion.dispose();
-            },
-            { once: true },
-          );
           let hovered =
             view.matchMedia("(hover: hover)").matches &&
             element.matches(":hover");
@@ -80,12 +75,12 @@ const control: Appearance<ControlState> = {
             const target = !enabled
               ? idle
               : pressed
-                ? Math.min(-6, idle - 4)
-                : hovered && hoverOffset !== undefined
-                  ? idle + hoverOffset
-                  : hovered || focused
+                ? (pressElevation ?? Math.min(-6, idle - 4))
+                : hovered || focused
+                  ? hoverOffset === undefined
                     ? Math.min(-2.8, idle - 1.6)
-                    : idle;
+                    : idle + hoverOffset
+                  : idle;
             motion.setTarget(target);
           }
           function endPointer(event: PointerEvent) {
@@ -237,26 +232,20 @@ const control: Appearance<ControlState> = {
             },
             { once: true },
           );
-          const target = binding.material!;
-          return {
-            ...binding,
-            material: Object.create(target, {
-              // Presence is derived from the existing motion value, not another
-              // visible/enabled state or a second ref-lifetime controller.
-              passes: {
-                get: () =>
-                  rest === null && motion.get() === flat ? [] : target.passes,
-              },
-            }),
-          };
+          return binding;
         },
       },
     });
     return {
       material,
       update(next) {
-        if (rest === next.rest && hoverOffset === next.hoverOffset) return;
-        ({ rest, hoverOffset } = next);
+        if (
+          rest === next.rest &&
+          hoverOffset === next.hoverOffset &&
+          pressElevation === next.pressElevation
+        )
+          return;
+        ({ rest, hoverOffset, pressElevation } = next);
         if (respond) respond();
         return "draw";
       },
@@ -267,7 +256,10 @@ const control: Appearance<ControlState> = {
 export function useCeramicControl(
   rest: number | null,
   ref?: Ref<HTMLElement>,
-  options?: Pick<ControlState, "hoverOffset" | "maxElevation">,
+  options?: Pick<
+    ControlState,
+    "hoverOffset" | "pressElevation" | "maxElevation"
+  >,
 ) {
   const bind = useSurface({ appearance: control, props: { rest, ...options } });
   return {

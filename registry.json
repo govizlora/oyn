@@ -20,19 +20,34 @@
           "target": "@ui/base-ui-ceramic-tabs-list.tsx"
         },
         {
-          "path": "packages/ui/src/ceramic-tabs-list.css",
+          "path": "packages/ui/src/selection-track.css",
           "type": "registry:ui",
-          "target": "@ui/ceramic-tabs-list.css"
+          "target": "@ui/selection-track.css"
         },
         {
-          "path": "packages/ui/src/use-ceramic-tabs.ts",
+          "path": "packages/ui/src/use-selection-track.ts",
           "type": "registry:ui",
-          "target": "@ui/use-ceramic-tabs.ts"
+          "target": "@ui/use-selection-track.ts"
+        },
+        {
+          "path": "packages/ui/src/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/animated-elevation.ts"
+        },
+        {
+          "path": "packages/ui/src/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/control-motion.ts"
         },
         {
           "path": "packages/ui/src/motion.css",
           "type": "registry:ui",
           "target": "@ui/motion.css"
+        },
+        {
+          "path": "packages/ui/src/tabs-panels.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tabs-panels.tsx"
         }
       ]
     },
@@ -54,19 +69,121 @@
           "target": "@ui/ceramic-tabs-list.tsx"
         },
         {
-          "path": "packages/ui/src/ceramic-tabs-list.css",
+          "path": "packages/ui/src/selection-track.css",
           "type": "registry:ui",
-          "target": "@ui/ceramic-tabs-list.css"
+          "target": "@ui/selection-track.css"
         },
         {
-          "path": "packages/ui/src/use-ceramic-tabs.ts",
+          "path": "packages/ui/src/use-selection-track.ts",
           "type": "registry:ui",
-          "target": "@ui/use-ceramic-tabs.ts"
+          "target": "@ui/use-selection-track.ts"
+        },
+        {
+          "path": "packages/ui/src/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/animated-elevation.ts"
+        },
+        {
+          "path": "packages/ui/src/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/control-motion.ts"
         },
         {
           "path": "packages/ui/src/motion.css",
           "type": "registry:ui",
           "target": "@ui/motion.css"
+        },
+        {
+          "path": "packages/ui/src/tabs-panels.tsx",
+          "type": "registry:ui",
+          "target": "@ui/tabs-panels.tsx"
+        }
+      ]
+    },
+    {
+      "name": "base-ui-ceramic-segmented-control",
+      "type": "registry:ui",
+      "title": "Ceramic Segmented Control (Base UI)",
+      "description": "SDK-owned single selection with a recessed Ceramic track and sliding indicator.",
+      "dependencies": [
+        "@oyn/surface@0.0.0",
+        "@oyn/ceramic@0.0.0",
+        "@base-ui/react@^1.9.0"
+      ],
+      "files": [
+        {
+          "path": "packages/ui/src/base-ui-segmented-control.tsx",
+          "type": "registry:ui",
+          "target": "@ui/base-ui-segmented-control.tsx"
+        },
+        {
+          "path": "packages/ui/src/selection-track.css",
+          "type": "registry:ui",
+          "target": "@ui/selection-track.css"
+        },
+        {
+          "path": "packages/ui/src/use-selection-track.ts",
+          "type": "registry:ui",
+          "target": "@ui/use-selection-track.ts"
+        },
+        {
+          "path": "packages/ui/src/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/animated-elevation.ts"
+        },
+        {
+          "path": "packages/ui/src/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/control-motion.ts"
+        },
+        {
+          "path": "packages/ui/src/motion.css",
+          "type": "registry:ui",
+          "target": "@ui/motion.css"
+        }
+      ]
+    },
+    {
+      "name": "ceramic-segmented-control",
+      "type": "registry:ui",
+      "title": "Ceramic Segmented Control (UI SDK)",
+      "description": "SDK-owned single selection with a recessed Ceramic track and sliding indicator.",
+      "dependencies": [
+        "@oyn/surface@0.0.0",
+        "@oyn/ceramic@0.0.0",
+        "@ui-sdk/core@0.1.0-beta.13",
+        "@ui-sdk/react@0.1.0-beta.13"
+      ],
+      "files": [
+        {
+          "path": "packages/ui/src/segmented-control.tsx",
+          "type": "registry:ui",
+          "target": "@ui/oyn/segmented-control.tsx"
+        },
+        {
+          "path": "packages/ui/src/selection-track.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/selection-track.css"
+        },
+        {
+          "path": "packages/ui/src/use-selection-track.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/use-selection-track.ts"
+        },
+        {
+          "path": "packages/ui/src/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/animated-elevation.ts"
+        },
+        {
+          "path": "packages/ui/src/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/control-motion.ts"
+        },
+        {
+          "path": "packages/ui/src/motion.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/motion.css"
         }
       ]
     },
@@ -85,6 +202,11 @@
           "path": "packages/ui/src/control-motion.ts",
           "type": "registry:ui",
           "target": "@ui/oyn/control-motion.ts"
+        },
+        {
+          "path": "packages/ui/src/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/animated-elevation.ts"
         },
         {
           "path": "packages/ui/src/ceramic-control.ts",
@@ -587,19 +709,24 @@
           "target": "@ui/oyn/ceramic-tabs-list.tsx"
         },
         {
-          "path": "packages/ui/src/use-ceramic-tabs.ts",
+          "path": "packages/ui/src/use-selection-track.ts",
           "type": "registry:ui",
-          "target": "@ui/oyn/use-ceramic-tabs.ts"
+          "target": "@ui/oyn/use-selection-track.ts"
         },
         {
-          "path": "packages/ui/src/ceramic-tabs-list.css",
+          "path": "packages/ui/src/selection-track.css",
           "type": "registry:ui",
-          "target": "@ui/oyn/ceramic-tabs-list.css"
+          "target": "@ui/oyn/selection-track.css"
         },
         {
           "path": "packages/ui/src/styles/tabs.css",
           "type": "registry:ui",
           "target": "@ui/oyn/styles/tabs.css"
+        },
+        {
+          "path": "packages/ui/src/tabs-panels.tsx",
+          "type": "registry:ui",
+          "target": "@ui/oyn/tabs-panels.tsx"
         }
       ]
     },

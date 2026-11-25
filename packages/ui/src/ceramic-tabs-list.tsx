@@ -3,21 +3,19 @@
 import type { ComponentProps } from "react";
 import { TabsIndicator, TabsList } from "@ui-sdk/react/tabs";
 import {
-  useCeramicTabs,
-  type CeramicTabsAppearance,
-} from "./use-ceramic-tabs.js";
+  useSelectionTrack,
+  type TrackAppearance,
+} from "./use-selection-track.js";
 
 export function CeramicTabsList({
   radius,
-  selectedTone,
   ref,
   children,
   style,
   ...props
-}: ComponentProps<typeof TabsList> & CeramicTabsAppearance) {
-  const { list, indicator } = useCeramicTabs({
+}: ComponentProps<typeof TabsList> & TrackAppearance) {
+  const { list, indicator } = useSelectionTrack({
     radius,
-    selectedTone,
     ref,
     style,
   });
@@ -25,10 +23,12 @@ export function CeramicTabsList({
     <TabsList {...props} {...list}>
       {(state) => (
         <>
-          <TabsIndicator {...indicator} />
+          <TabsIndicator data-slot="tabs-indicator" {...indicator} />
           {typeof children === "function" ? children(state) : children}
         </>
       )}
     </TabsList>
   );
 }
+
+export { TabsPanels } from "./tabs-panels.js";

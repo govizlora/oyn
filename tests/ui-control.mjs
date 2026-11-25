@@ -27,25 +27,33 @@ function step(dt) {
   callbacks.clear();
   for (const callback of pending) callback(now);
 }
-// Same press deadline for Recess, Lower slightly and Lift slightly. A longer
+// All relief transitions settle in 150 ms, including entry and return. A longer
 // trip must move faster, not take longer or acquire a longer settling tail.
-for (const hover of [-2.8, 2, 24]) {
-  const press = createControlMotion(view, hover);
-  press.setTarget(-6);
-  let previous = hover;
+for (const [origin, target] of [
+  [0, -2.8],
+  [-8, 0],
+  [0, -4],
+  [-4, 0],
+  [-2.8, -8],
+  [24, 2],
+]) {
+  const press = createControlMotion(view, origin);
+  press.setTarget(target);
+  let previous = origin;
   let previousStep = Infinity;
-  for (let i = 1; i <= 6; i++) {
-    step(25);
-    const distance = previous - press.get();
+  for (let i = 1; i <= 10; i++) {
+    step(15);
+    const distance = Math.abs(previous - press.get());
     assert.ok(distance > 0 && distance < previousStep);
     assert.ok(
-      Math.abs((press.get() + 6) / (hover + 6) - (1 - i / 6) ** 3) < 1e-10,
+      Math.abs((press.get() - target) / (origin - target) - (1 - i / 10) ** 2) <
+        1e-10,
     );
-    assert.equal(callbacks.size, i === 6 ? 0 : 1);
+    assert.equal(callbacks.size, i === 10 ? 0 : 1);
     previous = press.get();
     previousStep = distance;
   }
-  assert.equal(press.get(), -6);
+  assert.equal(press.get(), target);
   press.dispose();
 }
 const motion = createControlMotion(view, 8);
@@ -133,7 +141,7 @@ try {
     return canvas.screenshot();
   };
   // Read a composed pixel inside the real Button, away from the label and rim.
-  // Changing the receiver (not the Button) exposes any invented pigment or self-shadow.
+  // The CSS fill remains visible underneath the unpigmented material.
   await page
     .locator("#fieldset")
     .evaluate((el) => (el.style.backgroundColor = "#458692"));
@@ -151,17 +159,17 @@ try {
     );
     assert.deepEqual([...png.data], [...rgb, 255]);
   }
-  for (const [css, rgb] of [
-    ["", [69, 134, 146]],
-    ["#b56338", [181, 99, 56]],
+  for (const [css, restRGB, hoverRGB] of [
+    ["", [32, 32, 32], [0, 0, 0]],
+    ["#b56338", [181, 99, 56], [181, 99, 56]],
   ]) {
     await key.evaluate((el, color) => (el.style.backgroundColor = color), css);
     await at(-10, 0);
-    await checkInterior(rgb); // raised
+    await checkInterior(restRGB); // raised
     await at(3, bounds.height / 2);
-    await checkInterior(rgb); // flat
+    await checkInterior(hoverRGB); // lifted
     await page.mouse.down();
-    await checkInterior(rgb); // recessed
+    await checkInterior(hoverRGB); // lowered
     await page.mouse.up();
   }
   await at(3, bounds.height / 2);
@@ -248,6 +256,22 @@ try {
   await page.keyboard.up("Space");
   assert.ok(!(await painted()).equals(keyboardPress));
   assert.ok(await canvas.evaluate((node) => node === window.originalCanvas));
+
+  // Unlike raised buttons, a ghost has no material presentation until interaction.
+  const ghost = page.locator("#ghost");
+  assert.equal(await ghost.locator("canvas").count(), 0);
+  await ghost.hover();
+  await ghost.locator("canvas").waitFor();
+  await settle();
+  const ghostHover = await ghost.screenshot();
+  await page.mouse.down();
+  await settle();
+  assert.ok(!(await ghost.screenshot()).equals(ghostHover));
+  await page.mouse.up();
+  await settle();
+  assert.ok((await ghost.screenshot()).equals(ghostHover));
+  await page.mouse.move(0, 0);
+  await ghost.locator("canvas").waitFor({ state: "detached" });
 
   const toggle = page.locator("#toggle");
   const toggleCanvas = await toggle.locator("canvas").elementHandle();
@@ -440,13 +464,30 @@ try {
     "Works without GPU",
   );
   assert.equal(await fallback.locator("canvas").count(), 0);
-  await fallback.locator("#key").hover();
-  assert.equal(
-    await fallback
-      .locator("#key")
-      .evaluate((node) => getComputedStyle(node).backgroundColor),
-    "rgba(0, 0, 0, 0)",
-  );
+  const background = (locator) =>
+    locator.evaluate((node) => getComputedStyle(node).backgroundColor);
+  await fallback.emulateMedia({ reducedMotion: "reduce" });
+  for (const [colorScheme, primary, hover] of [
+    ["light", "rgb(32, 32, 32)", "rgb(0, 0, 0)"],
+    ["dark", "rgb(238, 238, 238)", "rgb(255, 255, 255)"],
+  ]) {
+    await fallback.emulateMedia({ colorScheme });
+    const transparent = "rgba(0, 0, 0, 0)";
+    for (const [id, atRest, onHover] of [
+      ["key", primary, hover],
+      ["secondary", transparent, transparent],
+      ["ghost", transparent, transparent],
+    ]) {
+      const button = fallback.locator("#" + id);
+      await fallback.mouse.move(0, 0);
+      assert.equal(await background(button), atRest);
+      await button.hover();
+      assert.equal(await background(button), onHover);
+      await fallback.mouse.down();
+      assert.equal(await background(button), onHover);
+      await fallback.mouse.up();
+    }
+  }
   assert.deepEqual(fallbackErrors, []);
   await fallback.close();
   console.log(

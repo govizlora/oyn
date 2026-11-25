@@ -17,7 +17,6 @@
 .tabs-workbench {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 210px;
-  border-block: 1px solid light-dark(#ccc, #444);
 }
 .tabs-preview {
   padding: 24px 0;
@@ -28,7 +27,6 @@
 }
 .tabs-workbench aside {
   padding: 24px 0 24px 24px;
-  border-inline-start: 1px solid light-dark(#ccc, #444);
 }
 .tabs-radius-control {
   display: block;
@@ -61,13 +59,13 @@
   }
   .tabs-workbench aside {
     padding: 20px 0;
-    border-inline: 0;
-    border-top: 1px solid light-dark(#ccc, #444);
   }
 }
 
-.tabs-example-panel {
+.tabs-preview [data-oyn-tab-panels] {
   margin-top: 1.5rem;
+}
+.tabs-example-panel {
   max-width: 46ch;
 }
 .tabs-example-panel p {
