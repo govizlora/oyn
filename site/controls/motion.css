@@ -1,0 +1,4 @@
+/* Instant push (quadratic ease-out): 1 - (1 - t)^2, as in control-motion.ts. */
+:root {
+  --oyn-ease-out: cubic-bezier(0.333333, 0.666667, 0.666667, 1);
+}

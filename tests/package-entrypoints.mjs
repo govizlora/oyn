@@ -101,7 +101,8 @@ try {
       (p) =>
         p.startsWith("examples/") ||
         p === "packages/ui" ||
-        /naga-wasm|shadcn|@ui-sdk|@base-ui/.test(p),
+        /naga-wasm|shadcn|@base-ui/.test(p) ||
+        (p.includes("node_modules/@ui-sdk/") && !lock.packages[p].dev),
     ),
     false,
   );

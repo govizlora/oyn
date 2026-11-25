@@ -177,12 +177,12 @@ try {
   });
   await page.waitForTimeout(250);
   assert.deepEqual(await position(), [140, 380]);
-  await page
-    .locator("label")
-    .filter({ hasText: /^Motion$/ })
-    .tap();
-  assert.equal(await page.locator("#motion").isVisible(), true);
-  await page.getByLabel("Appearance").selectOption("dark");
+  await page.getByRole("tab", { name: "Motion" }).tap();
+  assert.equal(
+    await page.getByRole("tabpanel", { name: "Motion" }).isVisible(),
+    true,
+  );
+  await page.getByRole("tab", { name: "Dark" }).tap();
   await page.waitForTimeout(400);
   await page.screenshot({ path: "/tmp/oyn-pointer-dark.png" });
   for (const width of [320, 390, 430]) {
@@ -200,6 +200,61 @@ try {
   assert.equal(await desktop.locator(".study-cursor").isVisible(), false);
   await desktop.mouse.move(400, 300);
   assert.equal(await desktop.locator(".study-cursor").isVisible(), false);
+  // Test the moving surface, not just the final selected label.
+  const rail = desktop.getByRole("tablist", { name: "Ceramic details" });
+  await rail
+    .locator(
+      "css=:scope[data-oyn-active] > [data-oyn-indicator][data-oyn-active]",
+    )
+    .waitFor();
+  const glide = await rail.evaluate(async (track) => {
+    const thumb = track.querySelector("[data-oyn-indicator]");
+    const target = track.querySelectorAll('[role="tab"]')[2];
+    const x = () => thumb.getBoundingClientRect().left;
+    const start = x();
+    const end = target.getBoundingClientRect().left;
+    target.click();
+    const frames = [];
+    for (let i = 0; i < 60; i++) {
+      await new Promise(requestAnimationFrame);
+      frames.push({
+        x: x(),
+        opacity: Number(
+          getComputedStyle(
+            document.querySelector('[role="tabpanel"]:not([inert],[hidden])'),
+          ).opacity,
+        ),
+      });
+      if (Math.abs(x() - end) < 1) break;
+    }
+    return {
+      start,
+      end,
+      frames,
+      sameThumb: thumb === track.querySelector("[data-oyn-indicator]"),
+    };
+  });
+  assert.ok(
+    glide.sameThumb &&
+      glide.frames.some(
+        ({ x, opacity }) =>
+          x > glide.start + 1 &&
+          x < glide.end - 1 &&
+          opacity > 0 &&
+          opacity < 1,
+      ),
+  );
+  assert.ok(Math.abs(glide.frames.at(-1).x - glide.end) < 1);
+  await desktop.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await rail
+      .locator("[data-oyn-indicator]")
+      .evaluate((el) => getComputedStyle(el).transitionDuration),
+    "0s",
+  );
+  await rail.getByRole("tab", { name: "Motion" }).focus();
+  await desktop.keyboard.press("ArrowLeft");
+  assert.ok(await desktop.getByRole("tabpanel", { name: "Light" }).isVisible());
   // Native CSS and the app input remain usable without a GPU; no backend retry.
   const fallback = await browser.newPage({ ...devices["iPhone 13"] });
   await fallback.addInitScript(() =>
@@ -208,10 +263,13 @@ try {
   await fallback.goto(url);
   await fallback.locator(".study-cursor").waitFor({ state: "visible" });
   await fallback
-    .locator("label")
-    .filter({ hasText: /^Light$/ })
+    .getByLabel("Ceramic details")
+    .getByRole("tab", { name: "Light" })
     .tap();
-  assert.equal(await fallback.locator("#light").isVisible(), true);
+  assert.equal(
+    await fallback.getByRole("tabpanel", { name: "Light" }).isVisible(),
+    true,
+  );
   assert.equal(await fallback.locator("[data-oyn-active]").count(), 0);
   assert.deepEqual(errors, []);
   console.log(

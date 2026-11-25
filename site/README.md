@@ -1,14 +1,15 @@
-# Website pointer study
+# Website Ceramic Tabs study
 
-The website consumes the public `oyn` Core and `oyn/materials/ceramic` entry points.
+The homepage uses the original FilmTabs composition and site-local Ceramic controls.
+UI SDK owns tab selection, keyboard behavior and indicator geometry. A single raised
+indicator moves along the recessed Ceramic track as the panels crossfade.
 Build with `npm run build:site`; run `node tests/site-pointer.mjs` for headless checks.
 
 `createStudyPointer(window)` owns one `SurfaceInputs` source, supplied through
-`engine.start(false, pointer.inputs)` instead of Core's default browser listeners.
+`<OynProvider inputs={studyPointer.inputs}>` instead of Core's default browser listeners.
 The decorative macOS-style arrow and Ceramic lighting read the same snapshot.
 The application owns animation; Core owns GPU scheduling; Ceramic reads current
-coordinates. No synthetic pointer events, gesture policy in materials, or archived
-components are involved.
+coordinates. No synthetic pointer events, gesture policy in materials, or second rendering backend is involved.
 
 Position starts at the viewport center. Without a hover-capable fine pointer, a
 slow figure-eight demonstrates lighting until the first real input. Touch follows
