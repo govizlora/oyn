@@ -44,7 +44,9 @@
     "build:registry": "rm -rf examples/atelier/public/r && shadcn build registry.json -o examples/atelier/public/r",
     "test:ui-control": "npm run build:packages && node tests/ui-control.mjs",
     "test:ui": "npm run build && node tests/ui-control.mjs && node tests/ui-items.mjs && node tests/atelier-tabs.mjs && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
-    "test:ui-catalog": "npm run build && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs"
+    "test:ui-catalog": "npm run build && node tests/ui-catalog-ssr.mjs && node tests/ui-catalog.mjs",
+    "build:site": "npm run build:packages && vite build site --base ./",
+    "dev:site": "vite site"
   },
   "dependencies": {
     "react": "^19.2.0",

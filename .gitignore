@@ -25,6 +25,10 @@ examples/atelier/public/recipe-source/
 /docs/
 /launch/
 artifacts/
+# Only approved public brand assets are versioned.
+!/artifacts/
+/artifacts/*
+!/artifacts/brand/
 recordings/
 screenshots/
 *.mp4
