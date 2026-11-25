@@ -61,7 +61,6 @@ resets when changing studies/rooms; only starred object IDs persist.
 Run `npm run bake:geometry` after editing the homepage control profiles. Normal builds use the checked-in assets.
 
 Read [the architecture contract](../../ARCHITECTURE.md) for current ownership.
-[The historical handoff](../../HANDOFF.md) records asset formats and measured evidence.
 
 - `@oyn/ceramic/baked`: immutable geometry data, one shared baked adapter.
 - `@oyn/ceramic/card`: compact analytic card adapter; no CSG machinery.
@@ -85,8 +84,7 @@ unique assets have the same memory cost as repeated instances.
 
 The homepage uses the baked adapter, with exact analytic rounded
 silhouette shadows for those rounded control bodies. Its profiles are not changed
-by live input; only rigid pose changes. See [the single 500-card benchmark](../../HANDOFF.md#6-validation-and-the-single-500-card-benchmark).
-The checkpoint before this exploration is `557ac86`.
+by live input; only rigid pose changes.
 
 ## Object library
 

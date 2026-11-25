@@ -35,3 +35,10 @@ screenshots/
 *.m4v
 *.mov
 *.webm
+
+# Keep editor preferences, local archives and internal working notes off GitHub.
+/.vscode/
+/archive/ui/
+/AGENTS.md
+/HANDOFF.md
+/site/.openai/

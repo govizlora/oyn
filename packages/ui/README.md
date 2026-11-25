@@ -6,8 +6,7 @@ Oyn maintains a focused set of Ceramic controls for forms, navigation and
 feedback, plus the standalone Card. The [Atelier catalog](../../examples/atelier/src/components/catalog.json)
 lists the active SDK families and their previews. Each has a workspace import
 such as `@oyn/ui/switch` and a source registry item such as `@oyn/ceramic-switch`.
-Other families and their stories are [archived outside the build](../../archive/ui/README.md);
-they are not supported imports or installable items.
+Only exported components and their registry items are part of the distribution.
 
 ## Ready / Not ready
 

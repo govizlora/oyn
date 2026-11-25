@@ -7,8 +7,7 @@ Ceramic consumes instantaneous values; it has no spring/transition or UI gesture
 
 Raised analytic cards and baked controls share the geometry/lighting contract.
 Signed analytic relief composites face and shadow in one surface pass; explicit
-card/baked geometry keeps its separate shadow and surface passes. See [the historical handoff](../../HANDOFF.md) for
-asset formats and benchmark evidence.
+card/baked geometry keeps its separate shadow and surface passes.
 `ceramic` is a stable `Appearance<CeramicProps>` definition. `./baked` also exports
 `baked` with `{ geometry, ...options }` props. `./card` remains an explicit low-level
 comparison adapter; `./sculpted` is deprecated and unused by Atelier. Concave optics

@@ -5,7 +5,6 @@ This is the **authoritative specification for cross-package boundaries**. Read i
 - [UI usage and delivery](packages/ui/README.md): component sources, SDK composition and registry.
 - [Surface API](packages/surface/README.md) and [source map](packages/surface/ARCHITECTURE.md): interfaces and reading order.
 - [Ceramic optics](packages/ceramic/README.md): color, lighting, shadows, padding and geometry.
-- [Handoff](HANDOFF.md): historical research, measurements and migration notes, **not a current API reference**.
 
 ## 1. Identify the output and assign one owner
 
@@ -126,7 +125,7 @@ Each animation owner responds to reduced motion: the numeric source emits the fi
 | Dialog and popups | SDK portal, focus and presence; CSS stacking | Ceramic height expresses optical depth; CSS does not simulate a cross-element 3D scene. |
 | Ripple exploration | `ripple-field.ts` propagates waves; `stone-appearance.ts` owns gestures and animation | Consumer numeric channels → bindMotion → `createFlipDiscMaterial`. The material never reads a clock. |
 
-The active scope comprises the families in the [Atelier catalog](examples/atelier/src/components/catalog.json) and the standalone Card. Routine iteration is limited to the [Ready list](packages/ui/ready.json). Unlisted families and their stories are Not ready but remain available for preview and testing. [Archived families](archive/ui/README.md) are excluded from builds, tests, exports and registry installs; restore them individually as needed.
+The active scope comprises the families in the [Atelier catalog](examples/atelier/src/components/catalog.json) and the standalone Card. Routine iteration is limited to the [Ready list](packages/ui/ready.json). Unlisted families and their stories are Not ready but remain available for preview and testing.
 
 Dependencies point from UI/app to Ceramic and Surface, and from Ceramic to Surface's public contracts. Surface does not depend on Ceramic, UI SDKs or component types. Ceramic does not depend on React or component interaction libraries. Surface's React entry depends on its runtime, never the other way around.
 
