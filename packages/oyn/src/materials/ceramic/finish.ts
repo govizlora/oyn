@@ -9,7 +9,7 @@ export type CeramicLighting = "soft" | "glossy";
 
 /**
  * Ceramic configuration. Ceramic owns environment and optical policy;
- * Surface only owns rendering/lifecycle. See README.md for the resolution contract.
+ * Surface only owns rendering/lifecycle. See the root ARCHITECTURE.md for the resolution contract.
  */
 export type CeramicOptions = {
   /**

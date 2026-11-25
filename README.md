@@ -1,60 +1,48 @@
 # OYN
 
-A DOM-native material system with a React-free Core and an optional React interface. **WIP.**
+A DOM-native material system: **one package, a React-free Core, composable materials,
+and an optional React interface.** WIP; version `0.0.0` is a local workspace build,
+not a public npm release.
 
-HTML and CSS own layout, content and interaction. OYN renders material relief with
-WebGPU. When WebGPU is unavailable or fails, native CSS remains visible; there is
-no second GPU backend.
+OYN supplies material rendering, not a component catalog. HTML/CSS and the
+consumer's UI SDK own structure, accessibility and interaction; materials turn
+instantaneous values into optics. Core binds them to DOM hosts and shares one
+WebGPU engine. If GPU rendering fails, native CSS remains visible.
 
-## One package, four entry points
+## Read only what you need
 
-| Entry point | Responsibility |
-| --- | --- |
-| `oyn` | Core contracts, Surface host lifecycle and shared rendering engine |
-| `oyn/react` | `OynProvider` and `useMaterial`, forwarding to the same Core lifecycle |
-| `oyn/materials/ceramic` | Standard signed Ceramic relief, optics and numeric setters |
-| `oyn/adapters/motion` | Connect a numeric source to a setter; no animation policy |
+- [Usage](packages/oyn/README.md): entry points, React and plain DOM integration,
+  Ceramic props and CSS fallback. This guide also ships with the package.
+- [Architecture](ARCHITECTURE.md): the single contract for ownership, dependencies,
+  lifecycle, material authoring, Ceramic optics and agent-oriented composition.
 
-```tsx
-import { OynProvider, useMaterial } from "oyn/react";
-import { ceramic } from "oyn/materials/ceramic";
+`Surface` remains Core's host-binding concept, not another package or an appearance
+layer. `OynProvider` and `useMaterial` are React interfaces to that same lifecycle.
+There is no separate Appearance object, React-dependent Core or WebGL backend.
 
-function Key() {
-  const ref = useMaterial({ material: ceramic, props: { elevation: 8 } });
-  return <button ref={ref}>Confirm</button>;
-}
-
-export function Example() {
-  return <OynProvider><Key /></OynProvider>;
-}
-```
-
-Version `0.0.0` is a local workspace build, not a public npm release.
-See [ARCHITECTURE.md](ARCHITECTURE.md) for ownership and dependency rules,
-[the API guide](packages/oyn/README.md) for usage, and
-[Ceramic optics](packages/oyn/src/materials/ceramic/README.md) for material behavior.
-
-## Fast iteration
+## Develop
 
 ```sh
 npm install
 npm test               # Build, architecture/types, numeric/lifecycle contracts, package isolation
-npm run test:browser   # Headless WebGPU, CSS fallback and Ceramic optical regressions
+npm run test:browser   # Explicit headless GPU, CSS fallback and optical regressions
 ```
 
-`npm run build` builds only `oyn`. No component catalog, registry, site, shader
-transpiler or archived example participates. Browser tests are explicit, not part
-of the fast default suite. `npm run dev` serves the isolated fixtures under
-`/tests/fixtures/`; it does not launch a browser or a component showcase.
+`npm run build` builds only `packages/oyn` and checks the architecture contract.
+`npm run dev` serves fixtures under `/tests/fixtures/`; it does not open a browser
+or launch a component showcase. Browser tests are not part of the fast suite.
 
-## Frozen local archive
+## Frozen local work
 
-At cleanup, the Ready component list was empty. All UI components, examples,
-showcases, site/deployment files, experimental materials and their dedicated tests
-were moved to `archive/2026-11-25-lean-core/`, outside Git and every active command.
-The local archive includes original paths, a checksum and a complete baseline
-snapshot. It must not be maintained or migrated with Core.
+Only Core, the React interface and standard Ceramic are active. The Ready list
+was empty at cleanup, so all UI components, examples, site/deployment files and
+material experiments were archived with their dedicated tests.
 
-A fresh clone does not include that local archive. The tracked baseline remains
-recoverable from commit `67c2f59`. Restore only explicitly selected work; do not
-reactivate the old workspace or its entire test suite.
+- `archive/2026-11-25-lean-core/`: original work and a complete baseline snapshot.
+- `archive/2026-11-25-docs-consolidation/`: previous docs, historical handoff and
+  local design/brand studies, with a checksum manifest.
+
+Archives are local, Git-ignored and excluded from builds, tests and formatting.
+Do not update them or treat them as current guidance. A fresh clone has no local
+archive; tracked pre-cleanup work is recoverable from commit `67c2f59`. Restore only
+explicitly selected work, not the retired workspace or test suite.

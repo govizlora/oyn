@@ -26,6 +26,11 @@ try {
     await readFile(path.join(installed, "package.json"), "utf8"),
   );
   assert.equal(manifest.name, "oyn");
+  assert.deepEqual(
+    packed.files.filter(({ path }) => path.endsWith(".md")).map(({ path }) => path),
+    ["README.md"],
+    "Ship one usage guide, not duplicate or retired architecture documents.",
+  );
   assert.equal(
     packed.files.some(({ path }) =>
       /webgl|generated|materials\/ceramic\/(baked|card|flip-disc|sculpted)/i.test(

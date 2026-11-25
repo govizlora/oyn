@@ -162,16 +162,19 @@ for (const [layer, directory] of Object.entries({
 assert.deepEqual(failures, [], failures.join("\n"));
 
 // Compile the actual canonical usage examples, not a hand-maintained second copy.
-const markdown = fs.readFileSync("ARCHITECTURE.md", "utf8");
 const virtual = new Map(
-  [...markdown.matchAll(/```tsx\n([\s\S]*?)```/g)].map((match, i) => [
-    path.resolve(`tests/architecture-example-${i}.tsx`),
-    match[1],
-  ]),
+  ["ARCHITECTURE.md", "packages/oyn/README.md"].flatMap((file, document) =>
+    [...fs.readFileSync(file, "utf8").matchAll(/```(tsx?)\n([\s\S]*?)```/g)].map(
+      (match, i) => [
+        path.resolve(`tests/document-${document}-example-${i}.${match[1]}`),
+        match[2],
+      ],
+    ),
+  ),
 );
 assert.ok(
-  virtual.size >= 2,
-  "Document both instantaneous props and external numeric sources.",
+  virtual.size >= 3,
+  "Document React props, plain DOM binding and external numeric sources.",
 );
 const config = ts.readConfigFile("tsconfig.json", ts.sys.readFile);
 const { options } = ts.parseJsonConfigFileContent(
