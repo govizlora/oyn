@@ -20,7 +20,6 @@
       font-weight: 500;
       white-space: nowrap;
       user-select: none;
-      cursor: default;
       /* Material and gesture response come from the shared Ceramic control. */
       &[data-disabled] {
         color: var(--line-disabled);

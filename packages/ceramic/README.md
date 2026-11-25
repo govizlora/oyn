@@ -87,8 +87,9 @@ encoded RGB averages or the linear luminance against 192/255.
 | light       | #c0c0c0    | glossy (exact boundary) | enabled          |
 
 Colored surfaces follow the same independent environment/lighting decisions.
-Negative analytic elevation uses concave floor/wall optics rather than soft/glossy
-raised lighting, and casts no external shadow.
+Negative analytic elevation uses a shared concave lip/wall/floor profile rather
+than raised geometry, and casts no external shadow. Glossy reflection strength
+and sharpness still apply to this profile.
 
 **Ownership:** Ceramic resolves this policy. Surface owns rendering and lifecycle
 and has no theme API. Each attached target receives its own resolved material,
@@ -124,8 +125,8 @@ Modules: `index.ts` public numeric API, `bounds.ts` extent policy, `optics.ts` s
 All material controls accept numeric options: `shadowLightHeight`, `shadowLightSize`, `shadowStrength`, `contactShadowStrength`, `rim`, `lightRim`, `lightZ`, `reflectionStrength`, `sharpness`, `lightReflectionStrength`, `lightReflectionSpread`, `lightEdgeShade`, `darkFrost`, `frostSpread`, `lightSurfaceTop`, `lightSurfaceShade`, plus `elevation` and optional `maxElevation`. `color` overrides the environment's default base color. Legacy light-prefixed optics tune soft lighting; reflectionStrength/sharpness/darkFrost tune glossy lighting, regardless of environment. Update appearance props to change optical configuration. The low-level program has an explicit elevation setter. The shadow configuration feeds both uniforms and bounds.
 Glossy frost (`darkFrost: 0.025`, `frostSpread: 0.625` by default) is reflected light on the ground,
 not a face tint. A live pointer supplies the virtual backlight independently of the main lamp. Its coupling ramps from zero with distance inside the silhouette, while diffuse transport favors the nearby ground; this is spatial rather than a timed hover fade. Its strength and reach increase with positive
-elevation; flat or recessed surfaces produce none. For example, a transparent
-Button using `hoverEffect="lift"` opens up a broader pool of light as it rises.
+elevation; flat or recessed surfaces produce none. For example, a raised transparent
+control opens up a broader pool of light as it rises.
 Canvas padding reserves the larger of the shadow and glow footprints.
 
 
@@ -178,6 +179,22 @@ band shrinks. Rescaling that steep specular profile into a subpixel strip caused
 bright flashes during an otherwise numerically continuous height sweep.
 Glossy radiance is saturated before applying rim coverage, not after it: even a
 very bright lobe cannot turn a partially covered edge into a fully opaque highlight.
+Recesses have a circular opening fillet of radius 1.25 CSS pixels, tangent to
+both the top plane and the 50-degree concave wall, which eases into a horizontal
+floor. Shallow recesses reduce this radius to reserve at least half the depth
+for the wall. This cross-section radius is not the host's CSS corner radius.
+The same normal profile produces the narrow lip reflection and broader wall
+reflection; four spatial samples filter the subpixel highlight, with no extra
+outline, canvas or temporal state. Glossy recesses use `reflectionStrength` and
+`sharpness`; soft recesses retain their calibrated wall lighting.
+
+```tsx
+// In Card Fantony, choose a dark pigment and negative Elevation / depth.
+useSurface({ appearance: ceramic, props: {
+  color: "#171717", elevation: -4, reflectionStrength: 1, sharpness: 1,
+} });
+```
+
 For recesses,
 the pigmented floor mixes toward black at 0.6% per depth unit in light mode or toward white at 1.2% per unit in dark mode (both capped at 12%, scaled by relief strength),
 while wall lighting supplies the edge shading. This bounded linear mapping is

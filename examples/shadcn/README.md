@@ -64,7 +64,7 @@ than the content in light mode and lighter in dark mode.
 
 ### Navigation depth motion
 
-Ceramic menu items animate their own material elevation from an almost-flat negative value to -4 on hover and -6 while pressed. The shared UI motion source uses a 150 ms cubic ease-out; interrupted gestures turn immediately from the current position. Exit settles before detaching the surface. Reduced-motion preferences bypass the transition. No opacity, scale, or cross-zero shader transition is layered onto the depth animation.
+Ceramic menu items animate their own material elevation from an almost-flat negative value to -4 on hover and -6 while pressed. The shared UI motion source uses a 150 ms quadratic ease-out; interrupted gestures turn immediately from the current position. Exit settles before detaching the surface. Reduced-motion preferences bypass the transition. No opacity, scale, or cross-zero shader transition is layered onto the depth animation.
 
 ### Selects and dropdown popups
 

@@ -45,13 +45,13 @@ textarea {
 .story-event:empty {
   visibility: hidden;
 }
-.button-hover-effects {
+.button-variants {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
 }
 @media (max-width: 440px) {
-  .button-hover-effects {
+  .button-variants {
     grid-template-columns: 1fr;
   }
   #preview {

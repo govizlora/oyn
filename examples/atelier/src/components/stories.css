@@ -82,7 +82,6 @@ textarea {
 .specimen-stage {
   border-radius: 24px;
   border: 1px solid light-dark(#d5d5d5, #393939);
-  background-color: var(--preview-background);
   min-width: 0;
 }
 .featured-stories > section {

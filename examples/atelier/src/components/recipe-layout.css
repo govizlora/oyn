@@ -513,47 +513,10 @@
       width: 24rem;
       max-width: 100%;
     }
-    /* The indicator glides in the demos that show it. */
-    :scope:is(
-      [data-example="tabs/indicator"],
-      [data-example="tabs/animation"]
-    ) {
-      & [data-slot="tabs-indicator"] {
-        transition-property: top, left, width, height;
-        transition-duration: calc(var(--duration) * 2);
-        transition-timing-function: var(--oyn-ease-out);
-
-        &[data-activation-direction="none"] {
-          transition: none;
-        }
-      }
-    }
     /* The reply form is the tallest panel, so both panels take its height. */
     :scope[data-example="tabs/keep-mounted"] [data-slot="tabs-panel"] {
       min-height: 9.5rem;
     }
-    :scope[data-example="tabs/animation"] {
-      & [data-slot="stack"] > [data-slot="tabs-panel"] {
-        transition:
-          opacity var(--duration) var(--oyn-ease-out),
-          translate var(--duration) var(--oyn-ease-out);
-
-        &:is([data-starting-style], [data-ending-style]) {
-          opacity: 0;
-        }
-
-        &[data-activation-direction="right"][data-starting-style],
-        &[data-activation-direction="left"][data-ending-style] {
-          translate: 2rem 0;
-        }
-
-        &[data-activation-direction="left"][data-starting-style],
-        &[data-activation-direction="right"][data-ending-style] {
-          translate: -2rem 0;
-        }
-      }
-    }
-
     /* textarea.css */
     /* A field that holds the growing textarea's maximum height, so its label stays put as it grows. */
     :scope[data-example="textarea/auto-resize"] [data-slot="field"] {

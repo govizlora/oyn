@@ -128,7 +128,6 @@
       border-radius: var(--radius-row);
       color: var(--ink);
       font-variant-numeric: tabular-nums;
-      cursor: default;
       user-select: none;
 
       &:hover:not(

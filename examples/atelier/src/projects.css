@@ -46,9 +46,6 @@
     500 13px/1.2 system-ui,
     sans-serif;
 }
-.project-switch a {
-  cursor: pointer;
-}
 .project-switch a[aria-current] {
   color: var(--preview-ink);
   font-weight: 650;
@@ -62,7 +59,6 @@
   height: 42px;
   display: grid;
   place-items: center;
-  cursor: pointer;
   flex: none;
 }
 .theme-switch:focus-visible {
@@ -98,11 +94,9 @@
   background: transparent;
   border: 0;
   text-decoration: none;
-  cursor: pointer;
 }
 .preview-controls button:disabled {
   opacity: 0.55;
-  cursor: default;
 }
 @media (max-width: 760px) {
   #root {
@@ -123,7 +117,6 @@
     font:
       600 13px/1.4 system-ui,
       sans-serif;
-    cursor: pointer;
   }
   .project-switch {
     position: absolute;
@@ -207,7 +200,6 @@
   padding: 7px 9px;
   margin-top: 4px;
   border-radius: 8px;
-  cursor: pointer;
   font: 600 13px/1.4 system-ui, sans-serif;
   color: var(--preview-ink);
 }
@@ -220,7 +212,6 @@
   display: flex;
   align-items: center;
   list-style: none;
-  cursor: pointer;
   border-radius: 8px;
 }
 .story-family summary::-webkit-details-marker,

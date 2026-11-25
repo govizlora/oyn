@@ -97,7 +97,6 @@ a {
   color: inherit;
   outline: 1px dotted #b06048;
   outline-offset: 0;
-  cursor: pointer;
   font-size: clamp(18px, 3vw, 28px);
 }
 .surface-button small {

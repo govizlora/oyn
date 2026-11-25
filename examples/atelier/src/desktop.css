@@ -232,7 +232,6 @@
   position: relative;
   align-items: center;
   gap: 0.8cqw;
-  cursor: pointer;
   min-height: 1.5cqw;
   user-select: none;
 }
@@ -260,7 +259,6 @@
   height: 1.5cqw;
   opacity: 0;
   margin: 0;
-  cursor: pointer;
 }
 .check:has(input:focus-visible) .check-box {
   outline: 2px solid #d96c41;
@@ -276,7 +274,6 @@
 }
 .menu summary {
   list-style: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -329,7 +326,6 @@
   height: 3cqw;
   padding: 0 0.5cqw;
   position: relative;
-  cursor: pointer;
   border-radius: 0.5cqw;
 }
 .menu-option > svg {
@@ -350,7 +346,6 @@
   width: 100%;
   height: 100%;
   margin: 0;
-  cursor: pointer;
 }
 .menu-option:has(input:focus-visible) {
   outline: 2px solid #d96c41;
@@ -435,9 +430,6 @@
 .search-field input::placeholder {
   color: #adb5a3;
 }
-.search-field input::-webkit-search-cancel-button {
-  cursor: pointer;
-}
 .search-field:has(input:focus-visible) {
   outline: 1.5px solid #d79d7a;
   outline-offset: 2px;
@@ -467,7 +459,6 @@
   width: 2.2cqw;
   height: 2.2cqw;
   color: #bbc3ae;
-  cursor: pointer;
   border-radius: 0.5cqw;
 }
 .file-view label[data-selected='true'] {
@@ -483,7 +474,6 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  cursor: pointer;
   margin: 0;
 }
 .file-view label:has(input:focus-visible) {
@@ -675,7 +665,6 @@
 }
 .selection-bar > button:disabled {
   opacity: 0.35;
-  cursor: default;
 }
 .empty-files {
   height: 18.2cqw;
@@ -725,7 +714,6 @@
   min-width: 9.5cqw;
   height: 3.4cqw;
   border-radius: 0.8cqw;
-  cursor: pointer;
   border: 1px solid #b5c0a631;
   color: #8e9a81;
   font-size: 0.9cqw;
@@ -750,7 +738,6 @@
   height: 100%;
   opacity: 0;
   margin: 0;
-  cursor: pointer;
 }
 .choice-chips svg {
   width: 1cqw;
@@ -1043,7 +1030,6 @@
   height: 2.9cqw;
   position: relative;
   isolation: isolate;
-  cursor: pointer;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.95cqw;
   color: #a3b092;
@@ -1061,7 +1047,6 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  cursor: pointer;
   margin: 0;
 }
 .duration-presets label:has(input:focus-visible) {

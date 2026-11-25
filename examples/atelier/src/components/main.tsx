@@ -6,6 +6,26 @@ import { readStory } from "./catalog";
 import { Overview } from "./overview";
 import "./stories.css";
 
+// An iframe is a separate CSS environment. Use the catalog's resolved scheme
+// rather than letting the preview resolve the OS preference a second time.
+function bindPreviewTheme(frame: HTMLIFrameElement | null) {
+  if (!frame) return;
+  const owner = frame.ownerDocument.documentElement;
+  function sync() {
+    const root = frame?.contentDocument?.documentElement;
+    if (root && root.style.colorScheme !== owner.style.colorScheme)
+      root.style.colorScheme = owner.style.colorScheme;
+  }
+  const observer = new MutationObserver(sync);
+  observer.observe(owner, { attributes: true, attributeFilter: ["style"] });
+  frame.addEventListener("load", sync);
+  sync();
+  return () => {
+    observer.disconnect();
+    frame.removeEventListener("load", sync);
+  };
+}
+
 function App() {
   const [{ family, example, group }, setRoute] = useState(readStory);
   const { stories } = group;
@@ -82,6 +102,7 @@ function App() {
             </header>
             <iframe
               key={family.id + "/" + example.id}
+              ref={bindPreviewTheme}
               className="specimen-stage"
               title={family.name + " · " + example.title}
               src={

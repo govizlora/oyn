@@ -13,9 +13,6 @@
       border-radius: var(--avatar-radius);
       border: 0;
       user-select: none;
-      &:is(button, a[href]) {
-        cursor: pointer;
-      }
       &:not([data-oyn-active]):has([data-slot="avatar-image"])::after {
         content: "";
         position: absolute;
