@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { chromium, firefox } from "playwright";
 import { createServer } from "vite";
-import { gaussianCoverageWGSL } from "../packages/oyn/dist/materials/ceramic/effects/shadow.js";
+import { gaussianCoverageWGSL } from "../packages/materials/dist/ceramic/effects/shadow.js";
 
 // Compare the production WGSL integral with a dense independent CPU integration.
 const functions = gaussianCoverageWGSL;

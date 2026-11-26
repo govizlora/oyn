@@ -1,6 +1,6 @@
 import { groundFrostWGSL } from "./optics.js";
 import { insetSurfaceWGSL } from "./inset.js";
-import { frameWGSL } from "./effects/frame.js";
+import { frameWGSL } from "../shared/frame.js";
 import { geometryWGSL } from "./effects/geometry.js";
 import { shadowWGSL } from "./effects/shadow.js";
 import { ceramicLightingWGSL } from "./effects/ceramic-lighting.js";

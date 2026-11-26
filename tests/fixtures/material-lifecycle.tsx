@@ -6,10 +6,10 @@ import {
   useState,
 } from "react";
 import { createRoot } from "react-dom/client";
-import { type Material, type SurfaceBinding } from "oyn";
-import { OynProvider, useMaterial } from "oyn/react";
-import type { ColorScheme } from "oyn/materials/ceramic";
-import { ceramic, type CeramicProps } from "oyn/materials/ceramic";
+import { type Material, type SurfaceBinding } from "@oyn/core";
+import { OynProvider, useMaterial } from "@oyn/react";
+import type { ColorScheme } from "@oyn/materials";
+import { ceramic, type CeramicProps } from "@oyn/materials";
 
 const records = {
   failUpdate: false,

@@ -1,5 +1,5 @@
 import { useContext, useLayoutEffect, useMemo } from "react";
-import { createSurface, type SurfaceOptions } from "../core/surface.js";
+import { createSurface, type SurfaceOptions } from "@oyn/core";
 import { OynContext } from "./OynContext.js";
 
 export type MaterialOptions<P> = SurfaceOptions<P>;

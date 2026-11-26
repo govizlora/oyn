@@ -4,12 +4,12 @@ import {
   preferredColorScheme,
   type ColorScheme,
 } from "./environment.js";
-import { createParameters } from "../../core/createParameters.js";
+import { createParameters } from "@oyn/core";
 import type {
   Material,
   MaterialInstance,
   MaterialUpdate,
-} from "../../core/types/material.js";
+} from "@oyn/core";
 import { ceramicBinding } from "./interaction.js";
 import { ceramicWGSL } from "./shaders.js";
 import { receiverBounds } from "./bounds.js";

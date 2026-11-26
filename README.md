@@ -1,54 +1,25 @@
 # OYN
 
-A DOM-native material system: **one package, a React-free Core, composable materials,
-and an optional React interface.** WIP; version `0.0.0` is a local workspace build,
-not a public npm release.
+**UI you can feel**
 
-OYN supplies material rendering, not a component catalog. HTML/CSS and the
-consumer's UI SDK own structure, accessibility and interaction; materials turn
-instantaneous values into optics. Core binds them to DOM hosts and shares one
-WebGPU engine. If GPU rendering fails, native CSS remains visible.
+OYN separates surface rendering from DOM structure. WebGPU materials draw the surfaces while native elements handle layout and interaction.
 
-## Read only what you need
+## Architecture
 
-- [Usage](packages/oyn/README.md): entry points, React and plain DOM integration,
-  Ceramic props and CSS fallback. This guide also ships with the package.
-- [Architecture](ARCHITECTURE.md): the single contract for ownership, dependencies,
-  lifecycle, material authoring, Ceramic optics and agent-oriented composition.
-
-`Surface` remains Core's host-binding concept, not another package or an appearance
-layer. `OynProvider` and `useMaterial` are React interfaces to that same lifecycle.
-There is no separate Appearance object, React-dependent Core or WebGL backend.
+- **Your app** owns semantics, layout, interaction and animation.
+- **Material** defines how a surface looks.
+- **Core** binds materials to DOM elements and renders them with WebGPU.
 
 ## Develop
 
 ```sh
 npm install
-npm test               # Build, architecture/types, numeric/lifecycle contracts, package isolation
-npm run test:browser   # Explicit headless GPU, CSS fallback and optical regressions
+npm run build
+npm run dev
 ```
-
-`npm run build` builds only `packages/oyn` and checks the architecture contract.
-`npm run dev` serves fixtures under `/tests/fixtures/`; it does not open a browser
-or launch a component showcase. Browser tests are not part of the fast suite.
 
 ## Website
 
 The official [oyn.dev](https://oyn.dev/) homepage lives in `site/`. It consumes the
 public package and is not an npm workspace. Run `npm run build:site` to build
 `site/dist/`; Vercel publishes that directory on pushes to `main`.
-
-## Frozen local work
-
-Only Core, the React interface and standard Ceramic are active. The Ready list
-was empty at cleanup, so all UI components, examples, former site implementation and
-material experiments were archived with their dedicated tests.
-
-- `archive/2026-11-25-lean-core/`: original work and a complete baseline snapshot.
-- `archive/2026-11-25-docs-consolidation/`: previous docs, historical handoff and
-  local design/brand studies, with a checksum manifest.
-
-Archives are local, Git-ignored and excluded from builds, tests and formatting.
-Do not update them or treat them as current guidance. A fresh clone has no local
-archive; tracked pre-cleanup work is recoverable from commit `67c2f59`. Restore only
-explicitly selected work, not the retired workspace or test suite.

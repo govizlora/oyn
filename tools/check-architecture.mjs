@@ -15,14 +15,11 @@ function files(directory) {
 }
 const failures = [];
 for (const [layer, directory] of Object.entries({
-  entry: "packages/oyn/src/index.ts",
-  surface: "packages/oyn/src/core",
-  react: "packages/oyn/src/react",
-  ceramic: "packages/oyn/src/materials",
+  core: "packages/core/src",
+  react: "packages/react/src",
+  materials: "packages/materials/src",
 })) {
-  for (const file of fs.statSync(directory).isDirectory()
-    ? files(directory)
-    : [directory]) {
+  for (const file of files(directory)) {
     const source = ts.createSourceFile(
       file,
       fs.readFileSync(file, "utf8"),
@@ -34,70 +31,38 @@ for (const [layer, directory] of Object.entries({
         `${file}:${source.getLineAndCharacterOfPosition(node.getStart()).line + 1}: ${message}`,
       );
     function checkImport(node, name) {
-      const local = name.startsWith(".")
-        ? path.normalize(path.join(path.dirname(file), name))
-        : name;
       if (name.startsWith(".")) {
-        if (
-          ["entry", "surface"].includes(layer) &&
-          !local.startsWith("packages/oyn/src/core/")
-        )
-          report(node, "Core entry and runtime imports stay inside Core.");
-        if (
-          layer === "react" &&
-          !/^packages\/oyn\/src\/(react|core)\//.test(local)
-        )
-          report(node, "React imports stay inside its interface or Core.");
-        if (
-          layer === "ceramic" &&
-          !/^packages\/oyn\/src\/(materials|core)\//.test(local)
-        )
-          report(
-            node,
-            "Material imports stay inside materials or allowed Core contracts.",
-          );
+        const local = path.normalize(path.join(path.dirname(file), name));
+        if (!local.startsWith(directory + "/"))
+          report(node, "Use a public entry point across package boundaries.");
+        return;
       }
-      const react = /^(react|react-dom)(\/|$)|(?:^|\/)react(?:\/|$)/.test(
-        local,
-      );
-      const uiOrMotion =
-        /@oyn\/ui|@ui-sdk|@base-ui|^motion(?:\/|$)|^framer-motion/.test(name);
-      const concrete = /(?:^|\/)materials\//.test(local);
+      if (layer === "materials" && name === "@oyn/core") {
+        if (ts.isImportDeclaration(node)) {
+          const clause = node.importClause;
+          const bindings = clause?.namedBindings;
+          if (
+            clause?.isTypeOnly ||
+            (bindings &&
+              ts.isNamedImports(bindings) &&
+              !clause.name &&
+              bindings.elements.every(
+                (item) =>
+                  item.isTypeOnly ||
+                  (item.propertyName ?? item.name).text === "createParameters",
+              ))
+          )
+            return;
+        }
+      }
+      if (layer === "react" && ["react", "@oyn/core"].includes(name)) return;
       if (
-        ["entry", "surface"].includes(layer) &&
-        (react || concrete || uiOrMotion)
+        file === "packages/react/src/index.ts" &&
+        ts.isExportDeclaration(node) &&
+        name === "@oyn/materials"
       )
-        report(
-          node,
-          "Core cannot depend on React, concrete materials, UI SDKs or animation libraries.",
-        );
-      if (layer === "react" && (concrete || uiOrMotion))
-        report(
-          node,
-          "The React interface depends on Core, not concrete materials or UI policy.",
-        );
-      if (layer === "ceramic") {
-        if (react || uiOrMotion)
-          report(node, "Materials cannot own React/UI/animation policy.");
-        if (
-          local.includes("/core/") &&
-          !/\/core\/(types\/|createParameters\.js$)/.test(local)
-        )
-          report(
-            node,
-            "Built-in materials may depend only on Core contracts and the parameter utility.",
-          );
-        if (name === "oyn" || name.startsWith("oyn/"))
-          report(
-            node,
-            "Built-in materials import exact internal contracts, not their own public package.",
-          );
-      }
-      if (/^@oyn\/(surface|ceramic)(\/|$)/.test(name))
-        report(
-          node,
-          "Removed package entry points must not return as compatibility paths.",
-        );
+        return;
+      report(node, `Unexpected ${layer} dependency: ${name}`);
     }
     function visit(node) {
       if (
@@ -127,7 +92,7 @@ for (const [layer, directory] of Object.entries({
             : "";
         const arg = node.arguments[0];
         const literal = arg && ts.isStringLiteral(arg) ? arg.text : "";
-        if (layer === "ceramic") {
+        if (layer === "materials") {
           if (
             ["requestAnimationFrame", "setInterval", "setTimeout"].includes(
               name,
@@ -163,13 +128,13 @@ assert.deepEqual(failures, [], failures.join("\n"));
 
 // Compile the actual canonical usage examples, not a hand-maintained second copy.
 const virtual = new Map(
-  ["ARCHITECTURE.md", "packages/oyn/README.md"].flatMap((file, document) =>
-    [...fs.readFileSync(file, "utf8").matchAll(/```(tsx?)\n([\s\S]*?)```/g)].map(
-      (match, i) => [
-        path.resolve(`tests/document-${document}-example-${i}.${match[1]}`),
-        match[2],
-      ],
-    ),
+  ["README.md", "packages/react/README.md"].flatMap((file, document) =>
+    [
+      ...fs.readFileSync(file, "utf8").matchAll(/```(tsx?)\n([\s\S]*?)```/g),
+    ].map((match, i) => [
+      path.resolve(`tests/document-${document}-example-${i}.${match[1]}`),
+      match[2],
+    ]),
   ),
 );
 assert.ok(

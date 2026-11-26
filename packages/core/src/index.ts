@@ -20,3 +20,4 @@ export type {
 } from "./types/input.js";
 export { createEngine, type Engine } from "./engine.js";
 export { createSurface, type SurfaceOptions } from "./surface.js";
+export { bindMotion, type MotionNumber } from "./adapters/motion.js";

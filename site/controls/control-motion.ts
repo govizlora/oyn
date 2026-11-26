@@ -1,4 +1,4 @@
-import type { MotionNumber } from "oyn/adapters/motion";
+import type { MotionNumber } from "@oyn/core";
 
 const durationMs = 150;
 

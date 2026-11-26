@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { createEngine, createSurface, createParameters } from "oyn";
-import { ceramic, createCeramicMaterial } from "oyn/materials/ceramic";
+import { createEngine, createSurface, createParameters } from "@oyn/core";
+import { ceramic, createCeramicMaterial } from "@oyn/materials";
 
 // No React, browser globals, or renderer mocks are needed for host lifecycle.
 const records = { creates: 0, updates: 0, disposes: 0 };

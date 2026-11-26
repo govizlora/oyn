@@ -1,11 +1,10 @@
 import { useCallback, type CSSProperties, type Ref } from "react";
-import { ceramic, createCeramicMaterial } from "oyn/materials/ceramic";
 import {
   type Material,
   type MaterialInstance,
   type SurfaceBindingContext,
-} from "oyn";
-import { useMaterial } from "oyn/react";
+} from "@oyn/core";
+import { ceramic, createCeramicMaterial, useMaterial } from "@oyn/react";
 import { bindAnimatedElevation } from "./animated-elevation.js";
 import "./selection-track.css";
 

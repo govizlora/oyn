@@ -1,6 +1,5 @@
-import { type Material } from "oyn";
-import { OynProvider, useMaterial } from "oyn/react";
-import { ceramic, type CeramicProps } from "oyn/materials/ceramic";
+import { type Material } from "@oyn/core";
+import { OynProvider, useMaterial, ceramic, type CeramicProps } from "@oyn/react";
 const alternate: Material<{ phase: number }> = {
   create() {
     throw Error("type test only");
@@ -71,9 +70,9 @@ function Check() {
 }
 
 // @ts-expect-error React hooks are not exported by Core.
-import { useMaterial as coreHook } from "oyn";
+import { useMaterial as coreHook } from "@oyn/core";
 // @ts-expect-error The removed wrapper has no compatibility export.
-import type { Appearance } from "oyn";
+import type { Appearance } from "@oyn/core";
 // @ts-expect-error The instance itself is the drawing object.
 ceramic.create({}).material;
 

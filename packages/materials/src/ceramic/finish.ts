@@ -1,15 +1,14 @@
 import type { CeramicLight } from "./interaction.js";
 import { preferredColorScheme, type ColorScheme } from "./environment.js";
 import { validateElevation } from "./bounds.js";
-import { parseColor } from "./color.js";
+import { parseColor } from "../shared/color.js";
 import { insetWallSlope } from "./inset.js";
 import defaults from "./defaults.json" with { type: "json" };
 /** Surface lighting model, independent of the surrounding color scheme. */
 export type CeramicLighting = "soft" | "glossy";
 
 /**
- * Ceramic configuration. Ceramic owns environment and optical policy;
- * Surface only owns rendering/lifecycle. See the root ARCHITECTURE.md for the resolution contract.
+ * Ceramic owns environment and lighting policy for each host.
  */
 export type CeramicOptions = {
   /**

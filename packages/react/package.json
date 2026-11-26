@@ -1,0 +1,27 @@
+{
+  "name": "@oyn/react",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@oyn/core": "0.0.0",
+    "@oyn/materials": "0.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

@@ -7,7 +7,7 @@ import React, {
 import { Sun, Moon } from "lucide-react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
-import { OynProvider } from "oyn/react";
+import { OynProvider } from "@oyn/react";
 import { Button } from "./controls/button";
 import { Tabs, TabsList, TabsTab } from "./controls/tabs";
 import { FilmTabs } from "./FilmTabs";

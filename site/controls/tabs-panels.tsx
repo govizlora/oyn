@@ -1,6 +1,5 @@
 import type { ComponentPropsWithRef } from "react";
-import { ceramic } from "oyn/materials/ceramic";
-import { useMaterial } from "oyn/react";
+import { ceramic, useMaterial } from "@oyn/react";
 import { useHostRef } from "./use-selection-track.js";
 
 /** One raised surface behind the SDK panels, independent of their presence. */

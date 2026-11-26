@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><link rel="icon" href="data:," /><title>Particle · OYN</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: #12141b;
+      color: #eeede8;
+      font: 15px system-ui;
+      display: grid;
+      place-items: center;
+      min-height: 100svh;
+    }
+    main {
+      width: min(86vw, 620px);
+    }
+    header,
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    header {
+      border-bottom: 1px solid #363942;
+      padding-bottom: 18px;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+    }
+    h1 {
+      font:
+        normal clamp(38px, 7vw, 62px)/1.1 Georgia,
+        serif;
+      margin: 30px 0 0;
+    }
+    .stage {
+      height: 240px;
+      display: grid;
+      place-items: center;
+    }
+    .cloud {
+      width: 62%;
+      height: 60px;
+      border-radius: 30px;
+      background: #414556;
+    }
+    .cloud[data-oyn-active] {
+      background: none;
+    }
+    .cloud[hidden] {
+      display: none;
+    }
+    footer {
+      border-top: 1px solid #363942;
+      padding-top: 18px;
+      color: #b8bac4;
+    }
+    button {
+      background: none;
+      color: inherit;
+      border: 1px solid #555866;
+      border-radius: 50px;
+      padding: 9px 18px;
+      cursor: pointer;
+      font: inherit;
+    }
+  </style>
+  <main>
+    <header><span>OYN MATERIAL STUDIES</span><span>02 / PARTICLE</span></header>
+    <h1>Suspended pigment.</h1>
+    <div class="stage"><div class="cloud" aria-hidden="true"></div></div>
+    <footer>
+      <span>Move through the grains.</span
+      ><button type="button">Disperse ↗</button>
+    </footer>
+  </main>
+  <script type="module" src="./demo.ts"></script>
+</html>

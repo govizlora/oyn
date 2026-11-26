@@ -62,11 +62,11 @@ try{
  await page.evaluate(()=>api.setQuiet(true));await settle();assert.equal((await state()).stats.pointerListeners,0,'No-input material has no implicit pointer subscription');const quiet=await state();await page.evaluate(()=>window.dispatchEvent(new PointerEvent('pointermove',{clientX:10,clientY:10})));await settle();assert.equal((await state()).stats.submits,quiet.stats.submits);
  await page.evaluate(()=>api.setMounted(false));await settle();assert.equal(await page.locator('canvas').count(),0);
  const final=await state();assert.equal(final.creates,final.disposes,'All instrumented instances disposed');assert.deepEqual(final.errors,[]);assert.deepEqual(errors,[]);
- const defaults=await page.evaluate(async()=>(await import('/packages/oyn/src/materials/ceramic/index.ts')).ceramicDefaults);
+ const defaults=await page.evaluate(async()=>(await import('/packages/materials/src/ceramic/index.ts')).ceramicDefaults);
  assert.deepEqual(defaults.light,{source:'pointer',position:{x:100,y:100},onLeave:'hold',onBlur:'hold',onHidden:'hold'});
  assert.equal('maxElevation' in defaults,false,'Maximum budget is derived per binding, not a fixed default');
  const inputChecks=await page.evaluate(async()=>{
-  const {createInputs}=await import('/packages/oyn/src/core/createInputs.ts');
+  const {createInputs}=await import('/packages/core/src/createInputs.ts');
   const service=createInputs(window),pointer=service.inputs.pointer;
   const initial=pointer.getSnapshot();let notifications=0;
   const a=pointer.subscribe(()=>notifications++),b=pointer.subscribe(()=>notifications++);
@@ -98,8 +98,8 @@ try{
  // Empty programs retain their one binding, but own no presentation or target.
  // Numeric notifications restore drawing without a second visibility API.
  const emptyProgram = await page.evaluate(async () => {
-  const {createEngine} = await import('/packages/oyn/src/core/engine.ts');
-  const {createCeramicMaterial} = await import('/packages/oyn/src/materials/ceramic/index.ts');
+  const {createEngine} = await import('/packages/core/src/engine.ts');
+  const {createCeramicMaterial} = await import('/packages/materials/src/ceramic/index.ts');
   const source = createCeramicMaterial({elevation:0,maxElevation:8,colorScheme:'light',light:{source:'fixed'}});
   const element = document.createElement('div');
   element.style.cssText = 'width:100px;height:60px';
@@ -152,8 +152,8 @@ try{
  // Exercise actual renderer failure channels with two surfaces and native CSS.
  for (const reason of ['missing-api','no-adapter','adapter-rejected','device-rejected','validation','device-lost']) {
   const result=await page.evaluate(async(reason)=>{
-   const {createEngine}=await import('/packages/oyn/src/core/engine.ts');
-   const {ceramic}=await import('/packages/oyn/src/materials/ceramic/index.ts');
+   const {createEngine}=await import('/packages/core/src/engine.ts');
+   const {ceramic}=await import('/packages/materials/src/ceramic/index.ts');
    const style=document.createElement('style');
    style.textContent='.fallback-probe {background:rgb(12, 34, 56);width:100px;height:60px}.fallback-probe[data-oyn-active]{background:transparent}';
    document.head.append(style);

@@ -1,7 +1,7 @@
 import type {
   MaterialInstance,
   SurfaceBindingContext,
-} from "../../core/types/material.js";
+} from "@oyn/core";
 
 /** The surrounding page/section environment, independent of surface lighting. */
 export type ColorScheme = "light" | "dark";

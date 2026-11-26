@@ -4,9 +4,8 @@ import {
   type Material,
   type MaterialInstance,
   type SurfaceBindingContext,
-} from "oyn";
-import { useMaterial } from "oyn/react";
-import { createCeramicMaterial } from "oyn/materials/ceramic";
+} from "@oyn/core";
+import { createCeramicMaterial, useMaterial } from "@oyn/react";
 import { bindAnimatedElevation } from "./animated-elevation.js";
 
 // Unpigmented controls have nothing to draw at zero relief.

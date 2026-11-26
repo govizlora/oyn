@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { SurfaceInputs } from "../core/types/input.js";
-import { createEngine } from "../core/engine.js";
+import type { SurfaceInputs } from "@oyn/core";
+import { createEngine } from "@oyn/core";
 import { OynContext } from "./OynContext.js";
 
 export function OynProvider({

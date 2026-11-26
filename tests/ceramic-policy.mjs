@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
-import { createCeramicMaterial } from "../packages/oyn/dist/materials/ceramic/index.js";
+import { createCeramicMaterial } from "../packages/materials/dist/ceramic/index.js";
 import {
   ceramicFinish,
   relativeLuminance,
-} from "../packages/oyn/dist/materials/ceramic/finish.js";
+} from "../packages/materials/dist/ceramic/finish.js";
 
 for (const scheme of ["light", "dark"]) {
   const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
@@ -84,7 +84,7 @@ try {
   await page.goto(fixtureUrl);
   const result = await page.evaluate(async () => {
     const { createCeramicMaterial } =
-      await import("/packages/oyn/src/materials/ceramic/material.ts");
+      await import("/packages/materials/src/ceramic/material.ts");
     const hosts = ["light", "dark"].map((colorScheme) => {
       const parent = document.createElement("section");
       parent.style.colorScheme = colorScheme;
