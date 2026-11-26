@@ -1,4 +1,4 @@
-# OYN
+# [![OYN wordmark above a raised Ceramic tab in a recessed track](assets/oyn-ceramic.png)](https://oyn.dev/)
 
 **UI you can feel**
 
