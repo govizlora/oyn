@@ -7,7 +7,7 @@
     <title>OYN — Native HTML UI with GPU-rendered materials</title>
     <meta
       name="description"
-      content="OYN is a material system for native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress."
+      content="OYN brings WebGPU materials to native HTML elements. The DOM handles layout and interaction while WebGPU renders the surfaces."
     />
     <link rel="canonical" href="https://oyn.dev/" />
     <meta property="og:type" content="website" />
@@ -19,7 +19,7 @@
     />
     <meta
       property="og:description"
-      content="OYN is a material system for native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress."
+      content="OYN brings WebGPU materials to native HTML elements. The DOM handles layout and interaction while WebGPU renders the surfaces."
     />
     <meta
       property="og:image"
@@ -39,7 +39,7 @@
         "@type": "SoftwareSourceCode",
         "name": "OYN",
         "url": "https://oyn.dev/",
-        "description": "OYN is a material system for native HTML. WebGPU renders ceramic surfaces with depth, light, and motion while controls stay in the DOM. Work in progress.",
+        "description": "OYN brings WebGPU materials to native HTML elements. The DOM handles layout and interaction while WebGPU renders the surfaces.",
         "codeRepository": "https://github.com/govizlora/oyn",
         "programmingLanguage": "TypeScript",
         "runtimePlatform": "Web browser",
@@ -50,7 +50,8 @@
     <link rel="stylesheet" href="./site.css" />
   </head>
   <body>
-    <div id="study">
+    <div id="study"></div>
+    <noscript>
       <main>
         <section>
           <h1>OYN — Native HTML UI with GPU-rendered materials</h1>
@@ -63,10 +64,10 @@
             <a href="/about/">About OYN</a> ·
             <a href="https://github.com/govizlora/oyn">Source on GitHub</a>
           </p>
-          <noscript>Enable JavaScript to try the interactive tabs.</noscript>
+          <p>Enable JavaScript to try the interactive tabs.</p>
         </section>
       </main>
-    </div>
+    </noscript>
     <script type="module" src="./study.tsx"></script>
   </body>
 </html>

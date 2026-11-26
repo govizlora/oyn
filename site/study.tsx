@@ -101,9 +101,7 @@ function Study() {
       <header>
         <span className="signature">
           <span role="img" aria-label="OYN" className="logo" />
-          <a href="/about/" title="About OYN (work in progress)">
-            WIP
-          </a>
+          <a href="/about/">About</a>
         </span>
         <nav aria-label="Project links">
           {profiles.map(({ name, label, href, path }) => (
