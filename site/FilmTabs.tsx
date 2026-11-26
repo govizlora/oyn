@@ -15,8 +15,8 @@ const sections = [
   },
   {
     tab: "Light",
-    title: "Light, not borders",
-    text: "Move your pointer. Watch the edge.",
+    title: "Reflections",
+    text: "The light follows your pointer.",
   },
   {
     tab: "Motion",
