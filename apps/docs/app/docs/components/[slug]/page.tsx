@@ -1,8 +1,9 @@
+import { RecessedCode } from "../../../../code-block";
+import { Article } from "../../../../article";
 import { notFound } from "next/navigation";
 import { catalog } from "../../../../catalog";
 import { pageMeta } from "../../../../meta";
-import { FilmTabs } from "../../../../FilmTabs";
-import { ButtonDemo } from "../../../../button-demo";
+import { ComponentExample, InstallCommand } from "../../../../component-example";
 export const dynamicParams = false;
 export function generateStaticParams() {
   return catalog.getPages().map((page) => ({ slug: page.slugs[0] }));
@@ -27,11 +28,12 @@ export default async function ComponentPage({
   const page = await readPage(params);
   const Content = page.data.body;
   return (
-    <main className="article">
-      <a href="/docs/components/">← Components</a>
+    <Article>
       <h1>{page.data.title}</h1>
       <p>{page.data.description}</p>
-      <Content components={{ FilmTabs, ButtonDemo }} />
-    </main>
+      <Content
+        components={{ ComponentExample, InstallCommand, pre: RecessedCode }}
+      />
+    </Article>
   );
 }

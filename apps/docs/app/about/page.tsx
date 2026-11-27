@@ -1,3 +1,4 @@
+import { Article } from "../../article";
 import { pageMeta } from "../../meta";
 export const metadata = pageMeta(
   "About OYN — WebGPU materials for native HTML",
@@ -6,7 +7,7 @@ export const metadata = pageMeta(
 );
 export default function About() {
   return (
-    <main className="article">
+    <Article>
       <h1>UI you can feel</h1>
       <p>
         OYN brings WebGPU materials to native HTML. A button keeps its text,
@@ -32,6 +33,6 @@ export default function About() {
         </a>
         .
       </p>
-    </main>
+    </Article>
   );
 }

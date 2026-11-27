@@ -1,25 +1,29 @@
 ---
 title: Button
-description: Press a raised Ceramic button and toggle its pressed state.
+description: A Ceramic button with primary, secondary and ghost variants.
 ---
 
-<ButtonDemo />
+<ComponentExample item="button" />
 
-## Apply Ceramic to a button
+<h2 id="installation">Installation</h2>
 
-Under an OYN provider, attach the material ref to the native button. Keep its accessible name, focus style and click handler on that element.
+With the OYN registry running locally and the OYN workspace packages available in your React 19 project, add Button with shadcn.
+
+<InstallCommand item="button" />
+
+## Usage
+
+Wrap your app in an `OynProvider` once. With the default shadcn UI alias:
 
 ```tsx
-import { ceramic, useMaterial } from "@oyn/react";
+import { OynProvider } from "@oyn/react";
+import { Button } from "@/components/ui/oyn/button";
 
-export function Key() {
-  const ref = useMaterial({ material: ceramic, props: { elevation: 8 } });
+export function App() {
   return (
-    <button type="button" ref={ref}>
-      Key
-    </button>
+    <OynProvider>
+      <Button>Continue</Button>
+    </OynProvider>
   );
 }
 ```
-
-The interactive example uses the website’s Button composition to animate the relief on hover and press.

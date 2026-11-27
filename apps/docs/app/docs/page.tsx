@@ -1,3 +1,6 @@
+import { HighlightedCode } from "../../highlighted-code";
+import { RecessedCode } from "../../code-block";
+import { Article } from "../../article";
 import { pageMeta } from "../../meta";
 export const metadata = pageMeta(
   "Getting started · OYN Docs",
@@ -6,20 +9,19 @@ export const metadata = pageMeta(
 );
 export default function Docs() {
   return (
-    <main className="article">
+    <Article>
       <h1>Getting started</h1>
       <p>
         OYN gives native HTML elements surfaces that respond to light and
         motion. Your app owns layout, keyboard interaction and animation.
       </p>
-      <h2>Set up React</h2>
       <p>
-        From the OYN repository, run <code>npm install</code> and{" "}
-        <code>npm run build</code> to build the local packages. Wrap your
-        controls in one <code>OynProvider</code>.
+        Run <code>npm install</code> and <code>npm run build</code> in the OYN
+        repository. Wrap your controls in one <code>OynProvider</code>, then
+        attach a material to an element that can contain a canvas.
       </p>
-      <pre>
-        <code>{`"use client";
+      <RecessedCode>
+        <HighlightedCode lang="tsx">{`"use client";
 import { OynProvider, ceramic, useMaterial } from "@oyn/react";
 
 function Surface() {
@@ -29,15 +31,12 @@ function Surface() {
 
 export function App() {
   return <OynProvider><Surface /></OynProvider>;
-}`}</code>
-      </pre>
-      <h2>Choose a surface</h2>
-      <p>
-        Bind a material to a host that can contain a canvas. Give the host its
-        size and focus style in CSS. If WebGPU is unavailable, the control keeps
-        its native appearance and behavior.
+}`}</HighlightedCode>
+      </RecessedCode>
+      <p className="flex flex-wrap gap-x-5 gap-y-2 pt-4">
+        <a href="/docs/components/">Explore components →</a>
+        <a href="/about/">About OYN</a>
       </p>
-      <a href="/docs/components/">Explore components →</a>
-    </main>
+    </Article>
   );
 }

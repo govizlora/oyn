@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "paths": { "@/components/ui/oyn/*": ["../../registry/ceramic/*"] },
     "allowJs": true,
     "esModuleInterop": true,
     "isolatedModules": true,

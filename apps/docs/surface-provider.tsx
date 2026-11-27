@@ -31,9 +31,21 @@ function StudyCursor({
     return unsubscribe;
   }, [studyPointer]);
   return (
-    <div className="study-cursor-layer" aria-hidden="true">
-      <div ref={ref} hidden className="study-cursor">
-        <svg viewBox="0 0 20 28" focusable="false">
+    <div
+      className="pointer-events-none fixed inset-0 z-10 overflow-clip"
+      aria-hidden="true"
+    >
+      <div
+        ref={ref}
+        hidden
+        data-study-cursor=""
+        className="absolute -top-px -left-px h-7 w-5"
+      >
+        <svg
+          className="block size-full drop-shadow-[0_1px_1px_#0005]"
+          viewBox="0 0 20 28"
+          focusable="false"
+        >
           <path
             d="M1 1v21l5.1-5.1 4.2 9.1 4-1.9-4.2-8.9H18Z"
             fill="#111"

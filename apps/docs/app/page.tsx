@@ -1,4 +1,4 @@
-import { Study } from "../study";
+import { FilmTabs } from "../FilmTabs";
 import { pageMeta } from "../meta";
 export const metadata = pageMeta(
   "OYN — Native HTML UI with GPU-rendered materials",
@@ -7,7 +7,7 @@ export const metadata = pageMeta(
 );
 export default function Home() {
   return (
-    <div id="study">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -27,10 +27,14 @@ export default function Home() {
       <h1 className="sr-only">
         OYN — Native HTML UI with GPU-rendered materials
       </h1>
-      <Study />
-      <a className="about-link" href="/about/">
-        About OYN
-      </a>
-    </div>
+      <main
+        className="grid min-w-0 flex-1 place-items-center px-5 pb-16 pt-6 sm:pb-24"
+        aria-label="Ceramic Tabs study"
+      >
+        <div className="@container w-full max-w-[680px]">
+          <FilmTabs />
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { Article } from "../../../article";
 import { catalog } from "../../../catalog";
 import { pageMeta } from "../../../meta";
 export const metadata = pageMeta(
@@ -7,25 +8,24 @@ export const metadata = pageMeta(
 );
 export default function Components() {
   return (
-    <main className="article">
+    <Article>
       <h1>Components</h1>
-      <p>
-        These working examples pair OYN materials with native elements or UI SDK
-        controls. The compositions live in the website workspace.
-      </p>
-      <ul className="catalog">
+      <ul className="m-0 list-none p-0">
         {catalog.getPages().map((page) => (
-          <li key={page.url}>
-            <a href={page.url + "/"}>{page.data.title}</a>
-            <p>{page.data.description}</p>
+          <li
+            key={page.url}
+            className="border-0 border-t border-solid border-neutral-200 dark:border-neutral-800 py-5"
+          >
+            <a
+              className="text-xl font-medium no-underline hover:underline"
+              href={page.url + "/"}
+            >
+              {page.data.title}
+            </a>
+            <p className="mt-1 mb-0 text-neutral-600 dark:text-neutral-400">{page.data.description}</p>
           </li>
         ))}
       </ul>
-      <h2>Other controls</h2>
-      <p>
-        There is no verified recipe here yet for other controls. To try one,
-        look for a public element or slot that can host a canvas.
-      </p>
-    </main>
+    </Article>
   );
 }

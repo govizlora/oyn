@@ -1,6 +1,6 @@
 # Website Ceramic Tabs study
 
-The homepage uses the original FilmTabs composition and site-local Ceramic controls.
+The homepage study, Tabs example and Preview and Code switcher use the Ceramic track from the registry.
 UI SDK owns tab selection, keyboard behavior and indicator geometry. A single raised
 indicator moves along the recessed Ceramic track as the panels crossfade.
 Build with `npm run build:site`; run `node tests/site-pointer.mjs` for headless checks.

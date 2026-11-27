@@ -144,7 +144,7 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(url);
-  const cursor = page.locator(".study-cursor");
+  const cursor = page.locator("[data-study-cursor]");
   await cursor.waitFor({ state: "visible" });
   const position = () =>
     cursor.evaluate((node) => {
@@ -185,8 +185,22 @@ try {
     await page.getByRole("tabpanel", { name: "Motion" }).isVisible(),
     true,
   );
+  const matchesBackground = (shade) =>
+    page.evaluate((shade) => {
+      const probe = document.createElement("span");
+      probe.style.backgroundColor = `var(--color-neutral-${shade})`;
+      document.body.append(probe);
+      const expected = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return (
+        getComputedStyle(document.documentElement).backgroundColor === expected
+      );
+    }, shade);
+  await page.emulateMedia({ colorScheme: "light" });
+  assert.ok(await matchesBackground(100));
   await page.getByRole("tab", { name: "Dark" }).tap();
   await page.waitForTimeout(400);
+  assert.ok(await matchesBackground(950));
   await page.screenshot({ path: "/tmp/oyn-pointer-dark.png" });
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 740 });
@@ -205,19 +219,22 @@ try {
     "Getting started",
   );
   await reader.getByRole("link", { name: "Explore components" }).click();
-  await reader.getByRole("link", { name: "Tabs", exact: true }).click();
+  await reader.getByRole("link", { name: "Button", exact: true }).click();
   assert.equal(
     await reader.locator('link[rel="canonical"]').getAttribute("href"),
-    "https://oyn.dev/docs/components/tabs/",
+    "https://oyn.dev/docs/components/button/",
   );
-  assert.match(await reader.locator("pre").innerText(), /FilmTabs/);
+  assert.match(
+    await reader.locator("pre").first().innerText(),
+    /shadcn@latest add/,
+  );
   await reader.close();
   const desktop = await browser.newPage();
   await desktop.goto(url);
-  await desktop.locator(".study-cursor").waitFor({ state: "attached" });
-  assert.equal(await desktop.locator(".study-cursor").isVisible(), false);
+  await desktop.locator("[data-study-cursor]").waitFor({ state: "attached" });
+  assert.equal(await desktop.locator("[data-study-cursor]").isVisible(), false);
   await desktop.mouse.move(400, 300);
-  assert.equal(await desktop.locator(".study-cursor").isVisible(), false);
+  assert.equal(await desktop.locator("[data-study-cursor]").isVisible(), false);
   // Test the moving surface, not just the final selected label.
   const rail = desktop.getByRole("tablist", { name: "Ceramic details" });
   await rail
@@ -279,7 +296,7 @@ try {
     Object.defineProperty(navigator, "gpu", { value: undefined }),
   );
   await fallback.goto(url);
-  await fallback.locator(".study-cursor").waitFor({ state: "visible" });
+  await fallback.locator("[data-study-cursor]").waitFor({ state: "visible" });
   await fallback
     .getByLabel("Ceramic details")
     .getByRole("tab", { name: "Light" })

@@ -1,24 +1,16 @@
 ---
 title: Tabs
-description: Switch between panels on a recessed Ceramic track.
+description: Switch panels with a raised indicator that moves along a recessed Ceramic track.
 ---
 
-<div className="specimen">
-  <FilmTabs />
-</div>
+<ComponentExample item="tabs" />
 
-## Try it
+## Installation
 
-Focus a tab and use the arrow keys. UI SDK handles selection, keyboard movement and panel visibility. OYN draws the track, indicator and panel surface.
+With the local OYN registry running and the OYN workspace packages available, add Tabs with shadcn.
 
-## Use the website composition
+<InstallCommand item="tabs" />
 
-Inside the website workspace, render the same study under an OYN provider.
+## Usage
 
-```tsx
-import { FilmTabs } from "./FilmTabs";
-
-export function Preview() {
-  return <FilmTabs radius={18} />;
-}
-```
+Under an `OynProvider`, give each `TabsTab` and its `TabsPanel` the same value. Use `TabsPanels` around the panels for a shared Ceramic surface. Use the arrow keys to move between tabs.
