@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { chromium, devices } from "playwright";
-import { createStudyPointer } from "../site/pointer.js";
+import { createStudyPointer } from "../apps/docs/pointer.js";
 
 // Deterministic source checks: one clock, live preferences, cleanup and handoff.
 class Host extends EventTarget {
@@ -110,7 +110,10 @@ const server = spawn(
   process.execPath,
   [
     "node_modules/vite/bin/vite.js",
-    "site",
+    "preview",
+    "apps/docs",
+    "--outDir",
+    "out",
     "--host",
     "127.0.0.1",
     "--port",
@@ -194,6 +197,21 @@ try {
       width,
     );
   }
+  const reader = await browser.newPage({ javaScriptEnabled: false });
+  await reader.goto(url);
+  await reader.getByRole("link", { name: "Docs", exact: true }).click();
+  assert.equal(
+    await reader.getByRole("heading", { level: 1 }).innerText(),
+    "Getting started",
+  );
+  await reader.getByRole("link", { name: "Explore components" }).click();
+  await reader.getByRole("link", { name: "Tabs", exact: true }).click();
+  assert.equal(
+    await reader.locator('link[rel="canonical"]').getAttribute("href"),
+    "https://oyn.dev/docs/components/tabs/",
+  );
+  assert.match(await reader.locator("pre").innerText(), /FilmTabs/);
+  await reader.close();
   const desktop = await browser.newPage();
   await desktop.goto(url);
   await desktop.locator(".study-cursor").waitFor({ state: "attached" });

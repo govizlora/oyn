@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 import { Button as Action } from "@ui-sdk/react/button";
-import { useCeramicControl } from "./ceramic-control.js";
+import { useCeramicControl } from "./ceramic-control";
 
 export * from "@ui-sdk/react/button";
 const raised = 8;

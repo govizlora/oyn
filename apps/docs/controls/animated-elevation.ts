@@ -1,7 +1,7 @@
 import type { CeramicMaterial } from "@oyn/materials";
 import type { SurfaceBindingContext } from "@oyn/core";
 import { bindMotion } from "@oyn/core";
-import { createControlMotion } from "./control-motion.js";
+import { createControlMotion } from "./control-motion";
 
 /** A bound control has one elevation writer; a relief-only face vanishes at zero. */
 export function bindAnimatedElevation(

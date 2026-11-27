@@ -1,9 +1,6 @@
 import type { ComponentProps } from "react";
 import { TabsIndicator, TabsList } from "@ui-sdk/react/tabs";
-import {
-  useSelectionTrack,
-  type TrackAppearance,
-} from "./use-selection-track.js";
+import { useSelectionTrack, type TrackAppearance } from "./use-selection-track";
 
 export function CeramicTabsList({
   radius,
@@ -29,4 +26,4 @@ export function CeramicTabsList({
   );
 }
 
-export { TabsPanels } from "./tabs-panels.js";
+export { TabsPanels } from "./tabs-panels";

@@ -20,6 +20,6 @@ npm run dev
 
 ## Website
 
-The official [oyn.dev](https://oyn.dev/) homepage lives in `site/`. It consumes the
-public package and is not an npm workspace. Run `npm run build:site` to build
-`site/dist/`; Vercel publishes that directory on pushes to `main`.
+The [OYN website](https://oyn.dev/) lives in `apps/docs/`. Its Next.js App Router
+pages use the public OYN packages. Run `npm run build:site` to export the homepage,
+guides and component examples to `apps/docs/out/` for Vercel.

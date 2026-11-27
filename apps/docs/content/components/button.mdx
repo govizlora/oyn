@@ -1,0 +1,25 @@
+---
+title: Button
+description: Press a raised Ceramic button and toggle its pressed state.
+---
+
+<ButtonDemo />
+
+## Apply Ceramic to a button
+
+Under an OYN provider, attach the material ref to the native button. Keep its accessible name, focus style and click handler on that element.
+
+```tsx
+import { ceramic, useMaterial } from "@oyn/react";
+
+export function Key() {
+  const ref = useMaterial({ material: ceramic, props: { elevation: 8 } });
+  return (
+    <button type="button" ref={ref}>
+      Key
+    </button>
+  );
+}
+```
+
+The interactive example uses the website’s Button composition to animate the relief on hover and press.

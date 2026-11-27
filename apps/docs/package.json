@@ -1,0 +1,25 @@
+{
+  "name": "@oyn/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build"
+  },
+  "dependencies": {
+    "@oyn/core": "0.0.0",
+    "@oyn/react": "0.0.0",
+    "@phosphor-icons/react": "2.1.10",
+    "@ui-sdk/core": "0.1.0-beta.17",
+    "@ui-sdk/react": "0.1.0-beta.17",
+    "fumadocs-core": "16.19.7",
+    "fumadocs-mdx": "15.6.4",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/mdx": "2.0.14",
+    "@types/node": "26.6.11"
+  }
+}

@@ -5,7 +5,7 @@ import {
   type SurfaceBindingContext,
 } from "@oyn/core";
 import { ceramic, createCeramicMaterial, useMaterial } from "@oyn/react";
-import { bindAnimatedElevation } from "./animated-elevation.js";
+import { bindAnimatedElevation } from "./animated-elevation";
 import "./selection-track.css";
 
 export type TrackAppearance = {

@@ -1,0 +1,24 @@
+---
+title: Tabs
+description: Switch between panels on a recessed Ceramic track.
+---
+
+<div className="specimen">
+  <FilmTabs />
+</div>
+
+## Try it
+
+Focus a tab and use the arrow keys. UI SDK handles selection, keyboard movement and panel visibility. OYN draws the track, indicator and panel surface.
+
+## Use the website composition
+
+Inside the website workspace, render the same study under an OYN provider.
+
+```tsx
+import { FilmTabs } from "./FilmTabs";
+
+export function Preview() {
+  return <FilmTabs radius={18} />;
+}
+```

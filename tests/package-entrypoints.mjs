@@ -103,14 +103,21 @@ try {
       (p) =>
         p.startsWith("examples/") ||
         p === "packages/ui" ||
-        /naga-wasm|shadcn|@base-ui/.test(p) ||
-        (p.includes("node_modules/@ui-sdk/") && !lock.packages[p].dev),
+        /naga-wasm|shadcn|@base-ui/.test(p),
     ),
     false,
   );
   await rm(path.join(temporary, "node_modules"), { recursive: true });
   await rm(path.join(temporary, "package-lock.json"));
   await install({ react, "@oyn/react": adapter });
+  const consumerLock = JSON.parse(
+    await readFile(path.join(temporary, "package-lock.json"), "utf8"),
+  );
+  assert.ok(
+    Object.keys(consumerLock.packages).every(
+      (p) => !p.includes("node_modules/@ui-sdk/"),
+    ),
+  );
   execFileSync(
     process.execPath,
     [

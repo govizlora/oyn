@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef } from "react";
 import { ceramic, useMaterial } from "@oyn/react";
-import { useHostRef } from "./use-selection-track.js";
+import { useHostRef } from "./use-selection-track";
 
 /** One raised surface behind the SDK panels, independent of their presence. */
 export function TabsPanels({ ref, ...props }: ComponentPropsWithRef<"div">) {

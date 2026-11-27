@@ -4,33 +4,31 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:site": "npm run build --workspaces && vite build site",
-    "dev": "vite --host 127.0.0.1",
-    "build": "npm run build --workspaces && npm run check:architecture",
+    "build:site": "npm run build && npm run build --workspace=@oyn/docs",
+    "dev": "npm run build && npm run dev --workspace=@oyn/docs",
+    "build": "npm run build --workspace=@oyn/core --workspace=@oyn/materials --workspace=@oyn/react && npm run check:architecture",
     "test": "npm run build && node tests/material-core.mjs && node tests/ceramic-elevation.mjs && node tests/ceramic-light.mjs && node tests/package-entrypoints.mjs",
-    "test:browser": "npm run build && node tests/material-lifecycle.mjs && node tests/ceramic-policy.mjs && node tests/ceramic-continuity.mjs && node tests/ceramic-shadow.mjs && node tests/ceramic-reflection.mjs && node tests/ceramic-contact-composition.mjs && node tests/particle-browser.mjs && node tests/site-pointer.mjs",
+    "test:browser": "npm run build:site && node tests/material-lifecycle.mjs && node tests/ceramic-policy.mjs && node tests/ceramic-continuity.mjs && node tests/ceramic-shadow.mjs && node tests/ceramic-reflection.mjs && node tests/ceramic-contact-composition.mjs && node tests/particle-browser.mjs && node tests/site-pointer.mjs",
     "check:architecture": "node tools/check-architecture.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "@ui-sdk/core": "0.1.0-beta.13",
-    "@ui-sdk/react": "0.1.0-beta.13",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@webgpu/types": "^0.1.74",
-    "lucide-react": "1.73.0",
     "playwright": "1.61.1",
     "pngjs": "^7.0.0",
     "prettier": "3.10.1",
     "typescript": "^5.9.0",
     "vite": "^7.2.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "workspaces": [
     "packages/core",
     "packages/materials",
-    "packages/react"
+    "packages/react",
+    "apps/docs"
   ]
 }

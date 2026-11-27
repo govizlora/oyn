@@ -3,4 +3,4 @@ export {
   TabsPanels,
   CeramicTabsList,
   CeramicTabsList as TabsList,
-} from "./ceramic-tabs-list.js";
+} from "./ceramic-tabs-list";

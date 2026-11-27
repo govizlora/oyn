@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   Tabs,
@@ -38,7 +39,7 @@ export function FilmTabs({ radius = 18 }: { radius?: number }) {
       <TabsPanels>
         {sections.map(({ tab, title, text }) => (
           <TabsPanel key={tab} value={tab}>
-            <h1>{title}</h1>
+            <h2>{title}</h2>
             <p>{text}</p>
           </TabsPanel>
         ))}
