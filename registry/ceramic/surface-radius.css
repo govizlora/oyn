@@ -1,0 +1,5 @@
+@layer components {
+  :where([data-oyn-button], [data-oyn-track], [data-oyn-tab-panels], [data-oyn-recess]) {
+    --oyn-surface-radius: var(--oyn-radius, 16px);
+  }
+}

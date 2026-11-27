@@ -1,0 +1,37 @@
+@import "./surface-radius.css";
+
+@layer components {
+  [data-oyn-button] {
+    box-sizing: border-box;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.6em 1em;
+    border: 0;
+    border-radius: var(--oyn-surface-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1.25;
+  }
+  [data-oyn-button="primary"] {
+    font-weight: 600;
+  }
+  [data-oyn-button]:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  [data-oyn-button]:is(:disabled, [aria-disabled="true"], [data-disabled]) {
+    opacity: 0.5;
+  }
+  [data-oyn-button]:not([data-oyn-active], [data-oyn-button="ghost"]) {
+    box-shadow: 0 1px 4px color-mix(in srgb, currentColor 30%, transparent);
+  }
+  [data-oyn-button]:not([data-oyn-active]):is([aria-pressed="true"], :active),
+  [data-oyn-button="ghost"]:not([data-oyn-active]):hover {
+    box-shadow: inset 0 1px 3px
+      color-mix(in srgb, currentColor 23%, transparent);
+  }
+}

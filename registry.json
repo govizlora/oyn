@@ -1,0 +1,95 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "oyn",
+  "homepage": "https://oyn.dev",
+  "items": [
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Ceramic Button",
+      "dependencies": [
+        "@oyn/core@0.0.0",
+        "@oyn/materials@0.0.0",
+        "@oyn/react@0.0.0",
+        "@ui-sdk/react@0.1.0-beta.17",
+        "@ui-sdk/core@0.1.0-beta.17"
+      ],
+      "files": [
+        {
+          "path": "registry/ceramic/button.tsx",
+          "type": "registry:ui",
+          "target": "@ui/oyn/button.tsx"
+        },
+        {
+          "path": "registry/ceramic/oyn-button.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/oyn-button.css"
+        },
+        {
+          "path": "registry/ceramic/ceramic-control.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/ceramic-control.ts"
+        },
+        {
+          "path": "registry/ceramic/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/animated-elevation.ts"
+        },
+        {
+          "path": "registry/ceramic/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/control-motion.ts"
+        },
+        {
+          "path": "registry/ceramic/surface-radius.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/surface-radius.css"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Ceramic Tabs",
+      "dependencies": [
+        "@oyn/core@0.0.0",
+        "@oyn/materials@0.0.0",
+        "@oyn/react@0.0.0",
+        "@ui-sdk/react@0.1.0-beta.17",
+        "@ui-sdk/core@0.1.0-beta.17"
+      ],
+      "files": [
+        {
+          "path": "registry/ceramic/tabs.tsx",
+          "type": "registry:ui",
+          "target": "@ui/oyn/tabs.tsx"
+        },
+        {
+          "path": "registry/ceramic/use-selection-track.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/use-selection-track.ts"
+        },
+        {
+          "path": "registry/ceramic/selection-track.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/selection-track.css"
+        },
+        {
+          "path": "registry/ceramic/animated-elevation.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/animated-elevation.ts"
+        },
+        {
+          "path": "registry/ceramic/control-motion.ts",
+          "type": "registry:ui",
+          "target": "@ui/oyn/control-motion.ts"
+        },
+        {
+          "path": "registry/ceramic/surface-radius.css",
+          "type": "registry:ui",
+          "target": "@ui/oyn/surface-radius.css"
+        }
+      ]
+    }
+  ]
+}
