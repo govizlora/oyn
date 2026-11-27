@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "./controls/button";
+import { Button } from "@/components/ui/oyn/button";
+import { ThemeSwitch } from "./theme-switch";
+
 const xProfile = "https://x.com/Govizlora";
 const profiles = [
   {
@@ -27,44 +29,58 @@ const profiles = [
 export function Header() {
   const path = usePathname();
   return (
-    <header>
-      <div className="signature">
-        <Link href="/" className="logo" aria-label="OYN home" />
-        <nav aria-label="Main navigation">
-          {[
-            ["Docs", "/docs/"],
-            ["Components", "/docs/components/"],
-          ].map(([label, href]) => (
+    <header className="mx-auto flex flex-wrap min-h-16 w-full max-w-6xl box-border items-center justify-between gap-2 px-3 text-sm sm:min-h-20 sm:px-10">
+      <nav
+        aria-label="Main navigation"
+        className="flex items-center gap-1 sm:gap-2"
+      >
+        <Link
+          href="/"
+          aria-label="OYN home"
+          className="mr-2 block h-4 w-10 bg-current text-inherit mask-[url(/oyn.svg)] mask-contain mask-center mask-no-repeat sm:mr-4"
+        />
+        {[
+          ["Docs", "/docs/"],
+          ["Components", "/docs/components/"],
+        ].map(([label, href]) => {
+          const current =
+            path === href
+              ? "page"
+              : href === "/docs/components/" && path.startsWith(href)
+                ? "location"
+                : undefined;
+          return (
             <Button
               key={href}
               variant="ghost"
               render={<Link href={href} />}
-              aria-current={
-                (href === "/docs/" ? path === href : path.startsWith(href))
-                  ? "page"
-                  : undefined
-              }
+              aria-current={current}
+              className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400 aria-[current]:font-semibold aria-[current]:text-inherit"
             >
               {label}
+            </Button>
+          );
+        })}
+      </nav>
+      <div className="ml-auto flex items-center gap-2">
+        <ThemeSwitch />
+        <nav aria-label="Project links" className="flex items-center">
+          {profiles.map(({ name, label, href, path }) => (
+            <Button
+              key={name}
+              variant="ghost"
+              render={<a href={href} />}
+              aria-label={label}
+              className="p-1.5"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden="true">
+                <path d={path} />
+              </svg>
+              <span className="hidden sm:inline">{name}</span>
             </Button>
           ))}
         </nav>
       </div>
-      <nav aria-label="Project links">
-        {profiles.map(({ name, label, href, path }) => (
-          <Button
-            key={name}
-            variant="ghost"
-            render={<a href={href} />}
-            aria-label={label}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d={path} />
-            </svg>
-            <span className="profile-name">{name}</span>
-          </Button>
-        ))}
-      </nav>
     </header>
   );
 }
