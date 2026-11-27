@@ -55,7 +55,8 @@ fn insetCeramic(in:VertexOut,material:CeramicOptics)->vec4f {
   }
   let relief=ceramicRelief(depth);
   let contrast=min(depth*mix(0.006f,0.012f,material.shape.w),0.12f)*relief;
-  let floorColor=mix(material.colorMode.xyz,vec3f(material.shape.w),contrast);
-  return over(lighting*mask*relief,vec4f(floorColor,1)*material.colorMode.w*mask);
+  let depthTint=vec4f(vec3f(material.shape.w),1)*contrast;
+  let pigment=vec4f(material.colorMode.xyz,1)*material.colorMode.w;
+  return over(lighting*relief,over(depthTint,pigment))*mask;
 }
 `;

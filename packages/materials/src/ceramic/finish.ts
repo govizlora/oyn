@@ -98,11 +98,7 @@ export type CeramicOptions = {
   /** Pointer/fixed light-source policy, independent of environment and lighting. */
   light?: CeramicLight;
   /**
-   * One opaque sRGB base color (#RGB, #RRGGBB or numeric rgb()), or "inverse"
-   * for the opposite default pigment without changing the lighting environment.
-   * The signed analytic material also accepts "transparent" for relief without pigment.
-   * Theme palettes must be resolved by the caller.
-   * @defaultValue #f0f0f0 in light environments; #0c0c0c in dark environments.
+   * Optional sRGB pigment (#RGB, #RRGGBB or numeric rgb()). Defaults to transparent.
    */
   color?: string;
   /**
@@ -117,9 +113,7 @@ export type CeramicOptions = {
   /**
    * Override automatic surface lighting. Soft uses surface gradients and softer
    * highlights; glossy uses specular/Fresnel edge reflection.
-   * By default compare relative luminance of the resolved sRGB color against
-   * #c0c0c0: strictly above -> soft; equal or below -> glossy.
-   * Channels are decoded to linear sRGB before applying Rec.709 weights.
+   * Defaults to soft in light environments and glossy in dark environments.
    * Negative elevation retains its concave wall shading without a ground glow.
    */
   lighting?: CeramicLighting;
@@ -147,14 +141,6 @@ export function snapshotCeramicOptions<T extends CeramicOptions>(
   };
 }
 
-/** Relative luminance of display/sRGB values, not encoded channel brightness. */
-export function relativeLuminance(rgb: readonly number[]): number {
-  const linear = rgb.map((v) =>
-    v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4,
-  );
-  return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
-}
-const lightingThreshold = relativeLuminance([192 / 255, 192 / 255, 192 / 255]);
 export function ceramicFinish(options: CeramicOptions = {}) {
   const settings = { ...defaults };
   for (const key of Object.keys(defaults) as (keyof typeof defaults)[]) {
@@ -207,19 +193,9 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     !["soft", "glossy"].includes(options.lighting)
   )
     throw Error("Invalid Ceramic lighting.");
-  if (options.color !== undefined && typeof options.color !== "string")
-    throw Error("Ceramic color must be a single string.");
   const environment = options.colorScheme ?? preferredColorScheme();
-  const inverse = options.color === "inverse";
-  const clear = options.color === "transparent";
-  const defaultColor =
-    (environment === "dark") !== inverse ? "#0c0c0c" : "#f0f0f0";
-  const rgb = parseColor(
-    inverse || clear ? defaultColor : (options.color ?? defaultColor),
-  );
-  const lighting =
-    options.lighting ??
-    (relativeLuminance(rgb) > lightingThreshold ? "soft" : "glossy");
+  const pigment = parseColor(options.color);
+  const lighting = options.lighting ?? (environment === "dark" ? "glossy" : "soft");
   const glossy = lighting === "glossy";
   const shadows = environment === "light";
   const rimStrength =
@@ -231,8 +207,7 @@ export function ceramicFinish(options: CeramicOptions = {}) {
     elevation,
     glossy ? settings.rim : settings.lightRim,
     Number(environment === "dark"),
-    ...rgb,
-    Number(!clear),
+    ...pigment,
     Number(glossy),
     Number(!glossy),
     settings.frostSpread,

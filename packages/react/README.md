@@ -53,7 +53,7 @@ consumer, not a rule Ceramic infers from CSS or events.
 | --- | --- |
 | A part reads darker than its surroundings, like a slider groove, a darkened checkbox well or a text input field | Recess it: use negative elevation. |
 | A white face needs a border to distinguish it from the surrounding white surface, like a slider thumb | Raise it: use positive elevation. |
-| A clear button has no visible face at rest, then gains a darker fill on hover or press | Start flat with transparent pigment; recess on hover and deepen the recess on press. |
+| A clear button has no visible face at rest, then gains a darker fill on hover or press | Omit `color`, start flat, and increase the recess depth on hover and press. |
 
 Focus lifts; pressure lowers. These are **directions**, not fixed signs: a focused
 input can be less recessed and still below zero. A pressed raised button can sink
@@ -125,9 +125,9 @@ surfaces rather than allocating one per element.
 | -------------- | ---------------------------------------------------------------------------------------------------- |
 | `elevation`    | Instantaneous signed relief: positive raised, zero flat, negative recessed; default 16               |
 | `maxElevation` | Nonnegative exterior-space budget, not a clamp or animation target; omission reserves initial height |
-| `color`        | Opaque HEX/numeric `rgb()`, `transparent`, or `inverse` for the opposite default pigment             |
+| `color`        | Optional HEX or numeric `rgb()` pigment. Defaults to transparent             |
 | `colorScheme`  | Optional `light` / `dark` environment override; otherwise inherited CSS then browser preference      |
-| `lighting`     | Optional `soft` / `glossy` override; independent of environment                                      |
+| `lighting`     | Defaults to `soft` in light environments and `glossy` in dark. Either can be set explicitly                                      |
 | `light`        | Pointer/fixed source, viewport position, and independent leave/blur/hidden policies                  |
 
 Reserve animation overshoot with `maxElevation`; elevation changes alone do not
@@ -220,7 +220,7 @@ export function placeholder(engine: ReturnType<typeof createEngine>, host: HTMLE
 }
 ```
 
-`color` is an opaque sRGB pigment (HEX or numeric rgb(), default #929bb8).
+`color` is an opaque sRGB pigment (HEX or numeric rgb(), transparent when omitted).
 Choose it for the surrounding background; Particle does not switch themes.
 `time` is instantaneous animation time in seconds (default 0); `exit` is
 dispersion progress in [0, 1] (default 0). The consumer drives both, can hold

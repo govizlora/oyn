@@ -2,44 +2,21 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { createCeramicMaterial } from "../packages/materials/dist/ceramic/index.js";
-import {
-  ceramicFinish,
-  relativeLuminance,
-} from "../packages/materials/dist/ceramic/finish.js";
+import { ceramicFinish } from "../packages/materials/dist/ceramic/finish.js";
 
-for (const scheme of ["light", "dark"]) {
-  const inverse = ceramicFinish({ colorScheme: scheme, color: "inverse" });
-  const opposite = ceramicFinish({
-    colorScheme: scheme === "light" ? "dark" : "light",
-  });
-  assert.deepEqual(inverse.values.slice(4, 8), opposite.values.slice(4, 8));
-  assert.equal(inverse.shadows, ceramicFinish({ colorScheme: scheme }).shadows);
-}
-
-for (const value of [0, 160, 170, 176, 180, 191, 192, 193, 240, 255]) {
-  for (const colorScheme of ["light", "dark"]) {
-    const options = { colorScheme, color: `rgb(${value} ${value} ${value})` };
-    const f = ceramicFinish(options);
-    assert.equal(f.lighting, value > 192 ? "soft" : "glossy");
-    const m = createCeramicMaterial(options);
-    assert.equal(m.parameters.get(8), Number(value <= 192));
-    assert.deepEqual(m.passes, ["surface"]);
-    if (colorScheme === "dark") {
-      assert.equal(m.parameters.get(14), 0);
-      assert.equal(m.parameters.get(15), 0);
-      assert.equal(m.measurePadding(100, 60).x > 0, f.lighting === "glossy");
-    }
+for (const colorScheme of ["light", "dark"]) {
+  const material = createCeramicMaterial({ colorScheme });
+  for (const color of [undefined, "#fff", "#000", "transparent", "#f00", undefined]) {
+    material.update({ colorScheme, color });
+    const pigment = material.parameters.snapshot().slice(4, 8);
+    const expected = { "#fff": [1, 1, 1, 1], "#000": [0, 0, 0, 1], "#f00": [1, 0, 0, 1] };
+    assert.deepEqual(Array.from(pigment), expected[color] ?? [0, 0, 0, 0]);
+    assert.equal(material.parameters.get(8), Number(colorScheme === "dark"));
     for (const lighting of ["soft", "glossy"])
-      assert.equal(ceramicFinish({ ...options, lighting }).lighting, lighting);
+      assert.equal(ceramicFinish({ colorScheme, color, lighting }).lighting, lighting);
   }
 }
-assert.ok(
-  relativeLuminance([0, 1, 0]) >
-    relativeLuminance([192 / 255, 192 / 255, 192 / 255]),
-);
-assert.equal(ceramicFinish({ color: "#00ff00" }).lighting, "soft");
-assert.equal(ceramicFinish({ color: "#ff0000" }).lighting, "glossy");
-assert.equal(ceramicFinish({ color: "#0000ff" }).lighting, "glossy");
+assert.throws(() => ceramicFinish({ color: "inverse" }), /Unsupported/);
 assert.equal(
   ceramicFinish({
     colorScheme: "dark",
@@ -124,7 +101,8 @@ try {
     const a = bind(shared, hosts[0]),
       b = bind(shared, hosts[1]);
     const state = (binding) => ({
-      color: Array.from(binding.material.parameters.snapshot().slice(4, 7)),
+      color: Array.from(binding.material.parameters.snapshot().slice(4, 8)),
+      glossy: binding.material.parameters.get(8),
       passes: [...binding.material.passes],
       elevation: binding.material.parameters.get(1),
     });
@@ -172,7 +150,11 @@ try {
     result.initial.map((s) => s.passes),
     [["surface"], ["surface"]],
   );
-  assert.notDeepEqual(result.initial[0].color, result.initial[1].color);
+  for (const state of [...result.initial, result.manual, result.isolated, result.both])
+    assert.deepEqual(state.color, [0, 0, 0, 0]);
+  assert.deepEqual(result.initial.map((s) => s.glossy), [0, 1]);
+  assert.equal(result.manual.glossy, 1);
+  assert.equal(result.both.glossy, 0);
   assert.deepEqual(result.elevations, [24, 24]);
   assert.ok(result.notified && result.sameParameters && result.cleanup);
   assert.deepEqual(result.manual.passes, ["surface"]);
@@ -180,7 +162,7 @@ try {
   assert.deepEqual(result.both.passes, ["surface"]);
   assert.deepEqual(result.isolated.passes, ["surface"]);
   console.log(
-    "PASS Ceramic policy: threshold, chromatic luminance, overrides, shadows, inherited CSS, shared targets, setters, cleanup",
+    "PASS Ceramic policy: transparent defaults, overrides, shadows, inherited CSS, shared targets, setters, cleanup",
   );
 } finally {
   await browser?.close();

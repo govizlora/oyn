@@ -51,7 +51,11 @@ try {
     assert.equal(grains.parameters.get(3), 3);
     assert.throws(() => grains.update({ exit: 2 }));
     assert.equal(grains.parameters.get(3), 3);
+    assert.equal(grains.parameters.get(5), 0);
+    grains.update({ color: '#000' });
+    assert.equal(grains.parameters.get(5), 1);
     grains.update({ exit: 1 });
+    assert.equal(grains.parameters.get(5), 0);
     assert.equal(grains.parameters.get(4), 1);
     const { ceramic } = await import('@oyn/materials');
     const instance = ceramic.create({ elevation: 8 });

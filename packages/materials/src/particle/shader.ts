@@ -9,7 +9,7 @@ export const padding = flight + 72;
 export const particleShader = /* wgsl */ `
 ${frameWGSL}
 struct Stroke { ends: vec4f, stamp: vec4f }
-struct GrainParams { pigmentTime: vec4f, exitPad: vec4f, strokes: array<Stroke, ${strokeSlots}> }
+struct GrainParams { pigmentTime: vec4f, exitPigment: vec4f, strokes: array<Stroke, ${strokeSlots}> }
 @group(0) @binding(1) var<uniform> params: GrainParams;
 
 // Hash integer cell identities: color, size and depth never flicker with time.
@@ -46,10 +46,11 @@ fn wake(pos:vec2f, t:f32) -> vec2f {
 }
 
 @fragment fn grains(in: VertexOut) -> @location(0) vec4f {
+  if (params.exitPigment.y == 0.0f) { return vec4f(0); }
   let halfSize = in.card.zw * 0.5;
   let p = in.local - halfSize;
   let t = params.pigmentTime.w;
-  let exit = params.exitPad.x;
+  let exit = params.exitPigment.x;
   let r = clamp(frame.geometry.x, 0.0, min(halfSize.x, halfSize.y));
   let feather = clamp(min(halfSize.x, halfSize.y)*0.78, 5.0, 24.0);
   if (any(abs(p) > halfSize + feather + 52.0 + exit * ${flight}.0)) { return vec4f(0); }

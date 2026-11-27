@@ -18,7 +18,7 @@ for (const colorScheme of ["light", "dark"]) {
       shader = material.shader,
       passes = material.passes;
     const finish = parameters.snapshot();
-    assert.equal(finish[7], Number(color !== "transparent"));
+    assert.equal(finish[7], Number(color !== undefined && color !== "transparent"));
     let notices = 0;
     const off = parameters.subscribe(() => notices++);
     for (const elevation of [-24, -6, -2, -0.001, 0, 0.001, 4, 8, -2]) {

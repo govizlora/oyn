@@ -7,24 +7,23 @@ const elevations = [
   -0.5, -1, -2, -3.2, -4, -6,
 ];
 const cases: (CeramicOptions & { name: string; background: string })[] = [
-  { name: "light", colorScheme: "light", background: "#e8e8e8" },
+  { name: "light", color: "#f0f0f0", colorScheme: "light", background: "#e8e8e8" },
   {
     name: "clear",
     colorScheme: "light",
-    color: "transparent",
     background: "#b98477",
   },
   {
     name: "frost",
     darkFrost: 0.1, // Resolve the spatial profile above 8-bit readback noise.
     colorScheme: "dark",
-    color: "transparent",
     reflectionStrength: 0,
     background: "#101010",
   },
-  { name: "dark", colorScheme: "dark", background: "#181818" },
+  { name: "dark", color: "#0c0c0c", colorScheme: "dark", background: "#181818" },
   {
     name: "contrast",
+    lighting: "glossy",
     colorScheme: "light",
     color: "#171717",
     background: "#e8e8e8",

@@ -21,7 +21,7 @@ export const particle: Material<ParticleProps> = {
   create(initial) {
     const parameters = createParameters(Array(8 + strokeSlots * 8).fill(0));
     let pigment: string | undefined;
-    function update({ color = "#929bb8", time = 0, exit = 0 }: ParticleProps) {
+    function update({ color, time = 0, exit = 0 }: ParticleProps) {
       if (
         !Number.isFinite(time) ||
         !Number.isFinite(Math.fround(time)) ||
@@ -31,7 +31,11 @@ export const particle: Material<ParticleProps> = {
       )
         throw Error("Particle requires finite f32 time and exit in [0, 1].");
       if (color !== pigment) {
-        parseColor(color).forEach((value, i) => parameters.set(i, value));
+        const [red, green, blue, alpha] = parseColor(color);
+        parameters.set(0, red);
+        parameters.set(1, green);
+        parameters.set(2, blue);
+        parameters.set(5, alpha);
         pigment = color;
       }
       parameters.set(3, time);

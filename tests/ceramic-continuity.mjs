@@ -66,7 +66,7 @@ try {
       fullPage: true,
     });
     const captures = await page.evaluate(() => window.continuity.capture());
-    for (const name of ["light", "dark", "contrast", "color", "clear"]) {
+    for (const name of ["light", "dark", "contrast", "color", "clear", "frost"]) {
       const samples = captures
         .filter((c) => c.name === name)
         .map((c) => ({
@@ -94,21 +94,23 @@ try {
               Math.floor(png.width / 2));
           return [...png.data.subarray(i, i + 4)];
         };
-        if (name === "clear") {
+        if (name === "clear" || name === "frost") {
           assert.ok(
             flat.data.every((v) => v === 0),
             "no pigment or relief at zero",
           );
           for (const { image, elevation } of samples) {
-            assert.equal(
-              center(image)[3],
-              0,
-              `no fill or self-shadow inside clear relief at ${elevation}`,
-            );
+            if (elevation >= 0) assert.equal(center(image)[3], 0);
           }
-          for (const height of [-3.2, 8])
+          const shallow = center(find(-2));
+          const deep = center(find(-6));
+          assert.ok(shallow[3] > 0 && deep[3] > shallow[3],
+            "recess depth increases the overlay alpha without pigment");
+          const channel = name === "clear" ? 0 : 255;
+          assert.deepEqual(deep.slice(0, 3), [channel, channel, channel]);
+          if (name === "clear")
             assert.ok(
-              find(height).data.some((v, i) => i % 4 === 3 && v > 0),
+              find(8).data.some((v, i) => i % 4 === 3 && v > 0),
               "clear relief still has edges",
             );
         } else {
