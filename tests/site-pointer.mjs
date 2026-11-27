@@ -144,6 +144,8 @@ try {
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   await page.goto(url);
+  assert.equal(await page.locator("html").evaluate(el => getComputedStyle(el).overscrollBehavior), "none");
+  assert.equal(await page.getByText("UI you can feel", { exact: true }).isVisible(), true);
   const cursor = page.locator("[data-study-cursor]");
   await cursor.waitFor({ state: "visible" });
   const position = () =>

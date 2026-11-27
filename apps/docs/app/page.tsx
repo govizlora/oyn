@@ -24,13 +24,13 @@ export default function Home() {
           }),
         }}
       />
-      <h1 className="sr-only">
-        OYN — Native HTML UI with GPU-rendered materials
-      </h1>
-      <main
-        className="grid min-w-0 flex-1 place-items-center px-5 pb-16 pt-6 sm:pb-24"
-        aria-label="Ceramic Tabs study"
-      >
+      <main className="flex min-w-0 flex-1 flex-col items-center justify-center gap-10 px-5 pt-8 pb-16 sm:gap-14 sm:pb-24">
+        <div className="grid justify-items-center gap-3">
+          <h1 className="m-0 aspect-[1388.626/448] w-[clamp(9rem,28vw,15rem)] bg-current mask-[url(/oyn.svg)] mask-contain mask-center mask-no-repeat">
+            <span className="sr-only">OYN</span>
+          </h1>
+          <p className="m-0 text-sm font-light">UI you can feel</p>
+        </div>
         <div className="@container w-full max-w-[680px]">
           <FilmTabs />
         </div>
