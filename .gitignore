@@ -15,6 +15,7 @@ playwright-report/
 !.env.example
 
 # Local design studies, proof sheets, and launch exports.
+/concepts/
 /docs/
 /launch/
 artifacts/
